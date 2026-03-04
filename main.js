@@ -312,7 +312,7 @@ function initApp() {
   // 组装当前播放列表
   let playlist = filesMap[timePeriod].map(filename => {
     const info = parseFileName(filename);
-    return { artist: info.artist, name: info.title, src: `music/${timePeriod}/${filename}` };
+    return { artist: info.artist, name: info.title, src: `/Lin/music/${timePeriod}/${encodeURIComponent(filename)}` };
   });
 
   // 洗牌算法（打乱数组）实现随机播放
