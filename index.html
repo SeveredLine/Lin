@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI 心理疗愈笔记</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- 引入 Howler.js -->
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+</head>
+<body>
+
+  <!-- 暗黑模式拉绳 -->
+  <!-- OH卡和表单的全局动画浮层 -->
+  <div id="global-overlay"></div>
+
+  <div class="pull-cord-container" id="lampCord"><div class="cord"><div class="knob"></div></div></div>
+
+  <div class="app-container">
+    <div class="notebook">
+      <div class="spiral-container" id="spirals"></div>
+
+      <div class="pages-container" id="book-pages">
+        <!-- 新增：书籍封面与封底层级 -->
+        <div class="page" data-index="-1">
+          <div class="page-front cover-design">
+            <h1>AI 疗愈笔记</h1>
+            <p>Inner Peace</p>
+          </div>
+          <div class="page-back close-book-area">
+            <span class="back-text">点击返回封面<br>休息一下</span>
+          </div>
+        </div>
+
+        <!-- 标签页容器，注入内容 -->
+        <div class="page" data-index="0">
+          <div class="page-front" id="page-0"></div>
+          <div class="page-back close-book-area"><span class="back-text">“把烦恼写在纸上，<br>它是一面不会评判的镜子。”<br><br>👉 点击合上书本</span></div>
+        </div>
+        
+        <div class="page" data-index="1">
+          <div class="page-front" id="page-1"></div>
+          <div class="page-back close-book-area"><span class="back-text">“面对真实的自我。”<br><br>👉 点击合上书本</span></div>
+        </div>
+        
+        <div class="page" data-index="2">
+          <div class="page-front" id="page-2"></div>
+          <div class="page-back close-book-area"><span class="back-text">“静听内心的声音。”<br><br>👉 点击合上书本</span></div>
+        </div>
+        
+        <div class="page" data-index="3">
+          <div class="page-front" id="page-3"></div>
+          <div class="page-back close-book-area"><span class="back-text">“重塑生活的秩序。”<br><br>👉 点击合上书本</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 侧边标签栏 -->
+    <div class="tabs-container">
+      <div class="tab active" data-index="0">📝 诊室</div>
+      <div class="tab" data-index="1">📋 档案</div>
+      <div class="tab" data-index="2">🌿 桌面</div>
+      <div class="tab" data-index="3">⚙️ 设置</div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
