@@ -445,22 +445,44 @@ function initApp() {
 
   // ================= 设置页功能 =================
   const fontSizeSlider = document.getElementById('fontSizeSlider');
+  const turnSpeedSlider = document.getElementById('turnSpeedSlider');
   const resetSettingsBtn = document.getElementById('resetSettingsBtn');
+  const fsBtn = document.getElementById('fsBtn');
 
-  volumeSlider.addEventListener('input', (e) => {
-    let vol = e.target.value / 100;
-    Howler.volume(vol); 
-  });
+  if(fsBtn) {
+    fsBtn.addEventListener('click', () => {
+      document.querySelector('.app-container').classList.toggle('fullscreen-mode');
+    });
+  }
 
-  fontSizeSlider.addEventListener('input', (e) => {
-    root.style.setProperty('--base-font-size', e.target.value + 'px');
-  });
+  if(volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+      let vol = e.target.value / 100;
+      Howler.volume(vol); 
+    });
+  }
 
-  resetSettingsBtn.addEventListener('click', () => {
-    fontSizeSlider.value = 15;
-    volumeSlider.value = 30;
-    if (autoPlaySwitch) autoPlaySwitch.checked = true;
-    root.style.setProperty('--base-font-size', '15px');
-    Howler.volume(0.3);
-  });
+  if(fontSizeSlider) {
+    fontSizeSlider.addEventListener('input', (e) => {
+      root.style.setProperty('--base-font-size', e.target.value + 'px');
+    });
+  }
+
+  if(turnSpeedSlider) {
+    turnSpeedSlider.addEventListener('input', (e) => {
+      root.style.setProperty('--turn-speed', e.target.value + 's');
+    });
+  }
+
+  if(resetSettingsBtn) {
+    resetSettingsBtn.addEventListener('click', () => {
+      if(fontSizeSlider) fontSizeSlider.value = 15;
+      if(volumeSlider) volumeSlider.value = 30;
+      if(turnSpeedSlider) turnSpeedSlider.value = 1;
+      if (autoPlaySwitch) autoPlaySwitch.checked = true;
+      root.style.setProperty('--base-font-size', '15px');
+      root.style.setProperty('--turn-speed', '1s');
+      Howler.volume(0.3);
+    });
+  }
 }
