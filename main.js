@@ -112,70 +112,144 @@ function initApp() {
   const chatInput = document.getElementById('chatInput');
   const chatHistory = document.getElementById('chat-history');
   const chatPage = document.getElementById('page-0');
-
   const globalOverlay = document.getElementById('global-overlay');
+
+  // 1. OH卡字卡和图卡图床数据
+  const ohWords =["8cuxn2","f2eyxf","ma8rol","ynq3b0","k3foo3","hd3568","i3o0xp","9lrdp9","68632e","uvr9tv","w0thk5","ujmmpo","q66smu","zyvinv","ia8mus","8knys3","077i0k","skos8v","3u1hv7","kowbr0","xnkky0","tfck9d","sjkl40","evboxw","ml853c","2lyqng","475w7u","1nath3","oed8o3","6cyy5v","5c33q8","bnp85w","ajk2sa","mrlu2c","uwu7bb","5w68r0","vut2kq","zaqb46","o0lkvy","0pt4ij","mynr0h","garhko","0j5370","nsd2e0","o9z0g0","4vke1u","vir293","2ncnww","tgodj4","ltsac7","3gskyd","2qa3mn","6bt92x","x4xa3m","oklbo5","0kidq6","0y57mk","am2kqg","v5uqh1","z87bjv","hq2lc6","g06q99","cw11bo","hytjao","ch3zhc","8w0hv6","nbpsfi","l597w7","n34zyi","f15yek","be2yv2","d4imbq","5fejh1","a4dsm1","44o0pa","21k2l2","qkaxrb","1u46i2","vc5lf6","6a1ktm","9rl12m","hl18q6","jfkj5s","s4x2j5","qgpxx0","yf8rwl","l26hfd","8o38z8"];
+  const ohImages =["t7nxvt","cbtwhq","k7tmry","sk8hvu","macnbz","49aiff","bwazsv","jcccmx","c00lc2","4d2px1","knvkbd","yux922","vhcjbb","upleiw","rxlk8x","7ywke2","013zs9","o9jvrp","slwxks","5pwwd5","6d25m3","22psds","hdgxtx","vksul3","dgvz2e","cztrdd","sx8va6","1fz3sp","e04m72","b2h400","bq1gwn","tv5ave","fcfvpq","e1m3bh","1mw4zo","ywv2v9","ie03kj","7eynf7","w9ucpp","rb4hux","rhwin1","5okqrp","h3j4k8","vcruzy","m12coa","s41zvs","9v5was","v2cvjw","77pbia","0nkcds","euw7g2","vze43r","8cc15t","9vm86f","u6czqn","8x1sd8","c5d43l","n68ngq","ewb4zu","vzwkm8","r2du4n","5bcvvk","tbrvza","wc5ujj","kdoe5h","fgn5fv","8usqhh","ccpkcx","gy9bx0","43eq4w","972dt9","f09sze","zdmzxq","9b6wfo","37pka1","od7bxy","82yiep","fbc7rw","oyo4nv","xhb8ox","m371uo","c4w4sy","l6gsz4","np2s61","ovwh0m","wl71lo","6ufv4h","qc6v18"];
 
   function sendOHCard() {
     globalOverlay.innerHTML = '';
+    const randomWord = ohWords[Math.floor(Math.random() * ohWords.length)];
+    const randomImage = ohImages[Math.floor(Math.random() * ohImages.length)];
+    
     const wrapper = document.createElement('div');
     wrapper.className = 'oh-card-wrapper';
     wrapper.innerHTML = `
-      <div class="oh-image-large">?</div>
-      <p style="text-align:center; color: var(--text-main); font-weight: 600; margin-bottom: 10px;">这是一张 OH 卡</p>
-      <p style="text-align:center; color: var(--text-ai); font-size: 13px;">请观察画面，你最先注意到的是什么？</p>
+      <div style="position: relative; width: 220px; height: 320px; margin-bottom: 15px; cursor: pointer; perspective: 1000px;" onclick="this.querySelector('.oh-inner').style.transform = this.querySelector('.oh-inner').style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';">
+        <div class="oh-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d;">
+          <!-- 牌背 -->
+          <div style="position: absolute; width: 100%; height: 100%; background: linear-gradient(145deg, #6a11cb 0%, #2575fc 100%); border-radius: 12px; backface-visibility: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; color:rgba(255,255,255,0.5); font-weight:bold; font-size:18px;">点击翻开</div>
+          <!-- 牌面 -->
+          <div style="position: absolute; width: 100%; height: 100%; transform: rotateY(180deg); backface-visibility: hidden; display: flex; justify-content: center; align-items: center; background:#fff; border-radius:12px; overflow:hidden;">
+            <img src="https://files.catbox.moe/${randomWord}.png" style="position: absolute; width: 92%; height: 92%; object-fit: contain; z-index: 1;">
+            <img src="https://files.catbox.moe/${randomImage}.jpg" style="position: absolute; width: 72%; height: 72%; object-fit: contain; z-index: 2; transition: transform 0.3s;" onmouseover="this.style.transform='rotate(5deg) scale(1.05)'" onmouseout="this.style.transform='rotate(0deg) scale(1)'">
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center; color: var(--text-main); font-weight: 600; margin-bottom: 5px;">你抽到了一张 OH 卡</p>
+      <p style="text-align:center; color: var(--text-ai); font-size: 13px; margin-bottom:15px;">请观察画面，你最先注意到的是什么？</p>
       <button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">收起卡片</button>
     `;
     globalOverlay.appendChild(wrapper);
 
     const aiMsg = document.createElement('div');
     aiMsg.className = 'ai-msg';
-    aiMsg.innerText = "我递给了你一张OH卡，看看书本上方的浮层。";
+    aiMsg.innerText = "我递给了你一张OH卡，看看书本上方的浮层。点击卡牌可以翻面。";
     chatHistory.appendChild(aiMsg);
     chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
   }
 
-  function sendSCL90() {
+  // JSON 量表引擎
+  window.loadAndShowScale = async function(scaleId) {
+    try {
+      const res = await fetch(`scales/${scaleId}.json`);
+      if (!res.ok) throw new Error("找不到量表文件");
+      const scale = await res.json();
+      renderScaleUI(scale);
+    } catch (e) {
+      console.error(e);
+      const err = document.createElement('div'); err.className = 'ai-msg';
+      err.innerText = `[系统提示] 无法加载量表 ${scaleId}.json`;
+      chatHistory.appendChild(err);
+    }
+  };
+
+  function renderScaleUI(scale) {
     globalOverlay.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'scl-wrapper';
     
-    // 生成带可选项的 SCL-90 量表内容
     let formHTML = `
-      <div class="scl-title">SCL-90 症状自评量表</div>
-      <div class="scl-desc">请根据最近一周的实际感受选择</div>
+      <div class="scl-title">${scale.title}</div>
+      <div class="scl-desc">${scale.desc}</div>
+      <div style="max-height:60vh; overflow-y:auto; padding-right:10px; margin-bottom:15px;" id="scale-questions-container">
     `;
     
-    const questions =[
-      "1. 头痛", "2. 感到紧张或容易激动", "3. 头脑中有不必要的想法或字句盘旋", 
-      "4. 感到眩晕或昏倒", "5. 睡眠不佳"
-    ];
-    
-    questions.forEach((q, idx) => {
+    // 动态生成选项 Radio 组
+    const optionsHTML = scale.options.map(opt => 
+      `<label><input type="radio" value="${opt.value}"><span>${opt.label}</span></label>`
+    ).join('');
+
+    scale.questions.forEach((q, idx) => {
       formHTML += `
         <div class="scl-q">
-          <div class="scl-q-text">${q}</div>
-          <div class="scl-options">
-            <label><input type="radio" name="q${idx}" value="1"><span>没有</span></label>
-            <label><input type="radio" name="q${idx}" value="2"><span>很轻</span></label>
-            <label><input type="radio" name="q${idx}" value="3"><span>中等</span></label>
-            <label><input type="radio" name="q${idx}" value="4"><span>偏重</span></label>
-            <label><input type="radio" name="q${idx}" value="5"><span>严重</span></label>
+          <div class="scl-q-text">${idx+1}. ${q.q}</div>
+          <div class="scl-options" data-factor="${q.f || ''}" data-idx="${idx}">
+            ${optionsHTML.replace(/<input type="radio"/g, `<input type="radio" name="sq${idx}"`)}
           </div>
         </div>
       `;
     });
 
-    formHTML += `<button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">提交并收起表单</button>`;
+    formHTML += `</div><button class="close-overlay-btn" id="submitScaleBtn">提交量表并发送给医生</button>
+                 <button class="close-overlay-btn" style="background:transparent; color:#999; box-shadow:none;" onclick="document.getElementById('global-overlay').innerHTML=''">取消填写</button>`;
+    
     wrapper.innerHTML = formHTML;
     globalOverlay.appendChild(wrapper);
 
-    const aiMsg = document.createElement('div');
-    aiMsg.className = 'ai-msg';
-    aiMsg.innerText = "这是一份 SCL-90 量表，请在浮层中填写你的真实感受。";
-    chatHistory.appendChild(aiMsg);
-    chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+    // 默认选中第一项防呆
+    scale.questions.forEach((_, idx) => {
+      const firstRadio = document.querySelector(`input[name="sq${idx}"]`);
+      if (firstRadio) firstRadio.checked = true;
+    });
+
+    document.getElementById('submitScaleBtn').onclick = () => {
+      let totalScore = 0; let posItems = 0;
+      let factorScores = {};
+      
+      // 初始化因子分数
+      if (scale.factors) {
+        for (let k in scale.factors) factorScores[k] = 0;
+      }
+
+      scale.questions.forEach((q, idx) => {
+        let val = parseInt(document.querySelector(`input[name="sq${idx}"]:checked`)?.value || 0);
+        totalScore += val;
+        if (val > 1) posItems++;
+        if (q.f && factorScores[q.f] !== undefined) factorScores[q.f] += val;
+      });
+
+      // 动态生成报告
+      let totalMean = (totalScore / scale.questions.length).toFixed(2);
+      let posMean = posItems > 0 ? (totalScore / posItems).toFixed(2) : 0;
+      
+      let report = `${scale.title} 结果\n--------------------\n【总体情况】\n总分: ${totalScore}\n总均分: ${totalMean}\n阳性项目数: ${posItems}\n阳性症状均分: ${posMean}\n--------------------\n`;
+      
+      if (scale.factors) {
+        report += `【各症状因子分】\n`;
+        for (let k in scale.factors) {
+           let mean = (factorScores[k] / scale.factors[k].count).toFixed(2);
+           report += `${scale.factors[k].name}: ${mean}\n`;
+        }
+      }
+
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: `这是我的${scale.title}结果：\n${report}` }, '*');
+      }
+
+      document.getElementById('global-overlay').innerHTML = `
+        <div class="scl-wrapper" style="text-align:center;">
+          <h3 style="color:#e74c3c; margin-bottom:15px;">测评已完成</h3>
+          <p style="font-size:14px; color:var(--text-main); margin-bottom:10px;">总分: ${totalScore}</p>
+          <p style="font-size:12px; color:var(--text-ai); margin-bottom:20px;">报告已同步给林医生，请等待她的分析。</p>
+          <button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">关闭面板</button>
+        </div>
+      `;
+    };
   }
 
+  // 3. 聊天输入逻辑
   function sendMessage() {
     const text = chatInput.value.trim();
     if (!text) return;
@@ -188,20 +262,24 @@ function initApp() {
     chatInput.value = '';
     chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
 
-    setTimeout(() => {
-      const lowerText = text.toLowerCase();
-      if (lowerText.includes('oh卡')) {
-        sendOHCard();
-      } else if (lowerText.includes('表单') || lowerText.includes('scl')) {
-        sendSCL90();
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes('oh卡')) {
+      setTimeout(sendOHCard, 800);
+    } else if (lowerText.includes('表单') || lowerText.includes('scl')) {
+      setTimeout(sendSCL90, 800);
+    } else {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
       } else {
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'ai-msg';
-        aiMsg.innerText = "我听到了。把这些思绪留在这张纸上吧，今晚好好休息。";
-        chatHistory.appendChild(aiMsg);
-        chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+        setTimeout(() => {
+          const aiMsg = document.createElement('div');
+          aiMsg.className = 'ai-msg';
+          aiMsg.innerText = "（文本已记录。由于未在酒馆环境中运行，我无法真正回复你。）";
+          chatHistory.appendChild(aiMsg);
+          chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+        }, 800);
       }
-    }, 800);
+    }
   }
 
   sendBtn.addEventListener('click', sendMessage);
@@ -331,6 +409,22 @@ function initApp() {
     const info = parseFileName(filename);
     return { artist: info.artist, name: info.title, src: `/Lin/music/${timePeriod}/${encodeURIComponent(filename)}` };
   });
+
+  window.activateBirthdayMode = function() {
+    console.log("🎂 生日彩蛋触发！特别曲目已加入歌单。");
+    const bdayTracks =[
+      "the_mountain-birthday-490600.mp3",
+      "the_mountain-cartoon-cartoon-music-489996.mp3"
+    ].map(f => ({
+      artist: parseFileName(f).artist, name: parseFileName(f).title, src: `/Lin/music/birthday/${encodeURIComponent(f)}`
+    }));
+    // 将生日歌曲强制置顶并混入播放列表
+    playlist.unshift(...bdayTracks);
+    if(currentHowl) {
+        currentHowl.stop();
+        loadTrack(0, true);
+    }
+  };
 
   // 洗牌算法（打乱数组）实现随机播放
   function shufflePlaylist(array) {
@@ -505,3 +599,40 @@ function initApp() {
     });
   }
 }
+
+// ================= 接收 SillyTavern 跨域数据 =================
+window.addEventListener('message', (event) => {
+  if (!event.data) return;
+
+  // 1. 同步 12 项状态栏
+  if (event.data.type === 'SYNC_STATUS') {
+    const d = event.data.data;
+    const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val || '暂无数据'; };
+    
+    setT('s-state', d['病历状态']);
+    setT('s-current', d['本次记录']);
+    setT('s-last', d['上次互动']);
+    setT('s-relation', d['当前关系']);
+    setT('s-special', d['特殊性']);
+    setT('s-resource', d['优势资源']);
+    setT('s-precaution', d['注意事项']);
+    setT('s-cause', d['问题成因']);
+    setT('s-impact', d['影响评估']);
+    setT('s-plan', d['干预方案']);
+    setT('s-action', d['执行事项']);
+    
+    const targetEl = document.getElementById('s-target');
+    if (targetEl) targetEl.innerHTML = `🎯 <strong>预期目标：</strong>${d['预期目标'] || '暂未设定'}`;
+  }
+
+  // 2. 触发动态量表引擎
+  if (event.data.type === 'TRIGGER_SCALE') {
+    const scaleId = event.data.scaleId;
+    window.loadAndShowScale(scaleId);
+  }
+
+  // 3. 生日彩蛋触发
+  if (event.data.type === 'TRIGGER_BIRTHDAY') {
+    if (window.activateBirthdayMode) window.activateBirthdayMode();
+  }
+});

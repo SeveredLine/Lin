@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AI 心理疗愈笔记</title>
+  <title>林语涵心理诊所</title>
   <link rel="stylesheet" href="style.css">
   <!-- 引入 Howler.js -->
   <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
 </head>
 <body>
 
-  <!-- 暗黑模式拉绳 -->
   <!-- OH卡和表单的全局动画浮层 -->
   <div id="global-overlay"></div>
 
+  <!-- 暗黑模式拉绳 -->
   <div class="pull-cord-container" id="lampCord"><div class="cord"><div class="knob"></div></div></div>
 
   <div class="app-container">
@@ -21,36 +21,45 @@
       <div class="spiral-container" id="spirals"></div>
 
       <div class="pages-container" id="book-pages">
-        <!-- 新增：书籍封面与封底层级 -->
+        
+        <!-- 封面与封底层级 -->
         <div class="page" data-index="-1">
           <div class="page-front cover-design">
-            <h1>AI 疗愈笔记</h1>
-            <p>Inner Peace</p>
+            <h1>林语涵</h1>
+            <p>Inner Peace 诊疗笔记</p>
           </div>
           <div class="page-back close-book-area">
-            <span class="back-text">点击返回封面<br>休息一下</span>
+            <span class="back-text">🖍️<br>妈妈今天又在叹气，小葵画了个大太阳给她！</span>
           </div>
         </div>
 
-        <!-- 标签页容器，注入内容 -->
+        <!-- 标签页容器 -->
         <div class="page" data-index="0">
           <div class="page-front" id="page-0"></div>
-          <div class="page-back close-book-area"><span class="back-text">“把烦恼写在纸上，<br>它是一面不会评判的镜子。”<br><br>👉 点击合上书本</span></div>
+          <div class="page-back close-book-area">
+            <span class="back-text">🐢<br>弟弟昨天把沙子吃进嘴里了，笨蛋。</span>
+          </div>
         </div>
         
         <div class="page" data-index="1">
           <div class="page-front" id="page-1"></div>
-          <div class="page-back close-book-area"><span class="back-text">“面对真实的自我。”<br><br>👉 点击合上书本</span></div>
+          <div class="page-back close-book-area">
+            <span class="back-text">🌸<br>门外的紫藤花掉了，我捡了一片夹在这里。</span>
+          </div>
         </div>
         
         <div class="page" data-index="2">
           <div class="page-front" id="page-2"></div>
-          <div class="page-back close-book-area"><span class="back-text">“静听内心的声音。”<br><br>👉 点击合上书本</span></div>
+          <div class="page-back close-book-area">
+            <span class="back-text">🍪<br>别告诉妈妈，我在抽屉里藏了半块果酱饼干...</span>
+          </div>
         </div>
         
         <div class="page" data-index="3">
           <div class="page-front" id="page-3"></div>
-          <div class="page-back close-book-area"><span class="back-text">“重塑生活的秩序。”<br><br>👉 点击合上书本</span></div>
+          <div class="page-back close-book-area">
+            <span class="back-text">💤<br>嘘，大家都在休息呢。<br><br>👉 点击合上书本</span>
+          </div>
         </div>
       </div>
     </div>
