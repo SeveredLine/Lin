@@ -254,31 +254,32 @@ function initApp() {
     const text = chatInput.value.trim();
     if (!text) return;
 
-    const userNote = document.createElement('div');
-    userNote.className = 'user-note';
-    userNote.innerText = text;
-    userNote.style.transform = `rotate(${(Math.random() * 6 - 3).toFixed(1)}deg)`;
-    chatHistory.appendChild(userNote);
+    // 清空输入框
     chatInput.value = '';
-    chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
 
-    const lowerText = text.toLowerCase();
-    if (lowerText.includes('oh卡')) {
-      setTimeout(sendOHCard, 800);
-    } else if (lowerText.includes('表单') || lowerText.includes('scl')) {
-      setTimeout(sendSCL90, 800);
+    // 将文本发给外层酒馆（JS-Runner会拦截并真正写入）
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
+      
+      // 本地做一个灰色的占位反馈，表示发送中，马上会被真实记录覆盖
+      const tempNote = document.createElement('div');
+      tempNote.className = 'user-note';
+      tempNote.style.opacity = '0.5';
+      tempNote.innerText = text;
+      chatHistory.appendChild(tempNote);
+      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+
     } else {
-      if (window.parent !== window) {
-        window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
-      } else {
-        setTimeout(() => {
-          const aiMsg = document.createElement('div');
-          aiMsg.className = 'ai-msg';
-          aiMsg.innerText = "（文本已记录。由于未在酒馆环境中运行，我无法真正回复你。）";
-          chatHistory.appendChild(aiMsg);
-          chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
-        }, 800);
-      }
+      // 兜底：脱离酒馆环境
+      const userNote = document.createElement('div');
+      userNote.className = 'user-note';
+      userNote.innerText = text;
+      chatHistory.appendChild(userNote);
+      const aiMsg = document.createElement('div');
+      aiMsg.className = 'ai-msg';
+      aiMsg.innerText = "（测试环境：未连接酒馆。）";
+      chatHistory.appendChild(aiMsg);
+      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
     }
   }
 
@@ -634,5 +635,46 @@ window.addEventListener('message', (event) => {
   // 3. 生日彩蛋触发
   if (event.data.type === 'TRIGGER_BIRTHDAY') {
     if (window.activateBirthdayMode) window.activateBirthdayMode();
+  }
+
+  // 4. 同步全局聊天记录
+  if (event.data.type === 'SYNC_CHAT') {
+    const msgs = event.data.messages;
+    const chatHistory = document.getElementById('chat-history');
+    const chatPage = document.getElementById('page-0');
+    if (!chatHistory) return;
+
+    // 清空当前记录
+    chatHistory.innerHTML = '';
+
+    // 简单 Markdown 解析器（处理加粗、斜体、换行）
+    const parseMD = (str) => {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+    };
+
+    msgs.forEach((m, i) => {
+      if (m.role === 'ai') {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'ai-msg';
+        aiMsg.innerHTML = parseMD(m.text);
+        chatHistory.appendChild(aiMsg);
+      } else {
+        const userNote = document.createElement('div');
+        userNote.className = 'user-note';
+        userNote.innerHTML = parseMD(m.text);
+        // 伪随机倾斜角度，保持手写便签质感（根据索引固定种子避免闪烁）
+        const rot = (((i * 13.5) % 6) - 3).toFixed(1);
+        userNote.style.transform = `rotate(${rot}deg)`;
+        chatHistory.appendChild(userNote);
+      }
+    });
+
+    // 自动滚动到最底部
+    if (chatPage) {
+      setTimeout(() => chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' }), 50);
+    }
   }
 });
