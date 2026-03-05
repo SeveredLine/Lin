@@ -37,7 +37,7 @@ body {
   background-color: var(--bg-color); background-image: var(--bg-noise);
   font-family: 'Nunito', 'PingFang SC', sans-serif;
   height: 100vh; display: flex; justify-content: center; align-items: center;
-  overflow: hidden; transition: background-color 1.2s ease;
+  overflow: hidden;
 }
 
 @keyframes floating {
@@ -53,7 +53,7 @@ body {
 
 /* 锁定移动端宽高比，防止拉伸 */
 .app-container { display: flex; align-items: flex-start; width: 92vw; max-width: 440px; aspect-ratio: 3/4; max-height: 85vh; height: auto; animation: floating 6s ease-in-out infinite; will-change: transform; }
-.notebook { flex: 1; height: 100%; position: relative; background: var(--notebook-bg); border-radius: 8px 18px 18px 8px; box-shadow: 15px 25px 45px var(--shadow-color), inset -2px 0 5px rgba(255,255,255,0.5); z-index: 10; transition: background-color 1.2s ease, box-shadow 1.2s ease; }
+.notebook { flex: 1; height: 100%; position: relative; background: var(--notebook-bg); border-radius: 8px 18px 18px 8px; box-shadow: 15px 25px 45px var(--shadow-color), inset -2px 0 5px rgba(255,255,255,0.5); z-index: 10; transition: box-shadow 1.2s ease; }
 
 .tabs-container { width: 42px; display: flex; flex-direction: column; gap: 12px; margin-top: 6%; margin-left: -15px; z-index: 1; }
 .tab { writing-mode: vertical-rl; text-orientation: mixed; padding: 16px 8px 16px 22px; border-radius: 0 12px 12px 0; font-weight: 800; color: #555; box-shadow: 4px 6px 12px var(--shadow-color), inset 2px 2px 5px rgba(255,255,255,0.4); cursor: pointer; font-size: 14px; letter-spacing: 3px; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease; position: relative; overflow: hidden; will-change: transform; }
@@ -89,6 +89,7 @@ body {
 .page-front::-webkit-scrollbar, .page-back::-webkit-scrollbar { display: none; }
 
 .page-front {
+  z-index: 2;
   background-image: var(--spotlight), var(--paper-noise), repeating-linear-gradient(transparent 0, transparent 34px, var(--line-color) 34px, var(--line-color) 35px);
   background-position: center top, 0 0, 0 40px; background-size: 100% 100%, 150px 150px, 100% auto;
   background-color: var(--notebook-bg);
@@ -99,6 +100,7 @@ body {
 
 /* 翻过去后的背面设计 */
 .page-back {
+  z-index: 1;
   transform: rotateY(180deg);
   background-image: var(--paper-noise);
   border-radius: 18px 0 0 18px;
@@ -150,14 +152,15 @@ body.dark-mode .page[data-index="3"] .page-back { background-color: #3b4952; }
 
 #chat-history { position: absolute; top: 25px; bottom: 90px; left: 20px; right: 20px; overflow-y: auto; scrollbar-width: none; }
 #chat-history::-webkit-scrollbar { display: none; }
-.input-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; height: 55px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 28px; box-shadow: 0 10px 25px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8); display: flex; align-items: center; padding: 0 8px 0 20px; z-index: 60; border: 1px solid rgba(255,255,255,0.5); }
+
+.input-wrapper { position: absolute; bottom: 20px; left: 20px; right: 20px; height: auto; min-height: 55px; background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.8); display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding: 10px 15px; z-index: 60; border: 1px solid rgba(255,255,255,0.5); gap: 5px; }
 body.dark-mode .input-wrapper { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
 body.dark-mode .input-wrapper input { color: #f0f0f0; }
-.input-wrapper input { flex: 1; border: none; outline: none; background: transparent; font-size: var(--base-font-size); color: #333; font-weight: bold;}
-.send-btn { flex-shrink: 0; background: linear-gradient(135deg, var(--tab-1), #e74c3c); border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-size: 18px; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); cursor: pointer; transition: transform 0.2s; margin-left: 8px; }
+.input-wrapper input { flex: 1 1 120px; margin-right: auto; border: none; outline: none; background: transparent; font-size: var(--base-font-size); color: #333; font-weight: bold;}
+.send-btn { flex-shrink: 0; background: linear-gradient(135deg, var(--tab-1), #e74c3c); border: none; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-size: 18px; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); cursor: pointer; transition: transform 0.2s; }
 .send-btn:active { transform: scale(0.9); }
 
-.fs-btn { flex-shrink: 0; background: transparent; border: none; width: 30px; height: 40px; color: var(--text-main); font-size: 22px; cursor: pointer; transition: transform 0.2s; margin-left: 5px; opacity: 0.6; }
+.fs-btn { flex-shrink: 0; background: transparent; border: none; width: 30px; height: 40px; color: var(--text-main); font-size: 22px; cursor: pointer; transition: transform 0.2s; opacity: 0.6; }
 .fs-btn:active { transform: scale(0.9); }
 
 /* 全屏模式样式 */
@@ -357,3 +360,27 @@ body.dark-mode .playlist-item.active { background: rgba(163, 217, 177, 0.1); }
 
 .li-artist { font-size: 11px; font-weight: 800; color: var(--text-main); opacity: 0.8;}
 .li-title { font-size: 13px; font-weight: 600; color: var(--text-ai); margin-top: 2px; }
+
+/* ================= 水波纹日夜切换特效 ================= */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(0px at var(--ripple-x, 85vw) var(--ripple-y, 80px));
+  animation: theme-ripple 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes theme-ripple { to { clip-path: circle(var(--ripple-r, 150vw) at var(--ripple-x, 85vw) var(--ripple-y, 80px)); } }
+
+/* ================= 字体全局深度绑定 ================= */
+.tab { font-size: calc(var(--base-font-size) - 1px); }
+.back-text { font-size: var(--base-font-size); }
+.archive-title { font-size: calc(var(--base-font-size) + 5px); }
+.d-box-label { font-size: calc(var(--base-font-size) - 3px); }
+.d-box-val, .clinical-notes li, .task-item, .goal-box { font-size: calc(var(--base-font-size) - 2px); }
+.setting-item label, .reset-btn { font-size: var(--base-font-size); }
+.p-artist { font-size: calc(var(--base-font-size) - 2px); }
+.p-name, .li-artist { font-size: calc(var(--base-font-size) - 4px); }
+.garden-label { font-size: calc(var(--base-font-size) + 1px); }
+.scl-title { font-size: calc(var(--base-font-size) + 3px); }
+.scl-q-text { font-size: calc(var(--base-font-size) - 1px); }
+.scl-options label { font-size: calc(var(--base-font-size) - 3px); }

@@ -74,7 +74,7 @@ function initApp() {
     });
   });
 
-  // 暗黑模式灯绳
+  // 暗黑模式灯绳 - 带水波纹扩散特效
   const lampCord = document.getElementById('lampCord');
   let isDarkMode = false;
   const toggleDarkMode = (e) => {
@@ -82,9 +82,26 @@ function initApp() {
     lampCord.classList.add('pulled');
     setTimeout(() => {
       lampCord.classList.remove('pulled');
-      isDarkMode = !isDarkMode;
-      if (isDarkMode) document.body.classList.add('dark-mode');
-      else document.body.classList.remove('dark-mode');
+      const switchTheme = () => {
+        isDarkMode = !isDarkMode;
+        if (isDarkMode) document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+      };
+      
+      // 检测浏览器是否支持全新的 View Transitions 水波纹 API
+      if (document.startViewTransition) {
+        const rect = lampCord.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.bottom;
+        const maxRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+        
+        document.documentElement.style.setProperty('--ripple-x', `${x}px`);
+        document.documentElement.style.setProperty('--ripple-y', `${y}px`);
+        document.documentElement.style.setProperty('--ripple-r', `${maxRadius}px`);
+        document.startViewTransition(switchTheme);
+      } else {
+        switchTheme();
+      }
     }, 350);
   };
   lampCord.addEventListener('mousedown', toggleDarkMode);
@@ -469,8 +486,10 @@ function initApp() {
   }
 
   if(turnSpeedSlider) {
+    // 算法反转：拉到最右侧10 = 0.2秒(极快)，拉到最左侧1 = 2秒(极慢)
     turnSpeedSlider.addEventListener('input', (e) => {
-      root.style.setProperty('--turn-speed', e.target.value + 's');
+      let speed = Math.max(0.2, 2.2 - (e.target.value * 0.2)).toFixed(2);
+      root.style.setProperty('--turn-speed', speed + 's');
     });
   }
 
@@ -478,8 +497,8 @@ function initApp() {
     resetSettingsBtn.addEventListener('click', () => {
       if(fontSizeSlider) fontSizeSlider.value = 15;
       if(volumeSlider) volumeSlider.value = 30;
-      if(turnSpeedSlider) turnSpeedSlider.value = 1;
-      if (autoPlaySwitch) autoPlaySwitch.checked = true;
+      if(turnSpeedSlider) turnSpeedSlider.value = 6;
+      if(autoPlaySwitch) autoPlaySwitch.checked = true;
       root.style.setProperty('--base-font-size', '15px');
       root.style.setProperty('--turn-speed', '1s');
       Howler.volume(0.3);
