@@ -89,7 +89,6 @@ body {
 .page-front::-webkit-scrollbar, .page-back::-webkit-scrollbar { display: none; }
 
 .page-front {
-  transform: translateZ(1px);
   background-image: var(--spotlight), var(--paper-noise), repeating-linear-gradient(transparent 0, transparent 34px, var(--line-color) 34px, var(--line-color) 35px);
   background-position: center top, 0 0, 0 40px; background-size: 100% 100%, 150px 150px, 100% auto;
   background-color: var(--notebook-bg);
@@ -100,7 +99,7 @@ body {
 
 /* 翻过去后的背面设计 */
 .page-back {
-  transform: rotateY(180deg) translateZ(1px);
+  transform: rotateY(180deg);
   background-image: var(--paper-noise);
   border-radius: 18px 0 0 18px;
   display: flex; align-items: center; justify-content: center; flex-direction: column;
@@ -110,19 +109,19 @@ body {
 .back-text { transform: rotate(15deg); font-family: 'Comic Sans MS', cursive; font-size: 15px; color: rgba(0,0,0,0.4); text-align: center; font-weight: bold; width: 60%; line-height: 1.6; }
 body.dark-mode .back-text { color: rgba(255,255,255,0.3); }
 
-/* 翻页后左侧可见角度设定，接近垂直防占空间。利用动态z-index覆盖订书环及上一页 */
-.page[data-index="-1"].flipped { transform: rotateY(-105deg) translateZ(1px); z-index: 101; }
-.page[data-index="0"].flipped { transform: rotateY(-102deg) translateZ(2px); z-index: 102; }
-.page[data-index="1"].flipped { transform: rotateY(-99deg) translateZ(3px); z-index: 103; }
-.page[data-index="2"].flipped { transform: rotateY(-96deg) translateZ(4px); z-index: 104; }
-.page[data-index="3"].flipped { transform: rotateY(-93deg) translateZ(5px); z-index: 105; }
+/* 翻页后左侧可见角度设定。必须先 translateZ 再 rotateY，确保所有的页根在左侧绝对对齐不偏移 */
+.page[data-index="-1"].flipped { transform: translateZ(1px) rotateY(-105deg); z-index: 101; }
+.page[data-index="0"].flipped  { transform: translateZ(2px) rotateY(-102deg); z-index: 102; }
+.page[data-index="1"].flipped  { transform: translateZ(3px) rotateY(-99deg); z-index: 103; }
+.page[data-index="2"].flipped  { transform: translateZ(4px) rotateY(-96deg); z-index: 104; }
+.page[data-index="3"].flipped  { transform: translateZ(5px) rotateY(-93deg); z-index: 105; }
 
-/* 初始右侧状态下的 z-index 层级，封面在最上 */
-.page[data-index="-1"] { z-index: 5; }
-.page[data-index="0"] { z-index: 4; }
-.page[data-index="1"] { z-index: 3; }
-.page[data-index="2"] { z-index: 2; }
-.page[data-index="3"] { z-index: 1; }
+/* 初始右侧状态下的物理 Z 轴偏移 */
+.page[data-index="-1"] { transform: translateZ(5px) rotateY(0deg); z-index: 5; }
+.page[data-index="0"]  { transform: translateZ(4px) rotateY(0deg); z-index: 4; }
+.page[data-index="1"]  { transform: translateZ(3px) rotateY(0deg); z-index: 3; }
+.page[data-index="2"]  { transform: translateZ(2px) rotateY(0deg); z-index: 2; }
+.page[data-index="3"]  { transform: translateZ(1px) rotateY(0deg); z-index: 1; }
 
 /* 纸张背面不同颜色的拟真处理 */
 .page[data-index="-1"] .page-back { background-color: #2a3b45; }
