@@ -249,43 +249,48 @@ function initApp() {
     };
   }
 
-  // 3. 聊天输入逻辑
+  // 3. 聊天输入逻辑 & 状态控制
+  let isGenerating = false;
+
   function sendMessage() {
+    // 如果当前正在生成，点击按钮则触发“停止请求”
+    if (isGenerating) {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'STOP_GEN_TO_ST' }, '*');
+      }
+      return;
+    }
+
     const text = chatInput.value.trim();
     if (!text) return;
 
-    // 清空输入框
     chatInput.value = '';
 
-    // 将文本发给外层酒馆（JS-Runner会拦截并真正写入）
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
       
-      // 本地做一个灰色的占位反馈，表示发送中，马上会被真实记录覆盖
       const tempNote = document.createElement('div');
-      tempNote.className = 'user-note';
+      tempNote.className = 'user-note temp-note';
       tempNote.style.opacity = '0.5';
       tempNote.innerText = text;
       chatHistory.appendChild(tempNote);
-      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
-
-    } else {
-      // 兜底：脱离酒馆环境
-      const userNote = document.createElement('div');
-      userNote.className = 'user-note';
-      userNote.innerText = text;
-      chatHistory.appendChild(userNote);
-      const aiMsg = document.createElement('div');
-      aiMsg.className = 'ai-msg';
-      aiMsg.innerText = "（测试环境：未连接酒馆。）";
-      chatHistory.appendChild(aiMsg);
-      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+      tempNote.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
   sendBtn.addEventListener('click', sendMessage);
   chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+  
+  // 监听输入框变化，实时同步回酒馆底层
+  chatInput.addEventListener('input', (e) => {
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'SYNC_INPUT_TO_ST', text: e.target.value }, '*');
+    }
   });
 
 
@@ -647,7 +652,7 @@ window.addEventListener('message', (event) => {
     // 清空当前记录
     chatHistory.innerHTML = '';
 
-    // 简单 Markdown 解析器（处理加粗、斜体、换行）
+    // 简单 Markdown 解析器（处理加粗、斜体、真实换行）
     const parseMD = (str) => {
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -676,5 +681,34 @@ window.addEventListener('message', (event) => {
     if (chatPage) {
       setTimeout(() => chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' }), 50);
     }
+  }
+
+  // 5. 实时输入框同步 (当你在酒馆里打字时，浮窗里也能看到)
+  if (event.data.type === 'SYNC_INPUT_FROM_ST') {
+    if (document.activeElement !== chatInput) {
+      chatInput.value = event.data.text;
+    }
+  }
+
+  // 6. 生成状态控制 (把发送按钮变成停止按钮)
+  if (event.data.type === 'GEN_STATE') {
+    isGenerating = event.data.state;
+    sendBtn.innerHTML = isGenerating ? '<span style="font-size:22px;">■</span>' : '↑';
+    sendBtn.style.background = isGenerating ? '#e74c3c' : '';
+  }
+
+  // 7. 流式打字机效果注入
+  if (event.data.type === 'STREAM_UPDATE') {
+    // 寻找当前是否已经有正在打字的 AI 气泡
+    let typingBubble = document.getElementById('typing-bubble');
+    if (!typingBubble) {
+      typingBubble = document.createElement('div');
+      typingBubble.id = 'typing-bubble';
+      typingBubble.className = 'ai-msg';
+      chatHistory.appendChild(typingBubble);
+      // 锚定滚动到消息开头
+      typingBubble.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    typingBubble.innerHTML = parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
   }
 });
