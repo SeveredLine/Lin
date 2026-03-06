@@ -421,7 +421,7 @@ function initApp() {
 
   // 读取本地存储的播放器设置（针对当前时段）
   const storageKey = `LinAudio_${timePeriod}`;
-  let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || { mode: 0, disabled:[], vol: 30 };
+  let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || { mode: 1, disabled:[], vol: 30 };
   let playMode = playerSettings.mode; // 0: 列表循环, 1: 随机播放, 2: 单曲循环
   
   function savePlayerSettings() {
@@ -476,8 +476,9 @@ function initApp() {
 
   // 格式化时间为 MM:SS
   function formatTime(secs) {
-    const minutes = Math.floor(secs / 60) || 0;
-    const seconds = Math.floor(secs - minutes * 60) || 0;
+    if (isNaN(secs) || secs < 0) return "00:00";
+    const minutes = Math.floor(secs / 60);
+    const seconds = Math.floor(secs % 60);
     return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
 
@@ -488,7 +489,7 @@ function initApp() {
     container.innerHTML = playlist.map((track, idx) => {
       const isDisabled = playerSettings.disabled.includes(track.src);
       const isActive = idx === currentTrackIndex;
-      const eyeIcon = isDisabled ? '🙈' : '👁️';
+      const eyeIcon = isDisabled ? '🙉' : '🎵️';
       return `
         <div class="playlist-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}" data-idx="${idx}">
           <div class="playlist-item-info">
@@ -559,9 +560,12 @@ function initApp() {
     const track = playlist[index];
     trackArtist.innerText = track.artist;
     trackName.innerText = track.name;
-    pBar.style.width = '0%';
-    if (pTimeCurrent) pTimeCurrent.innerText = "00:00";
-    if (pTimeTotal) pTimeTotal.innerText = "00:00";
+    const barEl = document.getElementById('p-bar');
+    const tCur = document.getElementById('p-time-current');
+    const tTot = document.getElementById('p-time-total');
+    if (barEl) barEl.style.width = '0%';
+    if (tCur) tCur.innerText = "00:00";
+    if (tTot) tTot.innerText = "00:00";
     
     renderPlaylist(); // 刷新律动和高亮状态
 
@@ -576,7 +580,8 @@ function initApp() {
       autoplay: false, // 拦截自动播放，利用淡入动画接管
       volume: volumeSlider.value / 100,
       onload: function() {
-        if (pTimeTotal) pTimeTotal.innerText = formatTime(this.duration());
+        const tTot = document.getElementById('p-time-total');
+        if (tTot) tTot.innerText = formatTime(this.duration());
         if (autoStart) playTrack();
       },
       onplay: function() {
@@ -600,11 +605,16 @@ function initApp() {
 
   function stepProgress() {
     if (currentHowl && isPlaying) {
-      let seek = currentHowl.seek() || 0;
+      let seek = currentHowl.seek();
+      if (typeof seek !== 'number') seek = 0; // 防止 Howler 抛出对象
       let duration = currentHowl.duration() || 0;
       let percent = (seek / duration) * 100;
-      pBar.style.width = `${percent || 0}%`;
-      if (pTimeCurrent) pTimeCurrent.innerText = formatTime(seek);
+      
+      const barEl = document.getElementById('p-bar');
+      const timeCur = document.getElementById('p-time-current');
+      if (barEl) barEl.style.width = `${percent || 0}%`;
+      if (timeCur) timeCur.innerText = formatTime(seek);
+      
       progressAnimationFrame = requestAnimationFrame(stepProgress);
     }
   }
@@ -842,7 +852,7 @@ function initApp() {
       Howler.volume(0.3);
       if (typeof playerSettings !== 'undefined') {
         playerSettings.vol = 30;
-        playerSettings.mode = 0;
+        playerSettings.mode = 1;
         playerSettings.disabled =[];
         savePlayerSettings();
         if (typeof updateModeUI === 'function') updateModeUI();
