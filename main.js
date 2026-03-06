@@ -274,7 +274,10 @@ function initApp() {
       tempNote.style.opacity = '0.5';
       tempNote.innerText = text;
       chatHistory.appendChild(tempNote);
-      tempNote.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      if (chatPage) {
+        setTimeout(() => chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' }), 10);
+      }
     }
   }
 
@@ -649,9 +652,6 @@ window.addEventListener('message', (event) => {
     const chatPage = document.getElementById('page-0');
     if (!chatHistory) return;
 
-    // 清空当前记录
-    chatHistory.innerHTML = '';
-
     // 简单 Markdown 解析器（处理加粗、斜体、真实换行）
     const parseMD = (str) => {
       return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -660,24 +660,45 @@ window.addEventListener('message', (event) => {
                 .replace(/\n/g, '<br>');
     };
 
+    document.querySelectorAll('.temp-note').forEach(el => el.remove());
+
+    const existingNodes = Array.from(chatHistory.children).filter(el => 
+      (el.classList.contains('ai-msg') || el.classList.contains('user-note')) && el.id !== 'typing-bubble'
+    );
+
     msgs.forEach((m, i) => {
-      if (m.role === 'ai') {
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'ai-msg';
-        aiMsg.innerHTML = parseMD(m.text);
-        chatHistory.appendChild(aiMsg);
+      const isAI = m.role === 'ai';
+      const className = isAI ? 'ai-msg' : 'user-note';
+      const contentHTML = parseMD(m.text);
+      
+      let node = existingNodes[i];
+      
+      if (node) {
+        if (node.className !== className) {
+          const newNode = document.createElement('div');
+          newNode.className = className;
+          newNode.innerHTML = contentHTML;
+          if (!isAI) newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
+          chatHistory.replaceChild(newNode, node);
+        } else if (node.innerHTML !== contentHTML) {
+          node.innerHTML = contentHTML;
+        }
       } else {
-        const userNote = document.createElement('div');
-        userNote.className = 'user-note';
-        userNote.innerHTML = parseMD(m.text);
-        // 伪随机倾斜角度，保持手写便签质感（根据索引固定种子避免闪烁）
-        const rot = (((i * 13.5) % 6) - 3).toFixed(1);
-        userNote.style.transform = `rotate(${rot}deg)`;
-        chatHistory.appendChild(userNote);
+        const newNode = document.createElement('div');
+        newNode.className = className;
+        newNode.innerHTML = contentHTML;
+        if (!isAI) newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
+        chatHistory.appendChild(newNode);
       }
     });
 
-    // 自动滚动到最底部
+    const allNodes = Array.from(chatHistory.children).filter(el => el.id !== 'typing-bubble');
+    if (allNodes.length > msgs.length) {
+      for (let i = msgs.length; i < allNodes.length; i++) {
+        allNodes[i].remove();
+      }
+    }
+
     if (chatPage) {
       setTimeout(() => chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' }), 50);
     }
@@ -699,16 +720,21 @@ window.addEventListener('message', (event) => {
 
   // 7. 流式打字机效果注入
   if (event.data.type === 'STREAM_UPDATE') {
-    // 寻找当前是否已经有正在打字的 AI 气泡
+    const chatPage = document.getElementById('page-0');
     let typingBubble = document.getElementById('typing-bubble');
+    
     if (!typingBubble) {
       typingBubble = document.createElement('div');
       typingBubble.id = 'typing-bubble';
       typingBubble.className = 'ai-msg';
       chatHistory.appendChild(typingBubble);
-      // 锚定滚动到消息开头
-      typingBubble.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+    
     typingBubble.innerHTML = parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
+    
+    // AI 正在打字时，始终让视口吸附在容器最底部，平滑跟随后续文字
+    if (chatPage) {
+      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'auto' });
+    }
   }
 });
