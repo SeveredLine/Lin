@@ -419,6 +419,15 @@ function initApp() {
     return { artist: info.artist, name: info.title, src: `/Lin/music/${timePeriod}/${encodeURIComponent(filename)}` };
   });
 
+  // 读取本地存储的播放器设置（针对当前时段）
+  const storageKey = `LinAudio_${timePeriod}`;
+  let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || { mode: 0, disabled:[], vol: 30 };
+  let playMode = playerSettings.mode; // 0: 列表循环, 1: 随机播放, 2: 单曲循环
+  
+  function savePlayerSettings() {
+    localStorage.setItem(storageKey, JSON.stringify(playerSettings));
+  }
+
   window.activateBirthdayMode = function() {
     console.log("🎂 生日彩蛋触发！特别曲目已加入歌单。");
     const bdayTracks =[
@@ -427,25 +436,18 @@ function initApp() {
     ].map(f => ({
       artist: parseFileName(f).artist, name: parseFileName(f).title, src: `/Lin/music/birthday/${encodeURIComponent(f)}`
     }));
-    // 将生日歌曲强制置顶并混入播放列表
     playlist.unshift(...bdayTracks);
+    
+    // 生日彩蛋：更改唱片机颜色
+    const albumArt = document.getElementById('album-art');
+    if (albumArt) albumArt.className = 'p-album-art birthday';
+    
+    if(typeof renderPlaylist === 'function') renderPlaylist(); // 重新渲染歌单
     if(currentHowl) {
         currentHowl.stop();
         loadTrack(0, true);
     }
   };
-
-  // 洗牌算法（打乱数组）实现随机播放
-  function shufflePlaylist(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-  }
-
-  if (playlist.length > 0) {
-    shufflePlaylist(playlist);
-  }
 
   let currentTrackIndex = 0;
   let currentHowl = null;
@@ -455,13 +457,102 @@ function initApp() {
   const pPlayBtn = document.getElementById('btn-play');
   const pPrevBtn = document.getElementById('btn-prev');
   const pNextBtn = document.getElementById('btn-next');
+  const pModeBtn = document.getElementById('btn-mode');
   const pControlPanel = document.getElementById('player-control-panel');
   const pInfoBar = document.getElementById('player-info');
   const pBar = document.getElementById('p-bar');
+  const pProgressBar = document.getElementById('p-progress-bar');
+  const pTimeCurrent = document.getElementById('p-time-current');
+  const pTimeTotal = document.getElementById('p-time-total');
   const trackArtist = document.getElementById('track-artist');
   const trackName = document.getElementById('track-name');
   const volumeSlider = document.getElementById('volumeSlider');
   const autoPlaySwitch = document.getElementById('autoPlaySwitch');
+  const albumArt = document.getElementById('album-art');
+  
+  // 设置唱片机根据时段分配外观颜色
+  if (albumArt) albumArt.className = `p-album-art ${timePeriod}`;
+  if (volumeSlider) volumeSlider.value = playerSettings.vol;
+
+  // 格式化时间为 MM:SS
+  function formatTime(secs) {
+    const minutes = Math.floor(secs / 60) || 0;
+    const seconds = Math.floor(secs - minutes * 60) || 0;
+    return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  }
+
+  // 动态渲染交互式播放列表
+  function renderPlaylist() {
+    const container = document.getElementById('playlist-container');
+    if (!container) return;
+    container.innerHTML = playlist.map((track, idx) => {
+      const isDisabled = playerSettings.disabled.includes(track.src);
+      const isActive = idx === currentTrackIndex;
+      const eyeIcon = isDisabled ? '🙈' : '👁️';
+      return `
+        <div class="playlist-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}" data-idx="${idx}">
+          <div class="playlist-item-info">
+            <span class="li-title">${track.name}</span>
+            <span class="li-artist">${track.artist}</span>
+          </div>
+          <div class="li-toggle" data-idx="${idx}">${eyeIcon}</div>
+        </div>
+      `;
+    }).join('');
+
+    // 绑定点击事件（歌曲切换 & 禁用开关）
+    container.querySelectorAll('.playlist-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.li-toggle')) {
+          e.stopPropagation(); 
+          const idx = parseInt(e.target.closest('.li-toggle').getAttribute('data-idx'));
+          const trackSrc = playlist[idx].src;
+          if (playerSettings.disabled.includes(trackSrc)) {
+            playerSettings.disabled = playerSettings.disabled.filter(src => src !== trackSrc);
+          } else {
+            playerSettings.disabled.push(trackSrc);
+          }
+          savePlayerSettings();
+          renderPlaylist(); 
+          return;
+        }
+        
+        const idx = parseInt(item.getAttribute('data-idx'));
+        if (playerSettings.disabled.includes(playlist[idx].src)) return; // 禁用的直接拦截
+        if (idx !== currentTrackIndex) {
+          loadTrack(idx, true);
+        } else {
+          togglePlay();
+        }
+      });
+    });
+  }
+
+  // 更新模式控制图标 UI
+  function updateModeUI() {
+    if (!pModeBtn) return;
+    pModeBtn.className = 'p-btn p-mode';
+    if (playMode === 0) pModeBtn.classList.add('loop');
+    else if (playMode === 1) pModeBtn.classList.add('random');
+    else if (playMode === 2) pModeBtn.classList.add('single');
+  }
+
+  if (pModeBtn) {
+    pModeBtn.addEventListener('click', () => {
+      playMode = (playMode + 1) % 3;
+      playerSettings.mode = playMode;
+      savePlayerSettings();
+      updateModeUI();
+    });
+    updateModeUI();
+  }
+
+  // 获取有效的（未被拉黑屏蔽的）歌曲索引数组
+  function getValidIndices() {
+    let valid =[];
+    playlist.forEach((t, i) => { if (!playerSettings.disabled.includes(t.src)) valid.push(i); });
+    return valid;
+  }
 
   function loadTrack(index, autoStart = false) {
     currentTrackIndex = index;
@@ -469,35 +560,175 @@ function initApp() {
     trackArtist.innerText = track.artist;
     trackName.innerText = track.name;
     pBar.style.width = '0%';
+    if (pTimeCurrent) pTimeCurrent.innerText = "00:00";
+    if (pTimeTotal) pTimeTotal.innerText = "00:00";
     
-    if (currentHowl) currentHowl.unload();
+    renderPlaylist(); // 刷新律动和高亮状态
+
+    if (currentHowl) {
+      currentHowl.stop();
+      currentHowl.unload();
+    }
 
     currentHowl = new Howl({
       src:[track.src],
       html5: true, 
-      autoplay: autoStart,
+      autoplay: false, // 拦截自动播放，利用淡入动画接管
       volume: volumeSlider.value / 100,
+      onload: function() {
+        if (pTimeTotal) pTimeTotal.innerText = formatTime(this.duration());
+        if (autoStart) playTrack();
+      },
       onplay: function() {
         isPlaying = true;
         updateUI(true);
         requestAnimationFrame(stepProgress);
       },
-      onpause: function() {
-        isPlaying = false;
-        updateUI(false);
-      },
+      onpause: function() { isPlaying = false; updateUI(false); },
+      onstop: function() { isPlaying = false; updateUI(false); },
       onend: function() {
         if (autoPlaySwitch && autoPlaySwitch.checked) {
-          playNext(true); // 播完如果开关开启则自动播放下一首
+          playNext(true); // 播完且开启连播时，触发下一首机制
         } else {
           isPlaying = false;
           updateUI(false);
         }
       },
-      onloaderror: function(id, err) {
-        console.error("音频加载失败:", err);
-      }
+      onloaderror: function(id, err) { console.error("音频加载失败:", err); }
     });
+  }
+
+  function stepProgress() {
+    if (currentHowl && isPlaying) {
+      let seek = currentHowl.seek() || 0;
+      let duration = currentHowl.duration() || 0;
+      let percent = (seek / duration) * 100;
+      pBar.style.width = `${percent || 0}%`;
+      if (pTimeCurrent) pTimeCurrent.innerText = formatTime(seek);
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
+    }
+  }
+
+  function updateUI(playing) {
+    if (playing) {
+      pControlPanel.classList.add('active');
+      pInfoBar.classList.add('active');
+      pPlayBtn.classList.add('playing');
+    } else {
+      pControlPanel.classList.remove('active');
+      pInfoBar.classList.remove('active');
+      pPlayBtn.classList.remove('playing');
+    }
+  }
+
+  function togglePlay() {
+    if (!currentHowl) return;
+    if (isPlaying) pauseTrack();
+    else playTrack();
+  }
+
+  // 接管播放：丝滑淡入
+  function playTrack() { 
+    if (!currentHowl) return;
+    const vol = volumeSlider.value / 100;
+    currentHowl.off('fade'); // 斩断历史冗余事件
+    currentHowl.volume(0);
+    currentHowl.play();
+    currentHowl.fade(0, vol, 1000); 
+  }
+
+  // 接管暂停：丝滑淡出再掐断
+  function pauseTrack() {
+    if (!currentHowl) return;
+    const vol = currentHowl.volume();
+    isPlaying = false; 
+    updateUI(false);
+    currentHowl.off('fade');
+    currentHowl.fade(vol, 0, 800);
+    currentHowl.once('fade', () => {
+      currentHowl.pause();
+      currentHowl.volume(volumeSlider.value / 100); // 重置内部音量，以备下次唤醒
+    });
+  }
+
+  function playNext(auto = false) {
+    const validIndices = getValidIndices();
+    if (validIndices.length === 0) return; // 全部黑名单了
+
+    let nextIndex = currentTrackIndex;
+    
+    if (auto && playMode === 2) {
+       nextIndex = currentTrackIndex; // 自然播完 && 单曲循环
+    } else if (playMode === 1) {
+       // 随机模式
+       if (validIndices.length > 1) {
+         let randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+         while (randomIdx === currentTrackIndex) randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+         nextIndex = randomIdx;
+       }
+    } else {
+       // 列表循环
+       let currentPos = validIndices.indexOf(currentTrackIndex);
+       if (currentPos === -1) nextIndex = validIndices[0]; // 当前被禁则顺延顺位第一个
+       else nextIndex = validIndices[(currentPos + 1) % validIndices.length];
+    }
+    loadTrack(nextIndex, true);
+  }
+
+  function playPrev() {
+    const validIndices = getValidIndices();
+    if (validIndices.length === 0) return;
+
+    let prevIndex = currentTrackIndex;
+    if (playMode === 1) {
+       if (validIndices.length > 1) {
+         let randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+         while (randomIdx === currentTrackIndex) randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
+         prevIndex = randomIdx;
+       }
+    } else {
+       let currentPos = validIndices.indexOf(currentTrackIndex);
+       if (currentPos === -1) prevIndex = validIndices[validIndices.length - 1]; 
+       else prevIndex = validIndices[(currentPos - 1 + validIndices.length) % validIndices.length];
+    }
+    loadTrack(prevIndex, true);
+  }
+
+  if (pPlayBtn) pPlayBtn.addEventListener('click', togglePlay);
+  if (pNextBtn) pNextBtn.addEventListener('click', () => playNext(false));
+  if (pPrevBtn) pPrevBtn.addEventListener('click', playPrev);
+
+  // 追加：进度条拖拽指引跳转
+  if (pProgressBar) {
+    pProgressBar.addEventListener('click', (e) => {
+      if (!currentHowl) return;
+      const rect = pProgressBar.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percent = clickX / rect.width;
+      const targetTime = percent * currentHowl.duration();
+      currentHowl.seek(targetTime);
+      stepProgress();
+    });
+  }
+
+  if(playlist.length > 0) {
+    renderPlaylist(); // 初次加载写入歌单
+    
+    // 智能寻路：定位到第一个未被拉黑的歌曲加载
+    const validIndices = getValidIndices();
+    const startIdx = validIndices.length > 0 ? validIndices[0] : 0;
+
+    const initPlay = () => {
+      if (autoPlaySwitch && autoPlaySwitch.checked && !isPlaying && currentHowl) playTrack();
+      document.removeEventListener('click', initPlay);
+    };
+    document.addEventListener('click', initPlay);
+    
+    loadTrack(startIdx, false); // 静默加载准备播放
+    Howler.volume(volumeSlider.value / 100);
+  } else {
+    trackArtist.innerText = "无音乐";
+    trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
   }
 
   function stepProgress() {
@@ -577,8 +808,13 @@ function initApp() {
 
   if(volumeSlider) {
     volumeSlider.addEventListener('input', (e) => {
-      let vol = e.target.value / 100;
-      Howler.volume(vol); 
+      let vol = e.target.value;
+      Howler.volume(vol / 100); 
+      // 存储音量设置
+      if (typeof playerSettings !== 'undefined') {
+        playerSettings.vol = vol;
+        savePlayerSettings();
+      }
     });
   }
 
@@ -589,7 +825,6 @@ function initApp() {
   }
 
   if(turnSpeedSlider) {
-    // 算法反转：拉到最右侧10 = 0.2秒(极快)，拉到最左侧1 = 2秒(极慢)
     turnSpeedSlider.addEventListener('input', (e) => {
       let speed = Math.max(0.2, 2.2 - (e.target.value * 0.2)).toFixed(2);
       root.style.setProperty('--turn-speed', speed + 's');
@@ -605,9 +840,18 @@ function initApp() {
       root.style.setProperty('--base-font-size', '15px');
       root.style.setProperty('--turn-speed', '1s');
       Howler.volume(0.3);
+      if (typeof playerSettings !== 'undefined') {
+        playerSettings.vol = 30;
+        playerSettings.mode = 0;
+        playerSettings.disabled =[];
+        savePlayerSettings();
+        if (typeof updateModeUI === 'function') updateModeUI();
+        if (typeof renderPlaylist === 'function') renderPlaylist();
+      }
     });
   }
 }
+
 
 // ================= 接收 SillyTavern 跨域数据 =================
 window.addEventListener('message', (event) => {

@@ -1,4 +1,3 @@
-<div class="archive-title">内心花园 🌿</div>
 <div class="garden-frame">
   <div class="garden-svg-container" id="svgGarden"></div>
   <div class="garden-label" id="gardenLabel"></div>
@@ -6,18 +5,21 @@
 
 <div class="mini-player">
   <div id="player-info" class="player-info">
-    <span class="p-artist" id="track-artist">载入中...</span>
-    <span class="p-name" id="track-name">等待播放</span>
-    <div class="p-progress-bar">
+    <span class="p-artist" id="track-name">等待播放</span>
+    <span class="p-name" id="track-artist">载入中...</span>
+    <div class="p-time-display"><span id="p-time-current">00:00</span> / <span id="p-time-total">00:00</span></div>
+    <div class="p-progress-bar" id="p-progress-bar">
       <div class="p-bar" id="p-bar"></div>
     </div>
   </div>
   <div id="player-control-panel" class="player-control-panel">
     <div class="p-album-art" id="album-art"></div>
     <div class="p-controls">
+      <div class="p-btn p-mode" id="btn-mode"></div>
       <div class="p-btn p-prev" id="btn-prev"></div>
       <div class="p-btn p-play" id="btn-play"></div>
       <div class="p-btn p-next" id="btn-next"></div>
     </div>
   </div>
+  <div id="playlist-container" class="playlist-container"></div>
 </div>
