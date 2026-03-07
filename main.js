@@ -775,69 +775,6 @@ function initApp() {
     trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
   }
 
-  function stepProgress() {
-    if (currentHowl && isPlaying) {
-      let seek = currentHowl.seek() || 0;
-      let percent = (seek / currentHowl.duration()) * 100;
-      pBar.style.width = `${percent || 0}%`;
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
-    }
-  }
-
-  function updateUI(playing) {
-    if (playing) {
-      pControlPanel.classList.add('active');
-      pInfoBar.classList.add('active');
-      pPlayBtn.classList.add('playing');
-    } else {
-      pControlPanel.classList.remove('active');
-      pInfoBar.classList.remove('active');
-      pPlayBtn.classList.remove('playing');
-    }
-  }
-
-  function togglePlay() {
-    if (!currentHowl) return;
-    if (currentHowl.playing()) currentHowl.pause();
-    else currentHowl.play();
-  }
-
-  function playTrack() { if (currentHowl) currentHowl.play(); }
-
-  function playNext(auto = false) {
-    let nextIndex = (currentTrackIndex + 1) % playlist.length;
-    loadTrack(nextIndex, auto);
-    if (!auto) playTrack(); 
-  }
-
-  function playPrev() {
-    let prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-    loadTrack(prevIndex, false);
-    playTrack();
-  }
-
-  pPlayBtn.addEventListener('click', togglePlay);
-  pNextBtn.addEventListener('click', () => playNext(false));
-  pPrevBtn.addEventListener('click', playPrev);
-
-  if(playlist.length > 0) {
-    // 现代浏览器通常拦截无交互的自动播放，
-    // 因此这里设置在用户首次点击页面的任意位置时，触发自动播放（如果开关是打开的）
-    const initPlay = () => {
-      if (autoPlaySwitch && autoPlaySwitch.checked && !isPlaying && currentHowl) {
-        currentHowl.play();
-      }
-      document.removeEventListener('click', initPlay);
-    };
-    document.addEventListener('click', initPlay);
-    
-    loadTrack(0, false); // 先预加载第一首，通过点击来激活
-    Howler.volume(volumeSlider.value / 100);
-  } else {
-    trackArtist.innerText = "无音乐";
-    trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
-  }
-
   // ================= 设置页功能 =================
   const fontSizeSlider = document.getElementById('fontSizeSlider');
   const turnSpeedSlider = document.getElementById('turnSpeedSlider');
