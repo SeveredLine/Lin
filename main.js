@@ -367,8 +367,6 @@ function initApp() {
     plantGenerated = true;
   }
 
-  if(typeof generateSucculent === 'function') generateSucculent();
-
   // ================= 音乐播放器系统 (Howler.js) =================
   // 前端JS由于安全限制无法读取文件系统结构，这里将结构映射为JSON
   const filesMap = {
@@ -648,14 +646,27 @@ function initApp() {
 
   function stepProgress() {
     if (!currentHowl || !isPlaying) return;
+
+    if (currentHowl.state() !== 'loaded') {
+        progressAnimationFrame = requestAnimationFrame(stepProgress);
+        return;
+    }
     
     let seek = currentHowl.seek();
+    const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
     if (typeof seek !== 'number') {
-        const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
         seek = node ? node.currentTime : 0;
     }
 
     let duration = currentHowl.duration() || 0;
+    if (duration === 0 && node && node.duration) {
+        duration = node.duration;
+    }
+
+    if (isNaN(duration) || duration <= 0) {
+        progressAnimationFrame = requestAnimationFrame(stepProgress);
+        return;
+    }
     let percent = duration > 0 ? (seek / duration) * 100 : 0;
     
     const barEl = document.getElementById('p-bar');
@@ -961,76 +972,87 @@ window.addEventListener('message', (event) => {
   }
 });
 
-function generateSucculent() {
-  const canvas = document.getElementById('succulentCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width;
-  const h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
+window.generateAllSucculents = function() {
+  const canvases = document.querySelectorAll('.mini-succulent');
+  canvases.forEach(canvas => {
+    if (canvas.dataset.drawn === "true") return; 
+    
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
 
-  const variations =[
-    { grad: ['#0a3d62', '#b8e994'], border: '#ffaaaa' },
-    { grad: ['#5a6852', '#cbdbe1'], border: '#cbdbe1' },
-    { grad:['#1f572f', '#8ed089'], border: '#8ed089' },
-    { grad:['#1b361a', '#50844d'], border: '#6b956b' },
-    { grad: ['#281616', '#483033'], border: '#9a9b95' },
-    { grad:['#266261', '#bde6f0'], border: '#bde6f0' }
-  ];
-  
-  const v = variations[Math.floor(Math.random() * variations.length)];
-  const count = 30 + Math.floor(Math.random() * 20);
-  const maxRadius = 3 * Math.sqrt(count);
-  const petalCurve = 1 + Math.random();
-  const petalPoint = 0.3 + Math.random() * 0.7;
-
-  ctx.translate(w / 2, h / 2);
-
-  for (let i = count; i > 0; i--) {
-    const a = i * 137.5 * (Math.PI / 180);
-    const r = 3 * Math.sqrt(i);
-    const x = r * Math.sin(a);
-    const y = r * Math.cos(a);
-
-    const scaleX = 0.2 + (0.8 * (r / maxRadius));
-    const scaleY = 1 * (r / maxRadius);
-    const rotation = 180 - (i * 137.5);
+    const variations =[
+      { grad:['#0a3d62', '#b8e994'], border: '#ffaaaa' },
+      { grad:['#5a6852', '#cbdbe1'], border: '#cbdbe1' },
+      { grad:['#1f572f', '#8ed089'], border: '#8ed089' },
+      { grad:['#1b361a', '#50844d'], border: '#6b956b' },
+      { grad: ['#281616', '#483033'], border: '#9a9b95' },
+      { grad:['#266261', '#bde6f0'], border: '#bde6f0' }
+    ];
+    
+    const v = variations[Math.floor(Math.random() * variations.length)];
+    const count = 25 + Math.floor(Math.random() * 20);
+    const maxRadius = 3 * Math.sqrt(count);
+    const petalCurve = 1 + Math.random();
+    const petalPoint = 0.3 + Math.random() * 0.7;
 
     ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation * Math.PI / 180);
-    ctx.scale(scaleX, scaleY);
+    ctx.translate(w / 2, h / 2);
+    ctx.scale(w / 140, h / 140); 
 
-    ctx.beginPath();
-    const res = 40;
-    const size = 35;
-    for (let j = 0; j <= res; j++) {
-      let phi = (Math.PI * 2) * j / res;
-      let t1 = Math.pow(Math.abs(Math.cos(3 * phi / 4)), petalPoint);
-      let t2 = Math.pow(Math.abs(Math.sin(3 * phi / 4)), petalPoint);
-      let rad = Math.pow(t1 + t2, 1 / petalCurve);
-      rad = rad === 0 ? 0 : 1 / rad;
-      let px = rad * Math.cos(phi) * size;
-      let py = rad * Math.sin(phi) * size - (size * 0.2);
-      if (j === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
+    for (let i = count; i > 0; i--) {
+      const a = i * 137.5 * (Math.PI / 180);
+      const r = 3 * Math.sqrt(i);
+      const x = r * Math.sin(a);
+      const y = r * Math.cos(a);
+
+      const scaleX = 0.2 + (0.8 * (r / maxRadius));
+      const scaleY = 1 * (r / maxRadius);
+      const rotation = 180 - (i * 137.5);
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation * Math.PI / 180);
+      ctx.scale(scaleX, scaleY);
+
+      ctx.beginPath();
+      const res = 40;
+      const size = 35;
+      for (let j = 0; j <= res; j++) {
+        let phi = (Math.PI * 2) * j / res;
+        let t1 = Math.pow(Math.abs(Math.cos(3 * phi / 4)), petalPoint);
+        let t2 = Math.pow(Math.abs(Math.sin(3 * phi / 4)), petalPoint);
+        let rad = Math.pow(t1 + t2, 1 / petalCurve);
+        rad = rad === 0 ? 0 : 1 / rad;
+        let px = rad * Math.cos(phi) * size;
+        let py = rad * Math.sin(phi) * size - (size * 0.2);
+        if (j === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      ctx.shadowColor = 'rgba(0,0,0,0.2)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 2;
+      ctx.strokeStyle = v.border;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.shadowColor = 'transparent';
+      const grad = ctx.createRadialGradient(0, size, 0, 0, 0, size);
+      grad.addColorStop(0, v.grad[0]);
+      grad.addColorStop(1, v.grad[1]);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      ctx.restore();
     }
-    ctx.closePath();
-
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 6;
-    ctx.shadowOffsetY = 2;
-    ctx.strokeStyle = v.border;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    ctx.shadowColor = 'transparent';
-    const grad = ctx.createRadialGradient(0, size, 0, 0, 0, size);
-    grad.addColorStop(0, v.grad[0]);
-    grad.addColorStop(1, v.grad[1]);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
     ctx.restore();
-  }
-}
+    canvas.dataset.drawn = "true";
+  });
+};
+
+setTimeout(() => {
+    if(typeof window.generateAllSucculents === 'function') window.generateAllSucculents();
+  }, 500);
