@@ -313,6 +313,7 @@ function initApp() {
   function generatePlant() {
     if (plantGenerated) return;
     const container = document.getElementById('svgGarden');
+    if (container && container.dataset.presentActive === "true") return;
     const label = document.getElementById('gardenLabel');
     if(!container) return;
 
@@ -620,8 +621,8 @@ function initApp() {
     }
     
     const entities =[];
-    const paperCount = w < 768 ? 40 : 80;
-    const ribbonCount = w < 768 ? 4 : 8; // 增加少量飘带
+    const paperCount = w < 768 ? 20 : 40;
+    const ribbonCount = w < 768 ? 8 : 16;
     for (let i = 0; i < paperCount; i++) entities.push(new Paper());
     for (let i = 0; i < ribbonCount; i++) entities.push(new ConfettiRibbon(Math.random() * w, -Math.random() * h * 2));
 
@@ -659,6 +660,8 @@ function initApp() {
   async function loadAndShowPresent() {
     const container = document.getElementById('svgGarden');
     if (!container) return;
+    
+    container.dataset.presentActive = "true"; 
 
     if (window.THREE) { 
       initPresent(container, window.THREE); 
@@ -686,9 +689,8 @@ function initApp() {
 
     scene = new THREE.Scene();
     
-    const rect = container.getBoundingClientRect();
-    let cw = rect.width || 300;
-    let ch = rect.height || 200;
+    let cw = container.clientWidth || 300;
+    let ch = container.clientHeight || 200;
     
     camera = new THREE.PerspectiveCamera(60, cw / ch, 0.1, 1000);
     camera.position.set(22, 22, 22); 
