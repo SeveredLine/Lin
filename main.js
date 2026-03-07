@@ -470,13 +470,20 @@ function initApp() {
     loadAndShowPresent();
   };
 
-// --- 彩蛋 1: 满屏飘带与纸屑引擎 (带物理回弹与停止功能) ---
+  // --- 彩蛋 1: 飘带与纸屑 ---
   function launchConfetti() {
-    if (document.getElementById('confetti-canvas')) return;
+    let oldCanvas = document.getElementById('confetti-canvas');
+    if (oldCanvas) oldCanvas.remove();
+
     const canvas = document.createElement('canvas');
     canvas.id = 'confetti-canvas';
+    
+    canvas.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:99999; pointer-events:none; opacity:0; transition:opacity 0.8s ease;';
     document.body.appendChild(canvas);
-    setTimeout(() => canvas.classList.add('active'), 100);
+    
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { canvas.style.opacity = '1'; });
+    });
 
     const ctx = canvas.getContext('2d');
     const retina = Math.min(2, window.devicePixelRatio || 1); 
@@ -486,7 +493,6 @@ function initApp() {
     const DEG_TO_RAD = Math.PI / 180;
     const colors = [["#df0049", "#660671"],["#00e857", "#005291"], ["#2bebbc", "#05798a"],["#ffd200", "#b06c00"]];
     
-    // 轻量级欧拉积分物理引擎 (用于飘带)
     class Vector2 {
        constructor(x, y) { this.x = x; this.y = y; }
     }
@@ -509,7 +515,7 @@ function initApp() {
 
     class ConfettiRibbon {
        constructor(x, y) {
-           this.particleCount = 20; // 降低节点数优化性能
+           this.particleCount = 20;
            this.particleDist = 8.0;
            this.particles =[];
            const ci = Math.floor(Math.random() * colors.length);
@@ -632,10 +638,15 @@ function initApp() {
 
     function animate() {
       const now = Date.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.05); 
+      let dt = (now - lastTime) / 1000;
       lastTime = now;
+      
+      if (dt <= 0.001) dt = 0.001; 
+      dt = Math.min(dt, 0.05);
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       entities.forEach(p => { p.update(dt); p.draw(); });
+      
       if (!isStopping) rafId = requestAnimationFrame(animate);
     }
     animate();
@@ -645,15 +656,13 @@ function initApp() {
       canvas.width = w * retina; canvas.height = h * retina;
     });
 
-    // 提供全局停止接口
     window.stopConfetti = () => {
-      canvas.classList.remove('active');
+      canvas.style.opacity = '0';
       setTimeout(() => {
         isStopping = true;
         cancelAnimationFrame(rafId);
-        canvas.remove();
-        window.stopConfetti = null;
-      }, 1500); // 等待 CSS 淡出动画结束后彻底销毁
+        if (document.body.contains(canvas)) canvas.remove(); 
+      }, 800);
     };
   }
 
