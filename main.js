@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. 动态加载各个标签页的内容
   const pages =['tab0.html', 'tab1.html', 'tab2.html', 'tab3.html'];
+  let isHtmlLoaded = false;
+  
   try {
     const fetchPromises = pages.map((page, index) =>
       fetch(page)
@@ -12,12 +13,19 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.getElementById(`page-${index}`).innerHTML = html;
         })
     );
-    // 等待所有 HTML 片段加载完毕再初始化交互
     await Promise.all(fetchPromises);
-    initApp();
+    isHtmlLoaded = true;
   } catch (error) {
-    console.error("加载片段失败，请确保您正在通过 HTTP 服务（如 Live Server）运行此项目：", error);
-    document.body.innerHTML = `<h2 style="color:red; text-align:center; padding: 20px;">跨域错误或文件未找到。<br>请使用 VS Code 的 Live Server 插件或其他 HTTP 服务器运行此网页！</h2>`;
+    console.error("加载片段失败：", error);
+    document.body.innerHTML = `<h2 style="color:red; text-align:center; padding: 20px;">跨域错误或文件未找到。<br>请确保您正在通过 HTTP 服务运行此项目！</h2>`;
+  }
+
+  if (isHtmlLoaded) {
+    try {
+      initApp();
+    } catch (e) {
+      console.error("应用初始化过程中出现非致命错误：", e);
+    }
   }
 });
 
@@ -586,6 +594,13 @@ function initApp() {
   }
 
   function loadTrack(index, autoStart = false) {
+    if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
+      console.warn("[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。");
+      if(trackArtist) trackArtist.innerText = "系统离线";
+      if(trackName) trackName.innerText = "网络异常或 CDN 被拦截，音乐不可用";
+      return;
+    }
+
     currentTrackIndex = index;
     const track = playlist[index];
     trackArtist.innerText = track.artist;
@@ -752,7 +767,9 @@ function initApp() {
     document.addEventListener('click', initPlay);
     
     loadTrack(startIdx, false); 
-    Howler.volume(volumeSlider ? volumeSlider.value / 100 : 0.3);
+    if (typeof Howler !== 'undefined') {
+        Howler.volume(volumeSlider ? volumeSlider.value / 100 : 0.3);
+    }
   } else {
     trackArtist.innerText = "无音乐";
     trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
