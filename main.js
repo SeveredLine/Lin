@@ -522,7 +522,7 @@ function initApp() {
         }
         
         if (playerSettings.disabled.includes(trackSrc)) {
-          console.log("[拦截] 该歌曲已被拉黑，不可播放。");
+          console.log("[Lin Debug] 该歌曲已被拉黑，不可播放。");
           return; 
         }
 
@@ -624,7 +624,7 @@ function initApp() {
     if (barEl) barEl.style.width = `${percent}%`;
     if (timeCur) timeCur.innerText = formatTime(seek);
     
-    // console.log(`[Lin Debug] ID:${currentSoundId} | Seek:${seek.toFixed(2)}s | Dur:${duration.toFixed(2)}s | Percent:${percent.toFixed(2)}%`);
+    console.log(`[Lin Debug] ID:${currentSoundId} | Seek:${seek.toFixed(2)}s | Dur:${duration.toFixed(2)}s | Percent:${percent.toFixed(2)}%`);
     
     progressAnimationFrame = requestAnimationFrame(stepProgress);
   }
