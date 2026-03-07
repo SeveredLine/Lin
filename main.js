@@ -662,12 +662,6 @@ function initApp() {
     if (barEl) barEl.style.width = `${percent}%`;
     if (timeCur) timeCur.innerText = formatTime(seek);
     
-    const secFloor = Math.floor(seek);
-    if (window._lastLogSec !== secFloor) {
-        console.log(`[Lin Debug][播放进度] ${formatTime(seek)} / ${formatTime(duration)} - ${playlist[currentTrackIndex].name}`);
-        window._lastLogSec = secFloor;
-    }
-    
     progressAnimationFrame = requestAnimationFrame(stepProgress);
   }
 

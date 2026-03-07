@@ -1,39 +1,50 @@
-<div class="archive-title">病历档案 📋</div>
+<div class="notebook-dossier">
+  <div class="nd-tape nd-tape--top"></div>
+  <div class="nd-paperclip"></div>
 
-<div class="dossier-wrapper">
-  <!-- 基础信息 5 项 -->
-  <div class="dossier-section" style="animation-delay: 0.1s;">
-    <h3 class="section-title">🔍 基础与状态评估</h3>
-    <div class="d-grid">
-      <div class="d-box full"><div class="d-box-label">病历状态</div><div class="d-box-val" id="s-state">加载中...</div></div>
-      <div class="d-box"><div class="d-box-label">本次记录</div><div class="d-box-val" id="s-current">加载中...</div></div>
-      <div class="d-box"><div class="d-box-label">上次互动</div><div class="d-box-val" id="s-last">加载中...</div></div>
-      <div class="d-box"><div class="d-box-label">当前关系</div><div class="d-box-val" id="s-relation">加载中...</div></div>
-      <div class="d-box"><div class="d-box-label">特殊性</div><div class="d-box-val" id="s-special">加载中...</div></div>
-    </div>
+  <h1>📋 病历档案</h1>
+
+  <p class="nd-first-paragraph">
+    <span class="nd-important">本次记录：</span> <span id="s-current">加载中...</span><br>
+    <strong>上次互动：</strong> <span id="s-last">加载中...</span><br>
+    <span class="nd-circled">当前关系：</span> <span id="s-relation">加载中...</span>
+  </p>
+
+  <div class="nd-sticky nd-sticky--blue">
+    💡 <strong>状态评估</strong><br>
+    病历状态：<strong id="s-state" style="color:#2c3e50;">加载中...</strong><br>
+    特殊性：<span id="s-special">加载中...</span>
   </div>
 
-  <!-- 深度解析 4 项 -->
-  <div class="dossier-section" style="animation-delay: 0.2s;">
-    <h3 class="section-title">🧠 临床深度解析</h3>
-    <div class="d-grid">
-      <div class="d-box full"><div class="d-box-label">优势资源</div><div class="d-box-val" id="s-resource">加载中...</div></div>
-      <div class="d-box full"><div class="d-box-label">问题成因</div><div class="d-box-val" id="s-cause">加载中...</div></div>
-      <div class="d-box full"><div class="d-box-label">影响评估</div><div class="d-box-val" id="s-impact">加载中...</div></div>
-      <div class="d-box full" style="border-color:#ffb7c5; background:rgba(255,183,197,0.05);"><div class="d-box-label" style="color:#c0392b;">注意事项</div><div class="d-box-val" id="s-precaution">加载中...</div></div>
-    </div>
+  <h2>🧠 临床深度解析</h2>
+  <blockquote>
+    <strong>问题成因：</strong> <span id="s-cause">加载中...</span>
+  </blockquote>
+
+  <p>
+    <strong>优势资源：</strong> <span id="s-resource">加载中...</span><br>
+    <strong>影响评估：</strong> <span id="s-impact">加载中...</span>
+  </p>
+
+  <div class="nd-sticky nd-sticky--pink">
+    ⚠️ <strong>注意事项：</strong><br>
+    <span id="s-precaution" style="color: #c0392b; font-weight: bold;">加载中...</span>
   </div>
 
-  <!-- 方案与执行 3 项 -->
-  <div class="dossier-section plan" style="animation-delay: 0.3s;">
-    <h3 class="section-title">🛠️ 干预与目标</h3>
-    <div class="d-grid">
-      <div class="d-box full"><div class="d-box-label">干预方案</div><div class="d-box-val" id="s-plan">加载中...</div></div>
-      <div class="d-box full"><div class="d-box-label">执行事项</div><div class="d-box-val" id="s-action">加载中...</div></div>
-    </div>
-    <div class="goal-box" id="s-target">
-      🎯 <strong>预期目标：</strong>加载中...
-    </div>
+  <h2>🛠️ 干预与目标</h2>
+  
+  <figure class="nd-polaroid">
+    <canvas id="succulentCanvas" width="200" height="200"></canvas>
+    <figcaption>Mental Garden 🌱</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>干预方案：</strong> <span id="s-plan" class="nd-important">加载中...</span></li>
+    <li><strong>执行事项：</strong> <span id="s-action">加载中...</span></li>
+  </ul>
+
+  <div class="nd-doodle" style="clear: both;">
+    <strong>🎯 预期目标：</strong><br>
+    <span id="s-target" style="display:inline-block; margin-top:5px;">加载中...</span>
   </div>
-  <div style="height: 30px;"></div>
 </div>
