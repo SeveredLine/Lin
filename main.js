@@ -435,8 +435,11 @@ function initApp() {
     localStorage.setItem(storageKey, JSON.stringify(playerSettings));
   }
 
+  // ================= 🎂 生日彩蛋特效引擎 =================
   window.activateBirthdayMode = function() {
     console.log("🎂 生日彩蛋触发！特别曲目已加入歌单。");
+    
+    // 1. 音乐逻辑
     const bdayTracks =[
       "the_mountain-birthday-490600.mp3",
       "the_mountain-cartoon-cartoon-music-489996.mp3"
@@ -445,16 +448,290 @@ function initApp() {
     }));
     playlist.unshift(...bdayTracks);
     
-    // 生日彩蛋：更改唱片机颜色
     const albumArt = document.getElementById('album-art');
     if (albumArt) albumArt.className = 'p-album-art birthday';
     
-    if(typeof renderPlaylist === 'function') renderPlaylist(); // 重新渲染歌单
+    if(typeof renderPlaylist === 'function') renderPlaylist(); 
     if(currentHowl) {
         currentHowl.stop();
         loadTrack(0, true);
     }
+
+    // 2. 触发满屏飘带纸屑 (2D Canvas)
+    launchConfetti();
+
+    // 3. 动态加载 Three.js 并在此处渲染 3D 礼盒，替换植物
+    const gardenLabel = document.getElementById('gardenLabel');
+    if (gardenLabel) gardenLabel.innerText = "生日快乐！点击拆开礼物 🎁";
+    loadAndShowPresent();
   };
+
+  // --- 彩蛋 1: 满屏纸屑引擎 (高度优化版) ---
+  function launchConfetti() {
+    if (document.getElementById('confetti-canvas')) return; // 防重复触发
+    const canvas = document.createElement('canvas');
+    canvas.id = 'confetti-canvas';
+    document.body.appendChild(canvas);
+    setTimeout(() => canvas.classList.add('active'), 100);
+
+    const ctx = canvas.getContext('2d');
+    // 性能优化：限制最大物理像素比为2，防止高端手机算力爆炸
+    const retina = Math.min(2, window.devicePixelRatio || 1); 
+    let w = window.innerWidth; let h = window.innerHeight;
+    canvas.width = w * retina; canvas.height = h * retina;
+
+    const DEG_TO_RAD = Math.PI / 180;
+    const colors = [["#df0049", "#660671"], ["#00e857", "#005291"], ["#2bebbc", "#05798a"], ["#ffd200", "#b06c00"]];
+    const papers = [];
+    
+    // 性能优化：移动端纸片数量减半
+    const count = w < 768 ? 40 : 80; 
+
+    class Paper {
+      constructor() {
+        this.pos = { x: Math.random() * w, y: Math.random() * -h };
+        this.rotationSpeed = Math.random() * 600 + 800;
+        this.angle = DEG_TO_RAD * Math.random() * 360;
+        this.rotation = DEG_TO_RAD * Math.random() * 360;
+        this.size = 6.0;
+        this.oscSpeed = Math.random() * 1.5 + 0.5;
+        this.xSpeed = 40.0;
+        this.ySpeed = Math.random() * 60 + 50.0;
+        this.time = Math.random();
+        const ci = Math.floor(Math.random() * colors.length);
+        this.front = colors[ci][0]; this.back = colors[ci][1];
+        this.corners = Array.from({length: 4}, (_, i) => ({
+          x: Math.cos(this.angle + DEG_TO_RAD * (i * 90 + 45)),
+          y: Math.sin(this.angle + DEG_TO_RAD * (i * 90 + 45))
+        }));
+      }
+      update(dt) {
+        this.time += dt;
+        this.rotation += this.rotationSpeed * dt;
+        this.pos.x += Math.cos(this.time * this.oscSpeed) * this.xSpeed * dt;
+        this.pos.y += this.ySpeed * dt;
+        if (this.pos.y > h) { this.pos.x = Math.random() * w; this.pos.y = -50; }
+      }
+      draw() {
+        const cosA = Math.cos(DEG_TO_RAD * this.rotation);
+        ctx.fillStyle = cosA > 0 ? this.front : this.back;
+        ctx.beginPath();
+        this.corners.forEach((c, i) => {
+          const px = (this.pos.x + c.x * this.size) * retina;
+          const py = (this.pos.y + c.y * this.size * cosA) * retina;
+          i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        });
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    for (let i = 0; i < count; i++) papers.push(new Paper());
+
+    let lastTime = Date.now();
+    function animate() {
+      const now = Date.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      papers.forEach(p => { p.update(dt); p.draw(); });
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * retina; canvas.height = h * retina;
+    });
+  }
+
+  async function loadAndShowPresent() {
+    const container = document.getElementById('svgGarden');
+    if (!container) return;
+
+    if (window.THREE) { 
+      initPresent(container, window.THREE); 
+      return; 
+    }
+
+    container.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--text-main); font-size:12px; font-weight:bold; opacity:0.6; animation: eqPulse 1s infinite alternate;">正在打包礼物...</div>`;
+
+    try {
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js');
+      window.THREE = THREE; // 挂载到全局作缓存，下次秒开
+      initPresent(container, THREE);
+    } catch (e) {
+      console.error("[Lin] 3D 彩蛋引擎加载失败:", e);
+      container.innerHTML = `<div style="text-align:center; padding-top:40px; color:#e74c3c; font-size:12px; font-weight:bold;">礼物被快递弄丢了 (网络阻断)</div>`;
+    }
+  }
+
+  function initPresent(container, THREE) {
+    container.innerHTML = ''; // 清除原有的提示或植物 SVG
+    let scene, camera, renderer, present, rafId;
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let intersects =[];
+
+    scene = new THREE.Scene();
+    
+    // 透视相机，完美适配小框尺寸
+    const rect = container.getBoundingClientRect();
+    camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
+    camera.position.set(22, 22, 22); 
+    camera.lookAt(scene.position);
+
+    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setClearColor(0x000000, 0); // 彻底透明，融于UI背景
+    renderer.setSize(rect.width, rect.height);
+    // 性能优化：移动端阴影降级
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // 光照设置
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    dirLight.position.set(10, 20, 0);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = window.innerWidth < 768 ? 256 : 512; 
+    dirLight.shadow.mapSize.height = window.innerWidth < 768 ? 256 : 512;
+    scene.add(dirLight);
+
+    // 构建礼盒类
+    class Present {
+      constructor() {
+        this.mesh = new THREE.Object3D();
+        this.opening = false; this.opened = false;
+        this.openTime = 0; this.opacity = 1;
+        this.pieces =[];
+        
+        const S = 8, HS = S/2, divs = 3, fracS = S/divs, HD = divs/2;
+        
+        const geo = new THREE.PlaneGeometry(fracS, fracS);
+        const wrapMat = new THREE.MeshStandardMaterial({ color: 0xffe6e6, side: THREE.DoubleSide, transparent: true }); 
+        const ribMat = new THREE.MeshStandardMaterial({ color: 0xff4d79, side: THREE.DoubleSide, transparent: true }); 
+
+        const rand = (min, max) => Math.random() * (max - min) + min;
+
+        for (let s = 0; s < 6; ++s) {
+          let side = new THREE.Object3D();
+          if(s===0) { side.position.set(0,-HS,0); side.rotation.x = Math.PI/2; }
+          else if(s===1) { side.position.set(0,0,-HS); side.rotation.y = Math.PI; }
+          else if(s===2) { side.position.set(-HS,0,0); side.rotation.y = -Math.PI/2; }
+          else if(s===3) { side.position.set(HS,0,0); side.rotation.y = Math.PI/2; }
+          else if(s===4) { side.position.set(0,0,HS); }
+          else { side.position.set(0,HS,0); side.rotation.x = -Math.PI/2; }
+
+          for (let h = -HD; h < HD; h++) {
+            for (let w = -HD; w < HD; w++) {
+              let isM = (w >= -1 && w <= 0) || (h >= -1 && h <= 0 && (s===0||s===5));
+              let piece = new THREE.Mesh(geo, isM ? ribMat.clone() : wrapMat.clone());
+              piece.receiveShadow = true;
+              piece.firstPos = { x: fracS*w + fracS/2, y: fracS*h + fracS/2, z: 0 };
+              piece.position.set(piece.firstPos.x, piece.firstPos.y, 0);
+              
+              piece.vel = new THREE.Vector3(rand(0.5, 1.5) * (Math.random()<0.5?-1:1), rand(0.5, 1.5) * (Math.random()<0.5?-1:1), rand(0.5, 1.5) * (Math.random()<0.5?-1:1));
+              piece.rotSpeed = new THREE.Vector3(rand(0.05,0.15)*(Math.random()<0.5?-1:1), rand(0.05,0.15)*(Math.random()<0.5?-1:1), rand(0.05,0.15)*(Math.random()<0.5?-1:1));
+              side.add(piece); this.pieces.push(piece);
+            }
+          }
+          this.mesh.add(side);
+        }
+        
+        const bowGeo = new THREE.DodecahedronGeometry(2);
+        this.bow = new THREE.Mesh(bowGeo, ribMat.clone());
+        this.bow.castShadow = true;
+        this.bow.firstPos = { y: HS + 1 };
+        this.bow.position.set(0, this.bow.firstPos.y, 0);
+        this.bow.vel = new THREE.Vector3(rand(0.5,1.5)*(Math.random()<0.5?-1:1), 1.5, rand(0.5,1.5)*(Math.random()<0.5?-1:1));
+        this.bow.rotSpeed = new THREE.Vector3(rand(0.1,0.2), rand(0.1,0.2), rand(0.1,0.2));
+        this.mesh.add(this.bow);
+        
+        // 赋予礼盒生命感
+        this.mesh.rotation.y = Math.PI / 4;
+      }
+
+      update() {
+        if(!this.opening && !this.opened) {
+           this.mesh.rotation.y += 0.01; // 待命状态：缓慢自转
+        } else if (this.opening) {
+          // 果冻缩放蓄力
+          let scaleBy = 1 - (0.05 * Math.sin(8 * Math.PI * this.openTime/100));
+          this.mesh.scale.set(scaleBy, scaleBy, scaleBy);
+          this.openTime += 5;
+          if (this.openTime >= 100) { this.opening = false; this.opened = true; }
+        } else if (this.opened) {
+          // 炸裂成碎片散落
+          if (this.opacity > 0) {
+            this.opacity -= 0.03;
+            this.pieces.forEach(e => {
+              e.position.add(e.vel);
+              e.rotation.x += e.rotSpeed.x; e.rotation.y += e.rotSpeed.y; e.rotation.z += e.rotSpeed.z;
+              e.material.opacity = this.opacity;
+            });
+            this.bow.position.add(this.bow.vel);
+            this.bow.rotation.x += this.bow.rotSpeed.x; this.bow.rotation.y += this.bow.rotSpeed.y;
+            this.bow.material.opacity = this.opacity;
+          } else {
+            // 时光倒流：碎片自动拼接重组
+            this.opacity = 1; this.opened = false; this.openTime = 0;
+            this.mesh.scale.set(1,1,1);
+            this.pieces.forEach(e => {
+              e.position.set(e.firstPos.x, e.firstPos.y, e.firstPos.z);
+              e.rotation.set(0,0,0);
+              e.material.opacity = 1;
+            });
+            this.bow.position.set(0, this.bow.firstPos.y, 0);
+            this.bow.rotation.set(0,0,0);
+            this.bow.material.opacity = 1;
+          }
+        }
+      }
+    }
+
+    present = new Present();
+    scene.add(present.mesh);
+
+    function animate() {
+      rafId = requestAnimationFrame(animate);
+      if(present) present.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 交互侦听：移动端兼容防抖
+    const handleInteract = (e) => {
+      let cx = e.clientX || (e.touches && e.touches[0].clientX);
+      let cy = e.clientY || (e.touches && e.touches[0].clientY);
+      if(!cx || !cy) return;
+      
+      const bcr = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((cx - bcr.left) / bcr.width) * 2 - 1;
+      pointer.y = -((cy - bcr.top) / bcr.height) * 2 + 1;
+      
+      raycaster.setFromCamera(pointer, camera);
+      intersects = raycaster.intersectObjects(present.mesh.children, true);
+      
+      if (intersects.length > 0) {
+          e.preventDefault(); // 只在真正点到盒子时拦截默认事件，防止页面误触发拖拽
+          present.opening = true;
+      }
+    };
+
+    renderer.domElement.addEventListener("mousedown", handleInteract);
+    renderer.domElement.addEventListener("touchstart", handleInteract, {passive: false});
+    
+    // 动态框体适配引擎
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        camera.aspect = entry.contentRect.width / entry.contentRect.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(entry.contentRect.width, entry.contentRect.height);
+      }
+    });
+    resizeObserver.observe(container);
+  }
 
   let currentTrackIndex = 0;
   let currentHowl = null;

@@ -531,3 +531,27 @@ body.dark-mode .mini-succulent {
   margin: 10px auto 0 auto;
   opacity: 0.6;
 }
+
+/* 生日彩蛋：满屏纸屑画布 */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+#confetti-canvas.active {
+  opacity: 1;
+}
+/* 3D 礼盒所在容器需允许点击交互 */
+.garden-svg-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  outline: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
