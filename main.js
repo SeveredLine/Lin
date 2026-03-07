@@ -451,6 +451,7 @@ function initApp() {
 
   let currentTrackIndex = 0;
   let currentHowl = null;
+  let currentSoundId = null;
   let isPlaying = false;
   let progressAnimationFrame = null;
 
@@ -462,8 +463,6 @@ function initApp() {
   const pInfoBar = document.getElementById('player-info');
   const pBar = document.getElementById('p-bar');
   const pProgressBar = document.getElementById('p-progress-bar');
-  const pTimeCurrent = document.getElementById('p-time-current');
-  const pTimeTotal = document.getElementById('p-time-total');
   const trackArtist = document.getElementById('track-artist');
   const trackName = document.getElementById('track-name');
   const volumeSlider = document.getElementById('volumeSlider');
@@ -496,7 +495,7 @@ function initApp() {
             <span class="li-title">${track.name}</span>
             <span class="li-artist">${track.artist}</span>
           </div>
-          <div class="li-toggle" data-idx="${idx}">${eyeIcon}</div>
+          <div class="li-toggle" data-idx="${idx}" title="${isDisabled ? '解除拉黑' : '拉黑此歌曲'}">${eyeIcon}</div>
         </div>
       `;
     }).join('');
@@ -504,22 +503,29 @@ function initApp() {
     // 绑定点击事件（歌曲切换 & 禁用开关）
     container.querySelectorAll('.playlist-item').forEach(item => {
       item.addEventListener('click', (e) => {
+        const idx = parseInt(item.getAttribute('data-idx'));
+        const trackSrc = playlist[idx].src;
+
         if (e.target.closest('.li-toggle')) {
           e.stopPropagation(); 
-          const idx = parseInt(e.target.closest('.li-toggle').getAttribute('data-idx'));
-          const trackSrc = playlist[idx].src;
           if (playerSettings.disabled.includes(trackSrc)) {
             playerSettings.disabled = playerSettings.disabled.filter(src => src !== trackSrc);
           } else {
             playerSettings.disabled.push(trackSrc);
+            if (idx === currentTrackIndex && isPlaying) {
+              playNext(false);
+            }
           }
           savePlayerSettings();
           renderPlaylist(); 
           return;
         }
         
-        const idx = parseInt(item.getAttribute('data-idx'));
-        if (playerSettings.disabled.includes(playlist[idx].src)) return; // 禁用的直接拦截
+        if (playerSettings.disabled.includes(trackSrc)) {
+          console.log("[拦截] 该歌曲已被拉黑，不可播放。");
+          return; 
+        }
+
         if (idx !== currentTrackIndex) {
           loadTrack(idx, true);
         } else {
@@ -577,23 +583,24 @@ function initApp() {
     currentHowl = new Howl({
       src:[track.src],
       html5: true, 
-      autoplay: false, // 拦截自动播放，利用淡入动画接管
-      volume: volumeSlider.value / 100,
+      autoplay: false, 
+      volume: volumeSlider ? volumeSlider.value / 100 : 0.3,
       onload: function() {
-        const tTot = document.getElementById('p-time-total');
         if (tTot) tTot.innerText = formatTime(this.duration());
         if (autoStart) playTrack();
       },
-      onplay: function() {
+      onplay: function(id) {
+        currentSoundId = id;
         isPlaying = true;
         updateUI(true);
-        requestAnimationFrame(stepProgress);
+        if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
+        progressAnimationFrame = requestAnimationFrame(stepProgress);
       },
       onpause: function() { isPlaying = false; updateUI(false); },
       onstop: function() { isPlaying = false; updateUI(false); },
       onend: function() {
         if (autoPlaySwitch && autoPlaySwitch.checked) {
-          playNext(true); // 播完且开启连播时，触发下一首机制
+          playNext(true); 
         } else {
           isPlaying = false;
           updateUI(false);
@@ -604,19 +611,22 @@ function initApp() {
   }
 
   function stepProgress() {
-    if (currentHowl && isPlaying) {
-      let seek = currentHowl.seek();
-      if (typeof seek !== 'number') seek = 0; // 防止 Howler 抛出对象
-      let duration = currentHowl.duration() || 0;
-      let percent = (seek / duration) * 100;
-      
-      const barEl = document.getElementById('p-bar');
-      const timeCur = document.getElementById('p-time-current');
-      if (barEl) barEl.style.width = `${percent || 0}%`;
-      if (timeCur) timeCur.innerText = formatTime(seek);
-      
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
-    }
+    if (!currentHowl || !isPlaying) return;
+    
+    let seek = currentHowl.seek(currentSoundId);
+    if (typeof seek !== 'number') seek = 0; 
+
+    let duration = currentHowl.duration() || 0;
+    let percent = duration > 0 ? (seek / duration) * 100 : 0;
+    
+    const barEl = document.getElementById('p-bar');
+    const timeCur = document.getElementById('p-time-current');
+    if (barEl) barEl.style.width = `${percent}%`;
+    if (timeCur) timeCur.innerText = formatTime(seek);
+    
+    // console.log(`[Lin Debug] ID:${currentSoundId} | Seek:${seek.toFixed(2)}s | Dur:${duration.toFixed(2)}s | Percent:${percent.toFixed(2)}%`);
+    
+    progressAnimationFrame = requestAnimationFrame(stepProgress);
   }
 
   function updateUI(playing) {
@@ -637,17 +647,15 @@ function initApp() {
     else playTrack();
   }
 
-  // 接管播放：丝滑淡入
   function playTrack() { 
     if (!currentHowl) return;
-    const vol = volumeSlider.value / 100;
-    currentHowl.off('fade'); // 斩断历史冗余事件
+    const vol = volumeSlider ? volumeSlider.value / 100 : 0.3;
+    currentHowl.off('fade'); 
     currentHowl.volume(0);
     currentHowl.play();
     currentHowl.fade(0, vol, 1000); 
   }
 
-  // 接管暂停：丝滑淡出再掐断
   function pauseTrack() {
     if (!currentHowl) return;
     const vol = currentHowl.volume();
@@ -657,29 +665,35 @@ function initApp() {
     currentHowl.fade(vol, 0, 800);
     currentHowl.once('fade', () => {
       currentHowl.pause();
-      currentHowl.volume(volumeSlider.value / 100); // 重置内部音量，以备下次唤醒
+      currentHowl.volume(volumeSlider ? volumeSlider.value / 100 : 0.3); 
     });
   }
 
   function playNext(auto = false) {
     const validIndices = getValidIndices();
-    if (validIndices.length === 0) return; // 全部黑名单了
+    if (validIndices.length === 0) {
+        console.log("所有歌曲均已被拉黑，停止播放。");
+        return pauseTrack(); 
+    }
 
+    const isCurrentDisabled = playerSettings.disabled.includes(playlist[currentTrackIndex].src);
     let nextIndex = currentTrackIndex;
     
-    if (auto && playMode === 2) {
-       nextIndex = currentTrackIndex; // 自然播完 && 单曲循环
+    if (auto && playMode === 2 && !isCurrentDisabled) {
+       nextIndex = currentTrackIndex; // 自然播完 && 单曲循环 && 没被拉黑
     } else if (playMode === 1) {
        // 随机模式
        if (validIndices.length > 1) {
          let randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
          while (randomIdx === currentTrackIndex) randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
          nextIndex = randomIdx;
+       } else {
+         nextIndex = validIndices[0];
        }
     } else {
        // 列表循环
        let currentPos = validIndices.indexOf(currentTrackIndex);
-       if (currentPos === -1) nextIndex = validIndices[0]; // 当前被禁则顺延顺位第一个
+       if (currentPos === -1) nextIndex = validIndices[0]; 
        else nextIndex = validIndices[(currentPos + 1) % validIndices.length];
     }
     loadTrack(nextIndex, true);
@@ -687,7 +701,10 @@ function initApp() {
 
   function playPrev() {
     const validIndices = getValidIndices();
-    if (validIndices.length === 0) return;
+    if (validIndices.length === 0) {
+        console.log("所有歌曲均已被拉黑，停止播放。");
+        return pauseTrack();
+    }
 
     let prevIndex = currentTrackIndex;
     if (playMode === 1) {
@@ -695,6 +712,8 @@ function initApp() {
          let randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
          while (randomIdx === currentTrackIndex) randomIdx = validIndices[Math.floor(Math.random() * validIndices.length)];
          prevIndex = randomIdx;
+       } else {
+         prevIndex = validIndices[0];
        }
     } else {
        let currentPos = validIndices.indexOf(currentTrackIndex);
