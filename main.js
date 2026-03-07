@@ -137,7 +137,10 @@ function initApp() {
       <div style="position: relative; width: 220px; height: 320px; margin-bottom: 15px; cursor: pointer; perspective: 1000px;" onclick="this.querySelector('.oh-inner').style.transform = this.querySelector('.oh-inner').style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';">
         <div class="oh-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d;">
           <!-- 牌背 -->
-          <div style="position: absolute; width: 100%; height: 100%; background: linear-gradient(145deg, #6a11cb 0%, #2575fc 100%); border-radius: 12px; backface-visibility: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; color:rgba(255,255,255,0.5); font-weight:bold; font-size:18px;">点击翻开</div>
+          <div style="position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #a29bfe, #fd79a8); border: 8px solid #fcfcfc; box-sizing: border-box; border-radius: 12px; backface-visibility: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 8px 30px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; flex-direction:column; cursor: pointer;">
+            <div style="font-size: 32px; margin-bottom: 8px;">🌌</div>
+            <div style="color:rgba(255,255,255,0.9); font-weight:900; font-size:16px; letter-spacing:1px; font-family:sans-serif;">OH CARD</div>
+          </div>
           <!-- 牌面 -->
           <div style="position: absolute; width: 100%; height: 100%; transform: rotateY(180deg); backface-visibility: hidden; display: flex; justify-content: center; align-items: center; background:#fff; border-radius:12px; overflow:hidden;">
             <img src="https://files.catbox.moe/${randomWord}.png" style="position: absolute; width: 92%; height: 92%; object-fit: contain; z-index: 1;">
@@ -466,26 +469,116 @@ function initApp() {
     loadAndShowPresent();
   };
 
-  // --- 彩蛋 1: 满屏纸屑引擎 (高度优化版) ---
+// --- 彩蛋 1: 满屏飘带与纸屑引擎 (带物理回弹与停止功能) ---
   function launchConfetti() {
-    if (document.getElementById('confetti-canvas')) return; // 防重复触发
+    if (document.getElementById('confetti-canvas')) return;
     const canvas = document.createElement('canvas');
     canvas.id = 'confetti-canvas';
     document.body.appendChild(canvas);
     setTimeout(() => canvas.classList.add('active'), 100);
 
     const ctx = canvas.getContext('2d');
-    // 性能优化：限制最大物理像素比为2，防止高端手机算力爆炸
     const retina = Math.min(2, window.devicePixelRatio || 1); 
     let w = window.innerWidth; let h = window.innerHeight;
     canvas.width = w * retina; canvas.height = h * retina;
 
     const DEG_TO_RAD = Math.PI / 180;
-    const colors = [["#df0049", "#660671"], ["#00e857", "#005291"], ["#2bebbc", "#05798a"], ["#ffd200", "#b06c00"]];
-    const papers = [];
+    const colors = [["#df0049", "#660671"],["#00e857", "#005291"], ["#2bebbc", "#05798a"],["#ffd200", "#b06c00"]];
     
-    // 性能优化：移动端纸片数量减半
-    const count = w < 768 ? 40 : 80; 
+    // 轻量级欧拉积分物理引擎 (用于飘带)
+    class Vector2 {
+       constructor(x, y) { this.x = x; this.y = y; }
+    }
+    class EulerMass {
+       constructor(x, y, mass, drag) {
+           this.pos = new Vector2(x, y);
+           this.mass = mass; this.drag = drag;
+           this.force = new Vector2(0,0); this.vel = new Vector2(0,0);
+       }
+       AddForce(fx, fy) { this.force.x += fx; this.force.y += fy; }
+       Integrate(dt) {
+           let speed = Math.sqrt(this.vel.x*this.vel.x + this.vel.y*this.vel.y);
+           let accX = (this.force.x - this.drag * this.mass * this.vel.x * speed) / this.mass;
+           let accY = (this.force.y - this.drag * this.mass * this.vel.y * speed) / this.mass;
+           this.pos.x += this.vel.x * dt; this.pos.y += this.vel.y * dt;
+           this.vel.x += accX * dt; this.vel.y += accY * dt;
+           this.force.x = 0; this.force.y = 0;
+       }
+    }
+
+    class ConfettiRibbon {
+       constructor(x, y) {
+           this.particleCount = 20; // 降低节点数优化性能
+           this.particleDist = 8.0;
+           this.particles =[];
+           const ci = Math.floor(Math.random() * colors.length);
+           this.front = colors[ci][0]; this.back = colors[ci][1];
+           this.xOff = Math.cos(45 * DEG_TO_RAD) * 8.0;
+           this.yOff = Math.sin(45 * DEG_TO_RAD) * 8.0;
+           this.pos = new Vector2(x, y);
+           this.prevPos = new Vector2(x, y);
+           this.velInherit = Math.random() * 2 + 4;
+           this.time = Math.random() * 100;
+           this.oscSpeed = Math.random() * 2 + 2;
+           this.oscDist = Math.random() * 40 + 40;
+           this.ySpeed = Math.random() * 40 + 80;
+           for(let i=0; i<this.particleCount; i++) {
+               this.particles.push(new EulerMass(x, y - i * this.particleDist, 1, 0.05));
+           }
+       }
+       update(dt) {
+           this.time += dt * this.oscSpeed;
+           this.pos.y += this.ySpeed * dt;
+           this.pos.x += Math.cos(this.time) * this.oscDist * dt;
+           this.particles[0].pos.x = this.pos.x;
+           this.particles[0].pos.y = this.pos.y;
+           let dx = this.prevPos.x - this.pos.x;
+           let dy = this.prevPos.y - this.pos.y;
+           let delta = Math.sqrt(dx*dx + dy*dy);
+           this.prevPos.x = this.pos.x; this.prevPos.y = this.pos.y;
+
+           for(let i=1; i<this.particleCount; i++) {
+               let dirX = this.particles[i-1].pos.x - this.particles[i].pos.x;
+               let dirY = this.particles[i-1].pos.y - this.particles[i].pos.y;
+               let len = Math.sqrt(dirX*dirX + dirY*dirY);
+               if(len>0){ dirX/=len; dirY/=len; }
+               this.particles[i].AddForce(dirX * (delta/dt) * this.velInherit, dirY * (delta/dt) * this.velInherit);
+           }
+           for(let i=1; i<this.particleCount; i++) this.particles[i].Integrate(dt);
+           for(let i=1; i<this.particleCount; i++) {
+               let rpX = this.particles[i].pos.x - this.particles[i-1].pos.x;
+               let rpY = this.particles[i].pos.y - this.particles[i-1].pos.y;
+               let len = Math.sqrt(rpX*rpX + rpY*rpY);
+               if(len>0){ rpX/=len; rpY/=len; }
+               this.particles[i].pos.x = this.particles[i-1].pos.x + rpX * this.particleDist;
+               this.particles[i].pos.y = this.particles[i-1].pos.y + rpY * this.particleDist;
+           }
+           if(this.pos.y > h + this.particleDist * this.particleCount) {
+               this.pos.y = -Math.random() * h; this.pos.x = Math.random() * w;
+               this.prevPos.x = this.pos.x; this.prevPos.y = this.pos.y;
+               for(let i=0; i<this.particleCount; i++) {
+                   this.particles[i].pos.x = this.pos.x;
+                   this.particles[i].pos.y = this.pos.y - i * this.particleDist;
+               }
+           }
+       }
+       draw() {
+           for(let i=0; i<this.particleCount-1; i++) {
+               let p0x = this.particles[i].pos.x + this.xOff, p0y = this.particles[i].pos.y + this.yOff;
+               let p1x = this.particles[i+1].pos.x + this.xOff, p1y = this.particles[i+1].pos.y + this.yOff;
+               let side = (this.particles[i].pos.x - this.particles[i+1].pos.x)*(p1y - this.particles[i+1].pos.y) - 
+                          (this.particles[i].pos.y - this.particles[i+1].pos.y)*(p1x - this.particles[i+1].pos.x);
+               ctx.fillStyle = side < 0 ? this.front : this.back;
+               ctx.beginPath();
+               ctx.moveTo(this.particles[i].pos.x * retina, this.particles[i].pos.y * retina);
+               ctx.lineTo(this.particles[i+1].pos.x * retina, this.particles[i+1].pos.y * retina);
+               ctx.lineTo(p1x * retina, p1y * retina);
+               ctx.lineTo(p0x * retina, p0y * retina);
+               ctx.closePath();
+               ctx.fill();
+           }
+       }
+    }
 
     class Paper {
       constructor() {
@@ -525,16 +618,24 @@ function initApp() {
         ctx.fill();
       }
     }
-    for (let i = 0; i < count; i++) papers.push(new Paper());
+    
+    const entities =[];
+    const paperCount = w < 768 ? 40 : 80;
+    const ribbonCount = w < 768 ? 4 : 8; // 增加少量飘带
+    for (let i = 0; i < paperCount; i++) entities.push(new Paper());
+    for (let i = 0; i < ribbonCount; i++) entities.push(new ConfettiRibbon(Math.random() * w, -Math.random() * h * 2));
 
     let lastTime = Date.now();
+    let rafId;
+    let isStopping = false;
+
     function animate() {
       const now = Date.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      const dt = Math.min((now - lastTime) / 1000, 0.05); 
       lastTime = now;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      papers.forEach(p => { p.update(dt); p.draw(); });
-      requestAnimationFrame(animate);
+      entities.forEach(p => { p.update(dt); p.draw(); });
+      if (!isStopping) rafId = requestAnimationFrame(animate);
     }
     animate();
 
@@ -542,6 +643,17 @@ function initApp() {
       w = window.innerWidth; h = window.innerHeight;
       canvas.width = w * retina; canvas.height = h * retina;
     });
+
+    // 提供全局停止接口
+    window.stopConfetti = () => {
+      canvas.classList.remove('active');
+      setTimeout(() => {
+        isStopping = true;
+        cancelAnimationFrame(rafId);
+        canvas.remove();
+        window.stopConfetti = null;
+      }, 1500); // 等待 CSS 淡出动画结束后彻底销毁
+    };
   }
 
   async function loadAndShowPresent() {
@@ -557,7 +669,7 @@ function initApp() {
 
     try {
       const THREE = await import('https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js');
-      window.THREE = THREE; // 挂载到全局作缓存，下次秒开
+      window.THREE = THREE; 
       initPresent(container, THREE);
     } catch (e) {
       console.error("[Lin] 3D 彩蛋引擎加载失败:", e);
@@ -566,7 +678,7 @@ function initApp() {
   }
 
   function initPresent(container, THREE) {
-    container.innerHTML = ''; // 清除原有的提示或植物 SVG
+    container.innerHTML = ''; 
     let scene, camera, renderer, present, rafId;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
@@ -574,21 +686,22 @@ function initApp() {
 
     scene = new THREE.Scene();
     
-    // 透视相机，完美适配小框尺寸
     const rect = container.getBoundingClientRect();
-    camera = new THREE.PerspectiveCamera(60, rect.width / rect.height, 0.1, 1000);
+    let cw = rect.width || 300;
+    let ch = rect.height || 200;
+    
+    camera = new THREE.PerspectiveCamera(60, cw / ch, 0.1, 1000);
     camera.position.set(22, 22, 22); 
     camera.lookAt(scene.position);
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setClearColor(0x000000, 0); // 彻底透明，融于UI背景
-    renderer.setSize(rect.width, rect.height);
-    // 性能优化：移动端阴影降级
+    renderer.setClearColor(0x000000, 0); 
+    renderer.setSize(cw, ch);
+    
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap; 
     container.appendChild(renderer.domElement);
 
-    // 光照设置
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     scene.add(ambientLight);
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -598,7 +711,6 @@ function initApp() {
     dirLight.shadow.mapSize.height = window.innerWidth < 768 ? 256 : 512;
     scene.add(dirLight);
 
-    // 构建礼盒类
     class Present {
       constructor() {
         this.mesh = new THREE.Object3D();
@@ -648,21 +760,18 @@ function initApp() {
         this.bow.rotSpeed = new THREE.Vector3(rand(0.1,0.2), rand(0.1,0.2), rand(0.1,0.2));
         this.mesh.add(this.bow);
         
-        // 赋予礼盒生命感
         this.mesh.rotation.y = Math.PI / 4;
       }
 
       update() {
         if(!this.opening && !this.opened) {
-           this.mesh.rotation.y += 0.01; // 待命状态：缓慢自转
+           this.mesh.rotation.y += 0.01; 
         } else if (this.opening) {
-          // 果冻缩放蓄力
           let scaleBy = 1 - (0.05 * Math.sin(8 * Math.PI * this.openTime/100));
           this.mesh.scale.set(scaleBy, scaleBy, scaleBy);
           this.openTime += 5;
           if (this.openTime >= 100) { this.opening = false; this.opened = true; }
         } else if (this.opened) {
-          // 炸裂成碎片散落
           if (this.opacity > 0) {
             this.opacity -= 0.03;
             this.pieces.forEach(e => {
@@ -674,7 +783,6 @@ function initApp() {
             this.bow.rotation.x += this.bow.rotSpeed.x; this.bow.rotation.y += this.bow.rotSpeed.y;
             this.bow.material.opacity = this.opacity;
           } else {
-            // 时光倒流：碎片自动拼接重组
             this.opacity = 1; this.opened = false; this.openTime = 0;
             this.mesh.scale.set(1,1,1);
             this.pieces.forEach(e => {
@@ -700,7 +808,6 @@ function initApp() {
     }
     animate();
 
-    // 交互侦听：移动端兼容防抖
     const handleInteract = (e) => {
       let cx = e.clientX || (e.touches && e.touches[0].clientX);
       let cy = e.clientY || (e.touches && e.touches[0].clientY);
@@ -714,20 +821,26 @@ function initApp() {
       intersects = raycaster.intersectObjects(present.mesh.children, true);
       
       if (intersects.length > 0) {
-          e.preventDefault(); // 只在真正点到盒子时拦截默认事件，防止页面误触发拖拽
-          present.opening = true;
+          e.preventDefault(); 
+          if (!present.opening && !present.opened) {
+              present.opening = true;
+              if(window.stopConfetti) window.stopConfetti();
+          }
       }
     };
 
     renderer.domElement.addEventListener("mousedown", handleInteract);
     renderer.domElement.addEventListener("touchstart", handleInteract, {passive: false});
     
-    // 动态框体适配引擎
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        camera.aspect = entry.contentRect.width / entry.contentRect.height;
-        camera.updateProjectionMatrix();
-        renderer.setSize(entry.contentRect.width, entry.contentRect.height);
+        let ew = entry.contentRect.width;
+        let eh = entry.contentRect.height;
+        if (ew > 0 && eh > 0) {
+            camera.aspect = ew / eh;
+            camera.updateProjectionMatrix();
+            renderer.setSize(ew, eh);
+        }
       }
     });
     resizeObserver.observe(container);
