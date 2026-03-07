@@ -644,6 +644,11 @@ function initApp() {
     });
   }
 
+  const pBarEl = document.getElementById('p-bar');
+  const pTimeCurEl = document.getElementById('p-time-current');
+  let lastTimeStr = "";
+  let lastPercentStr = "";
+
   function stepProgress() {
     if (!currentHowl || !isPlaying) return;
 
@@ -667,12 +672,19 @@ function initApp() {
         progressAnimationFrame = requestAnimationFrame(stepProgress);
         return;
     }
+
     let percent = duration > 0 ? (seek / duration) * 100 : 0;
+    let percentStr = percent.toFixed(2) + '%';
+    let timeStr = formatTime(seek);
     
-    const barEl = document.getElementById('p-bar');
-    const timeCur = document.getElementById('p-time-current');
-    if (barEl) barEl.style.width = `${percent}%`;
-    if (timeCur) timeCur.innerText = formatTime(seek);
+    if (pBarEl && lastPercentStr !== percentStr) {
+        pBarEl.style.width = percentStr;
+        lastPercentStr = percentStr;
+    }
+    if (pTimeCurEl && lastTimeStr !== timeStr) {
+        pTimeCurEl.innerText = timeStr;
+        lastTimeStr = timeStr;
+    }
     
     progressAnimationFrame = requestAnimationFrame(stepProgress);
   }
