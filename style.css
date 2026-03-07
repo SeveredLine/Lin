@@ -303,21 +303,21 @@ body.dark-mode .slider { background-color: #555; }
 .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 input:checked + .slider { background-color: var(--tab-3); }
 input:checked + .slider:before { transform: translateX(24px); }
-.player-info { position: absolute; height: 60px; top: 0; opacity: 0; left: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.65); backdrop-filter: blur(5px); padding: 8px 15px 5px 105px; border-radius: 12px; transition: all .5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 15px rgba(0,0,0,0.03); pointer-events: none; border: 1px solid var(--border-light); z-index: 1; }
+.player-info { position: absolute; height: 85px; top: 0; opacity: 0; left: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.65); backdrop-filter: blur(5px); padding: 10px 15px 25px 105px; border-radius: 12px; transition: all .5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 4px 15px rgba(0,0,0,0.03); pointer-events: none; border: 1px solid var(--border-light); z-index: 1; }
 body.dark-mode .player-info { background-color: var(--card-bg); border-color: rgba(255,255,255,0.05); }
 
 .p-artist { display: block; color: var(--text-main); font-size: 14px; font-weight: 800; margin-bottom: 3px; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-name { display: block; color: var(--text-ai); font-size: 11px; margin-bottom: 2px; opacity: 0.8; font-family: 'Courier New', Courier, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .p-time-display { font-size: 9px; color: var(--text-main); font-family: 'Courier New', Courier, monospace; text-align: right; margin-top: -12px; margin-bottom: 4px; opacity: 0.6; }
 
-.p-progress-bar { background-color: rgba(0,0,0,0.08); height: 6px; width: 100%; position: relative; border-radius: 3px; cursor: pointer; transition: height 0.2s; }
+.p-progress-bar { background-color: rgba(0,0,0,0.08); height: 6px; width: 100%; position: relative; border-radius: 3px; cursor: pointer; transition: height 0.2s; pointer-events: auto; }
 .p-progress-bar:hover { height: 8px; }
 body.dark-mode .p-progress-bar { background-color: rgba(255,255,255,0.1); }
 .p-bar { position: absolute; left: 0; top: 0; bottom: 0; background-color: var(--tab-3); width: 0%; border-radius: 3px; pointer-events: none; }
 .p-bar::after { content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; }
 .p-progress-bar:hover .p-bar::after { opacity: 1; }
 
-.player-info.active { top: -45px; opacity: 1; }
+.player-info.active { top: -60px; opacity: 1; }
 
 .player-control-panel { position: relative; background-color: var(--card-bg); border: 1px solid var(--border-light); border-radius: 12px; width: 100%; height: 70px; z-index: 5; box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.4); display: flex; align-items: center; }
 body.dark-mode .player-control-panel { box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2); }
