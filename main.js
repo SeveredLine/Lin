@@ -725,8 +725,14 @@ function initApp() {
       if (!currentHowl) return;
       const rect = pProgressBar.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
-      currentHowl.seek(percent * currentHowl.duration());
-      stepProgress();
+      const targetTime = percent * currentHowl.duration();
+      
+      const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
+      if (node) {
+         node.currentTime = targetTime;
+      } else {
+         currentHowl.seek(targetTime);
+      }
     });
   }
 
