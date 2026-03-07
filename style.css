@@ -292,6 +292,32 @@ body.dark-mode .garden-label { border-top-color: rgba(255,255,255,0.05); }
 @keyframes draw-plant { to { stroke-dashoffset: 0; } }
 @keyframes grow-leaf { to { opacity: 0.9; transform: scale(1); } }
 
+:root {
+  --player-theme: var(--tab-3);
+  --player-bg-active: rgba(163, 217, 177, 0.2);
+  --player-bg-active-dark: rgba(163, 217, 177, 0.1);
+}
+body:has(.p-album-art.morning) {
+  --player-theme: #4bb5a3;
+  --player-bg-active: rgba(75, 181, 163, 0.15);
+  --player-bg-active-dark: rgba(75, 181, 163, 0.2);
+}
+body:has(.p-album-art.afternoon) {
+  --player-theme: #e67e22;
+  --player-bg-active: rgba(230, 126, 34, 0.12);
+  --player-bg-active-dark: rgba(230, 126, 34, 0.2);
+}
+body:has(.p-album-art.evening) {
+  --player-theme: #8e7cc3;
+  --player-bg-active: rgba(142, 124, 195, 0.15);
+  --player-bg-active-dark: rgba(142, 124, 195, 0.2);
+}
+body:has(.p-album-art.birthday) {
+  --player-theme: #ff85a2;
+  --player-bg-active: rgba(255, 133, 162, 0.15);
+  --player-bg-active-dark: rgba(255, 133, 162, 0.2);
+}
+
 .mini-player { position: relative; width: 100%; max-width: 320px; margin: 75px auto 0 auto; z-index: 5; }
 
 /* Settings 开关样式 */
@@ -303,7 +329,7 @@ body.dark-mode .garden-label { border-top-color: rgba(255,255,255,0.05); }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
 body.dark-mode .slider { background-color: #555; }
 .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-input:checked + .slider { background-color: var(--tab-3); }
+input:checked + .slider { background-color: var(--player-theme); transition: .4s, background-color 0.8s ease; }
 input:checked + .slider:before { transform: translateX(24px); }
 .player-info { position: absolute; height: 85px; top: 0; opacity: 0; left: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.65); backdrop-filter: blur(5px); padding: 10px 15px 25px 105px; border-radius: 12px; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), clip-path 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.03); pointer-events: none; border: 1px solid var(--border-light); z-index: 1; clip-path: inset(-30px -30px 25px -30px); }
 body.dark-mode .player-info { background-color: var(--card-bg); border-color: rgba(255,255,255,0.05); }
@@ -315,7 +341,7 @@ body.dark-mode .player-info { background-color: var(--card-bg); border-color: rg
 .p-progress-bar { background-color: rgba(0,0,0,0.08); height: 6px; width: 100%; position: relative; border-radius: 3px; cursor: pointer; transition: height 0.2s; pointer-events: auto; }
 .p-progress-bar:hover { height: 8px; }
 body.dark-mode .p-progress-bar { background-color: rgba(255,255,255,0.1); }
-.p-bar { position: absolute; left: 0; top: 0; bottom: 0; background-color: var(--tab-3); width: 0%; border-radius: 3px; pointer-events: none; }
+.p-bar { position: absolute; left: 0; top: 0; bottom: 0; background-color: var(--player-theme); width: 0%; border-radius: 3px; pointer-events: none; transition: background-color 0.8s ease; }
 .p-bar::after { content: ''; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 8px; height: 8px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); opacity: 0; transition: opacity 0.2s; }
 .p-progress-bar:hover .p-bar::after { opacity: 1; }
 
@@ -365,11 +391,11 @@ body.dark-mode .playlist-container::-webkit-scrollbar-thumb { background: rgba(2
 .playlist-item-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .playlist-item:hover { background: rgba(0,0,0,0.03); }
 body.dark-mode .playlist-item:hover { background: rgba(255,255,255,0.08); }
-.playlist-item.active { background: rgba(163, 217, 177, 0.2); border-left: 3px solid var(--tab-3); }
-body.dark-mode .playlist-item.active { background: rgba(163, 217, 177, 0.1); }
+.playlist-item.active { background: var(--player-bg-active); border-left: 3px solid var(--player-theme); transition: background 0.8s ease, border-color 0.8s ease; }
+body.dark-mode .playlist-item.active { background: var(--player-bg-active-dark); }
         
 .playlist-item.disabled { opacity: 0.4; text-decoration: line-through; filter: grayscale(100%); }
-.playlist-item.active .li-title { color: #e74c3c; position: relative; display: inline-block; }
+.playlist-item.active .li-title { color: var(--player-theme); position: relative; display: inline-block; transition: color 0.8s ease; }
 .playlist-item.active .li-title::after { content: 'ılıılı'; position: absolute; right: -40px; top: 0; font-size: 10px; letter-spacing: 1px; animation: eqPulse 1s infinite alternate; }
 @keyframes eqPulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
 
