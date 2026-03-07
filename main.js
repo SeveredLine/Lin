@@ -92,7 +92,7 @@ function initApp() {
       if (document.startViewTransition) {
         const rect = lampCord.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
-        const y = rect.bottom;
+        const y = rect.bottom - 200;
         const maxRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
         
         document.documentElement.style.setProperty('--ripple-x', `${x}px`);

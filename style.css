@@ -290,7 +290,7 @@ body.dark-mode .garden-label { border-top-color: rgba(255,255,255,0.05); }
 @keyframes draw-plant { to { stroke-dashoffset: 0; } }
 @keyframes grow-leaf { to { opacity: 0.9; transform: scale(1); } }
 
-.mini-player { position: relative; width: 100%; max-width: 320px; margin: 25px auto 0 auto; z-index: 5; }
+.mini-player { position: relative; width: 100%; max-width: 320px; margin: 75px auto 0 auto; z-index: 5; }
 
 /* Settings 开关样式 */
 .setting-item { margin-top: 35px; display: flex; flex-direction: column; } 
