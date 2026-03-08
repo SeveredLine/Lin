@@ -320,40 +320,83 @@ function initApp() {
     const date = new Date();
     const month = date.getMonth();
     
-    // 植物配置字典：arch(架构), fType(花型), lShape(叶型)
-    const monthNames =["一月 迎春", "二月 瑞香", "三月 桃花", "四月 蔷薇", "五月 鸢尾", "六月 栀子", "七月 荷花", "八月 桂花", "九月 菊花", "十月 芙蓉", "十一 山茶", "十二 腊梅"];
     
+    // 植物月份字典
+    const monthNames =["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+
+    // n=品名, c=颜色组, w=权重, tCol/lCol=枝干/叶片颜色，arch=架构, fType=花型, lShape=叶型
     const pC =[
-      { arch: 'vine',  fType: 'jasmine', lShape: 'willow', tCol: '#4a5d23', lCol: '#5c7a1a', name: '迎春',
-        fPalettes: [['#FFD700'], ['#FFEA00'],['#F4C430']] }, // 迎春: 明黄, 嫩黄, 金黄
-      { arch: 'herb',  fType: 'cluster', lShape: 'tear',   tCol: '#5c4033', lCol: '#7a8f6a', name: '瑞香',
-        fPalettes: [['#E6A8D7'], ['#FFFFFF', '#FFB7C5'], ['#DDA0DD']] }, // 瑞香: 粉色, 粉白相间, 淡紫色
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#3E2F26', lCol: '#2d4c1e', name: '桃花',
-        fPalettes: [['#FFB7C5', '#FF69B4'],['#FFFFFF', '#FFB7C5'], ['#FF1493', '#C71585']] }, // 桃花: 碧桃(粉), 白桃(白), 绛桃(深红)
-      { arch: 'vine',  fType: 'rose',    lShape: 'sharp',  tCol: '#556B2F', lCol: '#3D5222', name: '蔷薇',
-        fPalettes: [['#E32636', '#800020'],['#FFC0CB', '#FF69B4'],['#FFFFFF', '#F5F5F5'], ['#FFD700', '#FFA500'],['#FF7F50', '#FF4500']] }, // 蔷薇: 红, 粉, 白, 黄, 珊瑚橘
-      { arch: 'basal', fType: 'iris',    lShape: 'sword',  tCol: '#4F7942', lCol: '#4F7942', name: '鸢尾',
-        fPalettes: [['#6A5ACD', '#E6E6FA'],['#4B0082', '#8A2BE2'],['#FFD700', '#FFFACD'], ['#FFFFFF', '#F0F8FF']] }, // 鸢尾: 经典蓝紫, 深紫, 明黄, 纯白
-      { arch: 'herb',  fType: 'simple',  lShape: 'round',  tCol: '#5C5448', lCol: '#2E472D', name: '栀子',
-        fPalettes: [['#FFFFFF', '#F5F5F5'], ['#FFFFF0', '#FFF8DC']] }, // 栀子: 纯白, 偏奶黄(老花)
-      { arch: 'basal', fType: 'lotus',   lShape: 'lotus',  tCol: '#2E8B57', lCol: '#2E8B57', name: '荷花',
-        fPalettes: [['#FF69B4', '#FFC0CB'], ['#FFFFFF', '#FFEC8B'],['#FF1493', '#FF69B4']] }, // 荷花: 经典粉, 纯白, 深红
-      { arch: 'tree',  fType: 'micro',   lShape: 'tear',   tCol: '#696969', lCol: '#355E3B', name: '桂花',
-        fPalettes: [['#FFA500'], ['#FFD700'],['#FFFACD']] }, // 桂花品种: 丹桂(橙), 金桂(黄), 银桂(浅白)
-      { arch: 'herb',  fType: 'mum',     lShape: 'lobed',  tCol: '#6B8E23', lCol: '#556B2F', name: '菊花',
-        fPalettes: [['#FFD700', '#DAA520'], ['#FFFFFF', '#D3D3D3'],['#D8BFD8', '#800080'], ['#FF4500', '#8B0000'],['#98FB98', '#2E8B57']] }, // 菊花: 黄, 白, 紫, 墨菊(暗红), 绿菊(罕见浅绿)
-      { arch: 'tree',  fType: 'hibiscus',lShape: 'broad',  tCol: '#5E4B3C', lCol: '#4F7942', name: '芙蓉',
-        fPalettes: [['#FF69B4', '#FFF0F5'],['#FFFFFF', '#FFB6C1'], ['#DC143C', '#FF1493']] }, // 弄色木芙蓉: 午粉, 晨白, 暮红
-      { arch: 'tree',  fType: 'rose',    lShape: 'round',  tCol: '#3B3C36', lCol: '#004225', name: '山茶',
-        fPalettes: [['#DC143C', '#8B0000'],['#FFC0CB', '#FFF0F5'], ['#FFFFFF', '#F5F5F5'],['#FF0000', '#FFFFFF']] }, // 山茶: 经典红, 宫粉, 纯白, 十八学士(红白复色交叠)
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#2F2F2F', lCol: '#1C1C1C', name: '腊梅', sympodial: true,
-        fPalettes: [['#FFFF00', '#FFD700'],['#FFFACD', '#8B008B']] } // 腊梅品种: 素心(纯黄), 狗牙(浅黄瓣+紫红心)
+      { arch: 'vine',  fType: 'jasmine', lShape: 'willow', tCol: '#4a5d23', lCol: '#5c7a1a',
+        vars: [{n: '金梅迎春', c:['#FFD700'], w: 7000}, {n: '小叶迎春', c:['#FFEA00'], w: 2500}, {n: '素馨迎春', c:['#F4C430'], w: 500}] },
+        
+      { arch: 'herb',  fType: 'cluster', lShape: 'tear',   tCol: '#5c4033', lCol: '#7a8f6a',
+        vars:[{n: '金边瑞香', c:['#E6A8D7'], w: 6000}, {n: '白花瑞香', c:['#FFFFFF', '#FFB7C5'], w: 3000}, {n: '蔷薇瑞香', c:['#DDA0DD'], w: 997.76}, 
+               {n: '林涵霁雨', c:['#00E5FF', '#B23AEE'], w: 2.24, tCol: '#E0E0E0', lCol: '#7FFFD4'}] }, 
+
+      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#3E2F26', lCol: '#2d4c1e',
+        vars: [{n: '碧桃', c:['#FFB7C5', '#FF69B4'], w: 6000}, {n: '白花桃', c:['#FFFFFF', '#FFB7C5'], w: 3000}, {n: '绛桃', c:['#FF1493', '#C71585'], w: 900}, 
+               {n: '紫叶桃', c:['#FF69B4', '#FF1493'], w: 100, tCol: '#2c141d', m: { bProb: 0.95, fProb: 0.15 }}] },
+
+      { arch: 'vine',  fType: 'rose',    lShape: 'sharp',  tCol: '#556B2F', lCol: '#3D5222',
+        vars:[{n: '粉团蔷薇', c:['#FFC0CB', '#FF69B4'], w: 4500}, {n: '七姊妹', c:['#E32636', '#800020'], w: 3500}, {n: '白玉堂', c:['#FFFFFF', '#F5F5F5'], w: 1500}, 
+               {n: '黄蔷薇', c:['#FFD700', '#FFA500'], w: 450}, {n: '珊瑚橘', c:['#FF7F50', '#FF4500'], w: 50}] },
+
+      { arch: 'basal', fType: 'iris',    lShape: 'sword',  tCol: '#4F7942', lCol: '#4F7942',
+        vars: [{n: '蓝蝴蝶', c:['#6A5ACD', '#E6E6FA'], w: 6000}, {n: '深紫鸢尾', c:['#4B0082', '#8A2BE2'], w: 2500}, {n: '白雪鸢尾', c:['#FFFFFF', '#F0F8FF'], w: 1000}, 
+               {n: '金脉鸢尾', c:['#FFD700', '#FFFACD'], w: 500}] },
+
+      { arch: 'herb',  fType: 'simple',  lShape: 'round',  tCol: '#5C5448', lCol: '#2E472D',
+        vars:[{n: '大叶栀子', c:['#FFFFFF', '#F5F5F5'], w: 8000}, {n: '水栀子', c:['#FFFFF0', '#FFF8DC'], w: 2000}] },
+
+      { arch: 'basal', fType: 'lotus',   lShape: 'lotus',  tCol: '#2E8B57', lCol: '#2E8B57',
+        vars:[{n: '红建莲', c:['#FF69B4', '#FFC0CB'], w: 6000}, {n: '白洋淀', c:['#FFFFFF', '#FFEC8B'], w: 3000}, 
+               {n: '千瓣莲', c:['#FF1493', '#C71585'], w: 1000, m: { layers: 5, dense: true }}] },
+
+      { arch: 'tree',  fType: 'micro',   lShape: 'tear',   tCol: '#696969', lCol: '#355E3B',
+        vars:[{n: '金桂', c:['#FFD700'], w: 5500}, {n: '银桂', c:['#FFFACD'], w: 3500}, {n: '丹桂', c:['#FFA500'], w: 1000}] },
+
+      { arch: 'herb',  fType: 'mum',     lShape: 'lobed',  tCol: '#6B8E23', lCol: '#556B2F',
+        vars:[{n: '秋菊', c:['#FFD700', '#DAA520'], w: 4500}, {n: '白菊', c:['#FFFFFF', '#D3D3D3'], w: 3000}, {n: '紫菊', c:['#D8BFD8', '#800080'], w: 1500}, 
+               {n: '墨菊', c:['#8B0000', '#4A0404'], w: 900, m: { cMod: 2.0, lDense: 2.5, fScale: 1.5, hMod: 0.8,  dense: true }}, {n: '绿菊', c:['#98FB98', '#2E8B57'], w: 100}] },
+
+      { arch: 'tree',  fType: 'hibiscus',lShape: 'broad',  tCol: '#5E4B3C', lCol: '#4F7942',
+        vars:[{n: '晨白芙蓉', c:['#FFFFFF', '#FFB6C1'], w: 4500}, {n: '午粉芙蓉', c:['#FF69B4', '#FFF0F5'], w: 4000}, {n: '暮红芙蓉', c:['#DC143C', '#FF1493'], w: 1500}] },
+
+      { arch: 'tree',  fType: 'rose',    lShape: 'round',  tCol: '#3B3C36', lCol: '#004225',
+        vars:[{n: '赤丹', c:['#DC143C', '#8B0000'], w: 5000}, {n: '宫粉', c:['#FFC0CB', '#FFF0F5'], w: 3000}, {n: '白天鹅', c:['#FFFFFF', '#F5F5F5'], w: 1950}, 
+               {n: '十八学士', c:['#FF0000', '#FFFFFF'], w: 50, m: { phyllotaxis: true, petals: 34 }}] },
+
+      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#2F2F2F', lCol: '#1C1C1C', sympodial: true,
+        vars: [{n: '素心腊梅', c:['#FFFF00', '#FFD700'], w: 7500}, {n: '狗牙腊梅', c:['#FFFACD', '#8B008B'], w: 2500}] }
     ];
 
-    const cfg = pC[month];
+    const cfg = Object.assign({}, pC[month]);
     
-    cfg.fCol = cfg.fPalettes[Math.floor(Math.random() * cfg.fPalettes.length)];
+    let selectedVar = null;
     
+    if (month === 1 && date.getDate() === 24) {
+      selectedVar = cfg.vars.find(v => v.n === '林涵霁雨');
+    }
+
+    if (!selectedVar) {
+      let totalWeight = cfg.vars.reduce((sum, v) => sum + v.w, 0);
+      let randomSpin = Math.random() * totalWeight;
+      for (let v of cfg.vars) {
+        if (randomSpin < v.w) {
+          selectedVar = v;
+          break;
+        }
+        randomSpin -= v.w;
+      }
+      if (!selectedVar) selectedVar = cfg.vars[0];
+    }
+
+    cfg.fCol = selectedVar.c;
+    cfg.name = selectedVar.n;
+    if (selectedVar.tCol) cfg.tCol = selectedVar.tCol;
+    if (selectedVar.lCol) cfg.lCol = selectedVar.lCol;
+    cfg.m = selectedVar.m || {};
+
     // 动态内联样式
     let svgContent = `
       <svg viewBox="0 0 400 450" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow: visible; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15));">
@@ -414,40 +457,68 @@ function initApp() {
         fHtml += `<circle r="3" fill="${c2}" />`;
       } 
       else if (cfg.fType === 'lotus') {
-        // 层叠荷花
-        for(let i=-2; i<=2; i++) {
-          fHtml += `<path d="M0,0 C-10,-15 -8,-45 0,-50 C8,-45 10,-15 0,0 Z" fill="${c1}" transform="rotate(${i*20})" opacity="0.85"/>`;
+        // 恢复侧面碗状结构，结合参数化层数
+        let layers = cfg.m.layers || 3; 
+        for(let l = layers; l >= 1; l--) {
+           let count = l * 2 + 1; 
+           let s = 1 - ((layers - l) * 0.15); 
+           let pC = (l % 2 === 0) ? c2 : c1;
+           let spread = 25 + l * 12; // 扇形展开角度
+           for(let i = 0; i < count; i++) {
+             let rot = -spread + (spread * 2 / (count - 1 || 1)) * i + (Math.random()*4-2); // 扇形排布+微调
+             let shape = cfg.m.dense ? `M0,0 C-5,-20 -3,-45 0,-50 C3,-45 5,-20 0,0 Z` : `M0,0 C-10,-15 -8,-45 0,-50 C8,-45 10,-15 0,0 Z`;
+             fHtml += `<path d="${shape}" fill="${pC}" transform="rotate(${rot}) scale(${s})" opacity="0.9"/>`;
+           }
         }
-        for(let i=-1; i<=1; i++) {
-          fHtml += `<path d="M0,0 C-6,-10 -5,-30 0,-35 C5,-30 6,-10 0,0 Z" fill="${c2}" transform="rotate(${i*15})" opacity="0.95"/>`;
-        }
+        // 底部加一个小莲蓬
+        fHtml += `<ellipse cx="0" cy="-8" rx="6" ry="3" fill="#FFD700" opacity="0.85"/>`;
       }
       else if (cfg.fType === 'mum') {
-        // 菊花 (细长管状花瓣)
-        for(let i=0; i<24; i++) {
-          fHtml += `<path d="M0,0 Q-3,-20 0,-35 Q3,-20 0,0 Z" fill="${c1}" transform="rotate(${i*15})" opacity="0.9"/>`;
+        // 菊花：加入随机长短的错落感与双层管状花瓣
+        let mDense = cfg.m.dense ? 40 : 24;
+        for(let i=0; i<mDense; i++) {
+          let r = 1 - Math.random() * 0.35; // 花瓣长短不一
+          let rot = i * (360 / mDense) + Math.random() * 8;
+          // 外层长瓣
+          fHtml += `<path d="M0,0 Q-4,-20 0,-${40*r} Q4,-20 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
+          // 内层短心
+          fHtml += `<path d="M0,0 Q-2,-10 0,-${20*r} Q2,-10 0,0 Z" fill="${c2}" transform="rotate(${rot+15})" opacity="0.95"/>`;
         }
-        fHtml += `<circle r="6" fill="${c2}" />`;
+        fHtml += `<circle r="4" fill="${c2}" />`;
       }
       else if (cfg.fType === 'iris') {
-        // 鸢尾花 (上下垂瓣)
-        fHtml += `<path d="M0,0 C-15,-20 -20,-40 0,-45 C20,-40 15,-20 0,0 Z" fill="${c2}" transform="rotate(0)" opacity="0.9"/>`; // 上
-        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(60)" opacity="0.9"/>`;  // 右下
-        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(-60)" opacity="0.9"/>`; // 左下
+        fHtml += `<path d="M0,0 C-15,-20 -20,-40 0,-45 C20,-40 15,-20 0,0 Z" fill="${c2}" transform="rotate(0)" opacity="0.9"/>`; 
+        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(60)" opacity="0.9"/>`; 
+        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(-60)" opacity="0.9"/>`;
       }
       else if (cfg.fType === 'rose') {
-        // 蔷薇/山茶 (圆形交叠花瓣)
-        for(let i=0; i<8; i++) {
-          let s = 1 - (i*0.08);
-          fHtml += `<circle cx="0" cy="-6" r="10" fill="${i%2===0?c1:c2}" transform="rotate(${i*65}) scale(${s})" opacity="0.9"/>`;
+        let count = cfg.m.petals || 8;
+        for(let i=1; i<=count; i++) {
+          let s, rot, cx=0, cy=-6, c;
+          if (cfg.m.phyllotaxis) {
+            let r = 2.0 * Math.sqrt(i); rot = i * 137.5;
+            cx = r * Math.sin(rot * Math.PI / 180); cy = -r * Math.cos(rot * Math.PI / 180);
+            s = 1.2 - (i * (1.0 / count)); c = i > count/2 ? c2 : c1;
+          } else {
+            s = 1 - (i*0.08); rot = i * 65; c = i % 2 === 0 ? c1 : c2;
+          }
+          fHtml += `<circle cx="${cx}" cy="${cy}" r="10" fill="${c}" transform="rotate(${rot}) scale(${s})" opacity="0.95"/>`;
         }
       }
       else if (cfg.fType === 'hibiscus') {
-        // 芙蓉 (阔大花瓣)
+        // 芙蓉：宽大重叠的波浪感花瓣，与生动的立体花蕊
         for(let i=0; i<5; i++) {
-          fHtml += `<path d="M0,0 C-20,-10 -25,-40 0,-45 C25,-40 20,-10 0,0 Z" fill="${c1}" transform="rotate(${i*72})" opacity="0.8"/>`;
+          let rot = i * 72 + (Math.random() * 10 - 5);
+          // 宽大透明的外层
+          fHtml += `<path d="M0,0 C-25,-10 -35,-40 0,-45 C35,-40 25,-10 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
+          // 颜色较深的内层渐变效果
+          fHtml += `<path d="M0,0 C-10,-5 -15,-20 0,-25 C15,-20 10,-5 0,0 Z" fill="${c2}" transform="rotate(${rot})" opacity="0.6"/>`;
         }
-        fHtml += `<line x1="0" y1="0" x2="0" y2="-25" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>`;
+        // 弯曲延伸的雄蕊群
+        fHtml += `<path d="M0,0 Q5,-15 0,-28" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>`;
+        fHtml += `<circle cx="0" cy="-28" r="2.5" fill="#FFA500"/>`;
+        fHtml += `<circle cx="-2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
+        fHtml += `<circle cx="2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
       }
       else if (cfg.fType === 'jasmine' || cfg.fType === 'simple') {
         // 简单4-5瓣花
@@ -465,7 +536,9 @@ function initApp() {
         }
       }
 
-      organs.push(`<g class="botany-flower" style="--tx:${x.toFixed(1)}px; --ty:${y.toFixed(1)}px; --rot:${angle.toFixed(1)}deg; --sc:${scale.toFixed(2)}; animation-delay:${delay}s;">${fHtml}</g>`);
+      let filterStr = (cfg.name === '林涵霁雨') ? `filter="drop-shadow(0 0 8px ${c1})"` : '';
+
+      organs.push(`<g class="botany-flower" style="--tx:${x.toFixed(1)}px; --ty:${y.toFixed(1)}px; --rot:${angle.toFixed(1)}deg; --sc:${scale.toFixed(2)}; animation-delay:${delay}s;" ${filterStr}>${fHtml}</g>`);
     }
 
     // ================= 生成算法 =================
@@ -477,30 +550,53 @@ function initApp() {
       let y2 = y - Math.cos(angle) * length;
       
       let isSympodial = cfg.sympodial && depth < 5;
-      let cx = x + Math.sin(angle + (isSympodial ? 0.3 : (Math.random()-0.5)*0.3)) * length * 0.5;
-      let cy = y - Math.cos(angle + (isSympodial ? 0.3 : (Math.random()-0.5)*0.3)) * length * 0.5;
+      let cx = x + Math.sin(angle + (isSympodial ? 0.4 : (Math.random()-0.5)*0.4)) * length * 0.5;
+      let cy = y - Math.cos(angle + (isSympodial ? 0.4 : (Math.random()-0.5)*0.4)) * length * 0.5;
 
       addStem(x, y, cx, cy, x2, y2, width, cfg.tCol, delay);
       let isEndpoint = (depth === 1);
       
+      // 提高花朵繁茂度 (簇生花可以在末端一次爆出多朵)
+      let fProb = cfg.m.fProb !== undefined ? cfg.m.fProb : 0.6; 
+      
       if (cfg.fType === 'peach' || cfg.fType === 'micro') {
-        if (depth <= 4 && Math.random() > 0.4) {
-          addFlower(x2, y2, Math.random()*360, 0.6 + Math.random()*0.5, delay + 0.5);
+        if (depth <= 4 && Math.random() < fProb) {
+          // 几率产生多朵花簇拥
+          let blooms = Math.floor(Math.random() * 3) + 1;
+          for(let b=0; b<blooms; b++) {
+            addFlower(x2 + (Math.random()*10-5), y2 + (Math.random()*10-5), Math.random()*360, 0.6 + Math.random()*0.5, delay + 0.5 + b*0.1);
+          }
         }
       } else {
-        if (isEndpoint) addFlower(x2, y2, angle * 180 / Math.PI + (Math.random()*40-20), 1.0 + Math.random()*0.4, delay + 0.6);
+        if (isEndpoint) addFlower(x2, y2, angle * 180 / Math.PI + (Math.random()*60-30), 1.0 + Math.random()*0.4, delay + 0.6);
       }
 
-      if (!isEndpoint && cfg.lShape !== 'none' && Math.random() > 0.3) {
-        addLeaf(x2, y2, (angle*180/Math.PI) + 60 + Math.random()*20, 0.7 + Math.random()*0.3, delay + 0.3);
-        addLeaf(x2, y2, (angle*180/Math.PI) - 60 - Math.random()*20, 0.7 + Math.random()*0.3, delay + 0.3);
+      if (!isEndpoint && cfg.lShape !== 'none' && Math.random() < 0.8) {
+        addLeaf(x2, y2, (angle*180/Math.PI) + 50 + Math.random()*30, 0.7 + Math.random()*0.4, delay + 0.3);
+        addLeaf(x2, y2, (angle*180/Math.PI) - 50 - Math.random()*30, 0.7 + Math.random()*0.4, delay + 0.3);
       }
 
-      let branches = depth === 5 ? (2 + Math.floor(Math.random()*2)) : (Math.random() > 0.2 ? 2 : 1);
-      for (let i = 0; i < branches; i++) {
-        let dir = (i === 0) ? -1 : 1;
-        let newAngle = angle + dir * (isSympodial ? 0.6 : 0.4) + (Math.random()*0.3 - 0.15);
-        buildTree(x2, y2, newAngle, length * (0.65 + Math.random()*0.2), depth - 1, width * 0.7, delay + 0.15);
+      // 底层干可生2-4枝，中层可生0-3枝
+      let bProb = cfg.m.bProb !== undefined ? cfg.m.bProb : 0.65;
+      let maxBranches = 1;
+      if (depth === 5) maxBranches = 2 + Math.floor(Math.random() * 3); // 根部 2~4 枝
+      else {
+        let r = Math.random();
+        if (r < bProb - 0.3) maxBranches = 3;      // 茂盛变异
+        else if (r < bProb) maxBranches = 2;       // 正常分叉
+        else if (r > 0.9 && depth < 3) maxBranches = 0; // 自然枯顶
+      }
+      
+      for (let i = 0; i < maxBranches; i++) {
+        // 让分支散得更开更随机
+        let dir = (i % 2 === 0) ? -1 : 1;
+        let spread = maxBranches === 1 ? (Math.random()*0.6 - 0.3) : (dir * (0.3 + i*0.15));
+        let newAngle = angle + (isSympodial ? dir * 0.5 : spread) + (Math.random()*0.4 - 0.2);
+        // 分叉越多，子枝干越倾向于缩短，形成自然的树冠穹顶
+        let lengthDrop = maxBranches > 2 ? 0.5 : 0.65;
+        let newLength = length * (lengthDrop + Math.random() * 0.3);
+        
+        buildTree(x2, y2, newAngle, newLength, depth - 1, width * 0.65, delay + 0.15);
       }
     }
 
@@ -547,15 +643,23 @@ function initApp() {
 
     // 草本单轴型 (菊花, 栀子, 瑞香)
     function buildHerb() {
-      let height = 180 + Math.random() * 70; // 随机主茎高度
-      let curveX = (Math.random() - 0.5) * 80; // 随机弯曲控制点
-      let endX = curveX * 0.5 + (Math.random() - 0.5) * 40; // 随机顶端偏离
+      // 从 cfg.m 读取形态学变异参数，若无则使用默认值 1.0
+      let hMod = cfg.m.hMod || 1.0;       // 高度乘数
+      let cMod = cfg.m.cMod || 1.0;       // 弯曲度(蛇形)乘数
+      let lDense = cfg.m.lDense || 1.0;   // 叶片密度乘数
+      let fScale = cfg.m.fScale || 1.0;   // 花朵大小乘数
+
+      let height = (180 + Math.random() * 70) * hMod; 
+      let curveX = (Math.random() - 0.5) * 80 * cMod; // 控制茎干的弯曲极值
+      let endX = curveX * 0.5 + (Math.random() - 0.5) * 40 * cMod; // 顶端偏移
       
       addStem(0, 0, curveX, -height*0.5, endX, -height, 6 + Math.random()*3, cfg.tCol, 0);
       
-      let steps = 4 + Math.floor(Math.random() * 4); // 随机叶片层数
+      let baseSteps = 4 + Math.floor(Math.random() * 4); 
+      let steps = Math.floor(baseSteps * lDense); // 应用叶片密度变异
+      
       for(let i=1; i<steps; i++) {
-        // 利用二次贝塞尔方程，计算叶子在弯曲茎干上的精准坐标
+        // 利用二次贝塞尔方程，计算叶子在弯曲茎干上的坐标
         let t = i / steps;
         let mt = 1 - t;
         let px = mt*mt*0 + 2*mt*t*curveX + t*t*endX;
@@ -563,15 +667,18 @@ function initApp() {
         let delay = i * 0.15 + Math.random() * 0.1;
         
         let lAng = (i % 2 === 0) ? -70 : 70;
-        lAng += (Math.random() - 0.5) * 40; // 随机叶片角度
-        let lScale = 0.8 + Math.random() * 0.6; // 随机叶片大小
+        lAng += (Math.random() - 0.5) * 40; 
+        let lScale = 0.8 + Math.random() * 0.6; 
 
         addLeaf(px, py, lAng, lScale, delay);
+        // 如果是 simple 类型或触发几率，则对生/多生
         if (cfg.fType === 'simple' || Math.random() > 0.7) { 
-          addLeaf(px, py, -lAng + (Math.random()-0.5)*30, lScale * (0.8+Math.random()*0.3), delay); // 对生或几率多生
+          addLeaf(px, py, -lAng + (Math.random()-0.5)*30, lScale * (0.8+Math.random()*0.3), delay); 
         }
       }
-      addFlower(endX, -height, (Math.random() - 0.5) * 40, 1.5 + Math.random() * 0.7, 1.0);
+      
+      // 生成顶端花朵，并应用缩放乘数
+      addFlower(endX, -height, (Math.random() - 0.5) * 40, (1.5 + Math.random() * 0.7) * fScale, 1.0);
     }
 
     // 藤本垂枝型 (迎春, 蔷薇)
@@ -613,7 +720,7 @@ function initApp() {
 
     svgContent += paths.join('') + organs.join('') + `</g></svg>`;
     container.innerHTML = svgContent;
-    label.innerText = monthNames[month];
+    label.innerText = `${monthNames[month]} · ${cfg.name}`;
     plantGenerated = true;
   }
 
