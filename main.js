@@ -324,21 +324,35 @@ function initApp() {
     const monthNames =["一月 迎春", "二月 瑞香", "三月 桃花", "四月 蔷薇", "五月 鸢尾", "六月 栀子", "七月 荷花", "八月 桂花", "九月 菊花", "十月 芙蓉", "十一 山茶", "十二 腊梅"];
     
     const pC =[
-      { arch: 'vine',  fType: 'jasmine', lShape: 'willow', tCol: '#4a5d23', fCol:['#FFD700'], lCol: '#5c7a1a', name: '迎春' }, // 1月: 藤本垂枝, 黄色小花
-      { arch: 'herb',  fType: 'cluster', lShape: 'tear',   tCol: '#5c4033', fCol:['#E6A8D7'], lCol: '#7a8f6a', name: '瑞香' }, // 2月: 草本单轴, 顶生花簇
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#3E2F26', fCol:['#FFB7C5', '#FF69B4'], lCol: '#2d4c1e', name: '桃花' }, // 3月: 木本, 花贴老枝, 无叶
-      { arch: 'vine',  fType: 'rose',    lShape: 'sharp',  tCol: '#556B2F', fCol: ['#E32636', '#800020'], lCol: '#3D5222', name: '蔷薇' }, // 4月: 藤本, 玫瑰花
-      { arch: 'basal', fType: 'iris',    lShape: 'sword',  tCol: '#4F7942', fCol:['#6A5ACD', '#E6E6FA'], lCol: '#4F7942', name: '鸢尾' }, // 5月: 基生, 剑叶, 蓝紫花
-      { arch: 'herb',  fType: 'simple',  lShape: 'round',  tCol: '#5C5448', fCol:['#FFFFFF', '#F5F5F5'], lCol: '#2E472D', name: '栀子' }, // 6月: 草本/灌木, 白花对生叶
-      { arch: 'basal', fType: 'lotus',   lShape: 'lotus',  tCol: '#2E8B57', fCol: ['#FF69B4', '#FFC0CB'], lCol: '#2E8B57', name: '荷花' }, // 7月: 基生水生, 挺水大圆叶, 巨型花
-      { arch: 'tree',  fType: 'micro',   lShape: 'tear',   tCol: '#696969', fCol: ['#FFA500'], lCol: '#355E3B', name: '桂花' }, // 8月: 木本, 浓密绿叶, 极小橙黄簇花
-      { arch: 'herb',  fType: 'mum',     lShape: 'lobed',  tCol: '#6B8E23', fCol: ['#FFD700', '#DAA520'], lCol: '#556B2F', name: '菊花' }, // 9月: 草本单轴, 顶生大头状花序
-      { arch: 'tree',  fType: 'hibiscus',lShape: 'broad',  tCol: '#5E4B3C', fCol:['#FF69B4', '#FFF0F5'], lCol: '#4F7942', name: '芙蓉' }, // 10月: 木本, 枝头大花, 阔叶
-      { arch: 'tree',  fType: 'rose',    lShape: 'round',  tCol: '#3B3C36', fCol: ['#DC143C'], lCol: '#004225', name: '山茶' }, // 11月: 木本, 墨绿叶, 深红花
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#2F2F2F', fCol: ['#FFFF00', '#FFD700'], lCol: '#1C1C1C', name: '腊梅', sympodial: true } // 12月: 木本合轴(之字形), 无叶, 黄花
+      { arch: 'vine',  fType: 'jasmine', lShape: 'willow', tCol: '#4a5d23', lCol: '#5c7a1a', name: '迎春',
+        fPalettes: [['#FFD700'], ['#FFEA00'],['#F4C430']] }, // 迎春: 明黄, 嫩黄, 金黄
+      { arch: 'herb',  fType: 'cluster', lShape: 'tear',   tCol: '#5c4033', lCol: '#7a8f6a', name: '瑞香',
+        fPalettes: [['#E6A8D7'], ['#FFFFFF', '#FFB7C5'], ['#DDA0DD']] }, // 瑞香: 粉色, 粉白相间, 淡紫色
+      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#3E2F26', lCol: '#2d4c1e', name: '桃花',
+        fPalettes: [['#FFB7C5', '#FF69B4'],['#FFFFFF', '#FFB7C5'], ['#FF1493', '#C71585']] }, // 桃花: 碧桃(粉), 白桃(白), 绛桃(深红)
+      { arch: 'vine',  fType: 'rose',    lShape: 'sharp',  tCol: '#556B2F', lCol: '#3D5222', name: '蔷薇',
+        fPalettes: [['#E32636', '#800020'],['#FFC0CB', '#FF69B4'],['#FFFFFF', '#F5F5F5'], ['#FFD700', '#FFA500'],['#FF7F50', '#FF4500']] }, // 蔷薇: 红, 粉, 白, 黄, 珊瑚橘
+      { arch: 'basal', fType: 'iris',    lShape: 'sword',  tCol: '#4F7942', lCol: '#4F7942', name: '鸢尾',
+        fPalettes: [['#6A5ACD', '#E6E6FA'],['#4B0082', '#8A2BE2'],['#FFD700', '#FFFACD'], ['#FFFFFF', '#F0F8FF']] }, // 鸢尾: 经典蓝紫, 深紫, 明黄, 纯白
+      { arch: 'herb',  fType: 'simple',  lShape: 'round',  tCol: '#5C5448', lCol: '#2E472D', name: '栀子',
+        fPalettes: [['#FFFFFF', '#F5F5F5'], ['#FFFFF0', '#FFF8DC']] }, // 栀子: 纯白, 偏奶黄(老花)
+      { arch: 'basal', fType: 'lotus',   lShape: 'lotus',  tCol: '#2E8B57', lCol: '#2E8B57', name: '荷花',
+        fPalettes: [['#FF69B4', '#FFC0CB'], ['#FFFFFF', '#FFEC8B'],['#FF1493', '#FF69B4']] }, // 荷花: 经典粉, 纯白, 深红
+      { arch: 'tree',  fType: 'micro',   lShape: 'tear',   tCol: '#696969', lCol: '#355E3B', name: '桂花',
+        fPalettes: [['#FFA500'], ['#FFD700'],['#FFFACD']] }, // 桂花品种: 丹桂(橙), 金桂(黄), 银桂(浅白)
+      { arch: 'herb',  fType: 'mum',     lShape: 'lobed',  tCol: '#6B8E23', lCol: '#556B2F', name: '菊花',
+        fPalettes: [['#FFD700', '#DAA520'], ['#FFFFFF', '#D3D3D3'],['#D8BFD8', '#800080'], ['#FF4500', '#8B0000'],['#98FB98', '#2E8B57']] }, // 菊花: 黄, 白, 紫, 墨菊(暗红), 绿菊(罕见浅绿)
+      { arch: 'tree',  fType: 'hibiscus',lShape: 'broad',  tCol: '#5E4B3C', lCol: '#4F7942', name: '芙蓉',
+        fPalettes: [['#FF69B4', '#FFF0F5'],['#FFFFFF', '#FFB6C1'], ['#DC143C', '#FF1493']] }, // 弄色木芙蓉: 午粉, 晨白, 暮红
+      { arch: 'tree',  fType: 'rose',    lShape: 'round',  tCol: '#3B3C36', lCol: '#004225', name: '山茶',
+        fPalettes: [['#DC143C', '#8B0000'],['#FFC0CB', '#FFF0F5'], ['#FFFFFF', '#F5F5F5'],['#FF0000', '#FFFFFF']] }, // 山茶: 经典红, 宫粉, 纯白, 十八学士(红白复色交叠)
+      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#2F2F2F', lCol: '#1C1C1C', name: '腊梅', sympodial: true,
+        fPalettes: [['#FFFF00', '#FFD700'],['#FFFACD', '#8B008B']] } // 腊梅品种: 素心(纯黄), 狗牙(浅黄瓣+紫红心)
     ];
 
     const cfg = pC[month];
+    
+    cfg.fCol = cfg.fPalettes[Math.floor(Math.random() * cfg.fPalettes.length)];
     
     // 动态内联样式
     let svgContent = `
