@@ -308,64 +308,133 @@ function initApp() {
   });
 
 
-  // ================= SVG 植物生成 =================
+  // ================= SVG 植物分形生成 =================
   let plantGenerated = false;
   function generatePlant() {
     if (plantGenerated) return;
     const container = document.getElementById('svgGarden');
     if (container && container.dataset.presentActive === "true") return;
     const label = document.getElementById('gardenLabel');
-    if(!container) return;
+    if (!container) return;
 
     const date = new Date();
     const month = date.getMonth();
-    const monthNames =["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-    
-    // 植物生长参数配置
-    const pC =[
-      { s: "#4a5d23", l: "#2e472d", d: 5, sp: 0.4, ln: 40, t: "M0,0L-3,-15L0,-30L3,-15Z" },
-      { s: "#5c4033", l: "#ffb7c5", d: 5, sp: 0.6, ln: 35, t: "M0,0 C-10,-10 -10,-20 0,-20 C10,-20 10,-10 0,0 Z" },
-      { s: "#8b9a46", l: "#a8b054", d: 5, sp: 0.7, ln: 45, t: "M0,0 C10,-10 15,-20 0,-40 C-5,-20 0,-10 0,0 Z" },
-      { s: "#6b5b53", l: "#ffc0cb", d: 5, sp: 0.5, ln: 35, t: "M0,0 C-15,-10 -15,-25 0,-30 C15,-25 15,-10 0,0 Z" },
-      { s: "#2d4c1e", l: "#3a5f27", d: 4, sp: 0.4, ln: 50, t: "M0,0 C-25,-15 -30,-40 0,-60 C30,-40 25,-15 0,0 Z" },
-      { s: "#455e14", l: "#5c7a1a", d: 5, sp: 0.5, ln: 40, t: "M0,0 C-5,-5 -5,-15 0,-20 C5,-15 5,-5 0,0 Z" },
-      { s: "#305e3a", l: "#e8a0bf", d: 4, sp: 0.3, ln: 55, t: "M0,0 C-20,-10 -30,-30 0,-40 C30,-30 20,-10 0,0 Z" },
-      { s: "#68785c", l: "#7a8f6a", d: 3, sp: 0.4, ln: 25, t: "M0,0 C-15,-5 -15,-20 0,-25 C15,-20 15,-5 0,0 Z" },
-      { s: "#5c4a3d", l: "#c24100", d: 5, sp: 0.6, ln: 35, t: "M0,-15 L-10,-15 L-5,-5 L-10,5 L0,0 L10,5 L5,-5 L10,-15 Z" },
-      { s: "#63594b", l: "#e8c547", d: 5, sp: 0.5, ln: 40, t: "M0,0 L-20,-30 A25,25 0 0,1 20,-30 Z" },
-      { s: "#8c9c81", l: "#d1d8c5", d: 4, sp: 0.2, ln: 50, t: "M0,0 C-2,-10 -5,-20 0,-40 C5,-20 2,-10 0,0 Z" },
-      { s: "#4a4e4d", l: "#a8b6bf", d: 5, sp: 0.7, ln: 40, t: "M0,0 L-5,-5 L0,-10 L5,-5 Z" }
-    ];
-    const cfg = pC[month];
-    let svgContent = `<svg viewBox="0 0 300 300" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">`;
-    let paths = [];
-    let leaves =[];
+    const monthNames = ["一月 迎春", "二月 瑞香", "三月 桃花", "四月 蔷薇", "五月 鸢尾", "六月 栀子", "七月 荷花", "八月 桂花", "九月 菊花", "十月 芙蓉", "十一 山茶", "十二 腊梅"];
 
-    function buildBranch(x, y, angle, len, depth, delay) {
+    // d: 递归深度, len: 基础长度, sw: 基础主干粗细, ang: 发散角度, ls: 叶片尺寸基数
+    // tCol: 树干渐变起, bCol: 树干渐变末, l1/l2: 叶片渐变色, shape: 叶片SVG路径
+    const leafShapes = {
+      tear: 'M0,0 C-6,-8 -8,-20 0,-25 C8,-20 6,-8 0,0 Z',
+      soft: 'M0,0 C-12,-10 -15,-25 0,-32 C15,-25 12,-10 0,0 Z',
+      willow: 'M0,0 C-4,-15 -4,-35 0,-45 C4,-35 4,-15 0,0 Z',
+      sharp: 'M0,0 L-8,-15 L0,-28 L8,-15 Z',
+      round: 'M0,0 C-18,-8 -22,-22 0,-28 C22,-22 18,-8 0,0 Z',
+      ginkgo: 'M0,0 L-14,-20 C-8,-32 8,-32 14,-20 Z'
+    };
+
+    const pC = [
+      { d: 6, len: 55, sw: 12, ang: 0.45, ls: 0.6, tCol: '#3A2E25', bCol: '#544738', l1: '#FFD700', l2: '#FF9900', shape: leafShapes.willow }, // 1月 迎春
+      { d: 6, len: 50, sw: 11, ang: 0.40, ls: 0.8, tCol: '#483B32', bCol: '#6E5C4F', l1: '#E6A8D7', l2: '#C74291', shape: leafShapes.tear },   // 2月 瑞香
+      { d: 6, len: 55, sw: 14, ang: 0.50, ls: 0.9, tCol: '#3E2F26', bCol: '#2E221B', l1: '#FFB7C5', l2: '#FF69B4', shape: leafShapes.soft },   // 3月 桃花
+      { d: 6, len: 45, sw: 10, ang: 0.55, ls: 0.7, tCol: '#556B2F', bCol: '#3D5222', l1: '#FF2400', l2: '#C21807', shape: leafShapes.sharp },  // 4月 蔷薇
+      { d: 5, len: 65, sw: 12, ang: 0.35, ls: 1.0, tCol: '#4F7942', bCol: '#355E3B', l1: '#6A5ACD', l2: '#483D8B', shape: leafShapes.ginkgo }, // 5月 鸢尾
+      { d: 6, len: 50, sw: 12, ang: 0.40, ls: 1.1, tCol: '#5C5448', bCol: '#423C33', l1: '#FFFFFF', l2: '#F5F5DC', shape: leafShapes.round },  // 6月 栀子
+      { d: 5, len: 70, sw: 16, ang: 0.30, ls: 1.4, tCol: '#2E8B57', bCol: '#006400', l1: '#FF69B4', l2: '#FF1493', shape: leafShapes.round },  // 7月 荷花
+      { d: 7, len: 45, sw: 13, ang: 0.45, ls: 0.5, tCol: '#696969', bCol: '#4F4F4F', l1: '#FFD700', l2: '#FFA500', shape: leafShapes.tear },   // 8月 桂花
+      { d: 6, len: 48, sw: 11, ang: 0.50, ls: 0.8, tCol: '#6B8E23', bCol: '#556B2F', l1: '#FFD700', l2: '#DAA520', shape: leafShapes.sharp },  // 9月 菊花
+      { d: 6, len: 52, sw: 13, ang: 0.40, ls: 1.2, tCol: '#5E4B3C', bCol: '#44362A', l1: '#FFB6C1', l2: '#FF69B4', shape: leafShapes.soft },   // 10月 芙蓉
+      { d: 6, len: 50, sw: 12, ang: 0.45, ls: 1.0, tCol: '#3B3C36', bCol: '#222222', l1: '#8B0000', l2: '#DC143C', shape: leafShapes.soft },   // 11月 山茶
+      { d: 6, len: 55, sw: 11, ang: 0.50, ls: 0.7, tCol: '#2F2F2F', bCol: '#1C1C1C', l1: '#FFFF00', l2: '#FFD700', shape: leafShapes.tear }    // 12月 腊梅
+    ];
+
+    const cfg = pC[month];
+    
+    let svgContent = `
+      <svg viewBox="0 0 400 450" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow: visible; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));">
+      <defs>
+        <linearGradient id="leafGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stop-color="${cfg.l1}" />
+          <stop offset="100%" stop-color="${cfg.l2}" />
+        </linearGradient>
+      </defs>
+      <style>
+        .fractal-branch {
+          fill: none;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+          animation: drawBranch 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .fractal-leaf {
+          opacity: 0;
+          animation: popLeaf 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes drawBranch {
+          to { stroke-dashoffset: 0; }
+        }
+        @keyframes popLeaf {
+          0% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0); opacity: 0; }
+          100% { transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(var(--sc)); opacity: 0.9; }
+        }
+      </style>
+      <g transform="translate(200, 420)">
+    `;
+
+    let paths = [];
+    let leaves = [];
+
+    // 递归分形树核心算法
+    function buildBranch(x, y, angle, length, depth, branchWidth, delay) {
       if (depth === 0) return;
-      let curve = (Math.random() - 0.5) * 30;
-      let x2 = x + Math.sin(angle) * len;
-      let y2 = y - Math.cos(angle) * len;
-      let cx = x + Math.sin(angle) * (len / 2) + curve;
-      let cy = y - Math.cos(angle) * (len / 2);
-      let strokeWidth = depth * 1.5;
-      paths.push(`<path class="svg-stem" d="M ${x},${y} Q ${cx},${cy} ${x2},${y2}" style="stroke:${cfg.s};stroke-width:${strokeWidth}px; animation-delay:${delay}s;" />`);
-      if (depth <= 2 && Math.random() > 0.3) {
-        let leafAngle = (angle * 180 / Math.PI) + (Math.random() * 60 - 30);
-        let leafDelay = delay + 0.6 + Math.random() * 0.5;
-        let scale = 0.4 + Math.random() * 0.4;
-        leaves.push(`<g transform="translate(${x2}, ${y2}) rotate(${leafAngle}) scale(${scale})" style="transform-origin: 0 0;"><path class="svg-leaf" d="${cfg.t}" style="fill:${cfg.l};animation-delay:${leafDelay}s;" /></g>`);
+
+      // 算终点坐标
+      let x2 = x + Math.sin(angle) * length;
+      let y2 = y - Math.cos(angle) * length;
+
+      // 引入贝塞尔控制点，使得枝干有机弯曲而非死板直线
+      let curveOffset = (Math.random() - 0.5) * length * 0.4;
+      let cx = x + Math.sin(angle + curveOffset) * (length * 0.5);
+      let cy = y - Math.cos(angle + curveOffset) * (length * 0.5);
+
+      // 计算当前颜色的平滑过渡 (根部深色，末梢浅色)
+      let isTrunk = depth > cfg.d - 2;
+      let strokeColor = isTrunk ? cfg.tCol : cfg.bCol;
+      let pathLen = length * 1.3; // 近似路径长度用于 dasharray 动画
+
+      paths.push(`<path class="fractal-branch" d="M ${x.toFixed(2)},${y.toFixed(2)} Q ${cx.toFixed(2)},${cy.toFixed(2)} ${x2.toFixed(2)},${y2.toFixed(2)}"
+        style="stroke:${strokeColor}; stroke-width:${branchWidth.toFixed(1)}px; stroke-dasharray:${pathLen}; stroke-dashoffset:${pathLen}; animation-delay:${delay}s;" />`);
+
+      // 渲染叶子/花瓣的逻辑
+      // 树枝末端必须长叶，中间层有概率长叶
+      if (depth <= 2 || (depth <= cfg.d - 1 && Math.random() > 0.6)) {
+        // 让叶片方向稍微顺着树枝方向发散
+        let leafAngle = (angle * 180 / Math.PI) + (Math.random() * 80 - 40);
+        let leafScale = cfg.ls * (0.7 + Math.random() * 0.5);
+        let leafDelay = delay + 0.6 + Math.random() * 0.4; // 树枝长完后叶子再弹出
+
+        leaves.push(`<g class="fractal-leaf" style="--tx:${x2.toFixed(2)}px; --ty:${y2.toFixed(2)}px; --rot:${leafAngle.toFixed(1)}deg; --sc:${leafScale.toFixed(2)}; animation-delay:${leafDelay}s;">
+          <path d="${cfg.shape}" fill="url(#leafGrad)" stroke="${cfg.l1}" stroke-width="0.5" />
+        </g>`);
       }
-      let numBranches = depth === cfg.d ? 2 : (Math.random() > 0.2 ? 2 : 1);
+
+      // 生成子树枝分支
+      // 主干分裂必定至少2支，末端随机1-2支
+      let numBranches = depth === cfg.d ? 3 : (Math.random() > 0.2 ? 2 : 1);
       for (let i = 0; i < numBranches; i++) {
-        let newAngle = angle + (Math.random() * cfg.sp * 2 - cfg.sp);
-        let newLen = len * (0.6 + Math.random() * 0.2);
-        buildBranch(x2, y2, newAngle, newLen, depth - 1, delay + 0.4);
+        let dir = (i === 0) ? -1 : (i === 1) ? 1 : (Math.random() > 0.5 ? 0.5 : -0.5);
+        // 添加非对称随机倾斜角
+        let newAngle = angle + dir * cfg.ang + (Math.random() * 0.3 - 0.15);
+        // 长度递减法则
+        let newLen = length * (0.7 + Math.random() * 0.15);
+        // 粗细递减法则
+        let newWidth = branchWidth * 0.68;
+        buildBranch(x2, y2, newAngle, newLen, depth - 1, newWidth, delay + 0.15);
       }
     }
 
-    buildBranch(150, 290, 0, cfg.ln, cfg.d, 0);
-    svgContent += paths.join('') + leaves.join('') + `</svg>`;
+    // 初始化根节点，X=0 Y=0 (因为外层 group 已经平移到了画布正下方居中位置)
+    buildBranch(0, 0, 0, cfg.len, cfg.d, cfg.sw, 0.2);
+
+    svgContent += paths.join('') + leaves.join('') + `</g></svg>`;
     container.innerHTML = svgContent;
     label.innerText = monthNames[month];
     plantGenerated = true;
