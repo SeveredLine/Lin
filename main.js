@@ -1346,6 +1346,66 @@ function initApp() {
     updateModeUI();
   }
 
+  let preloadedNextIndex = -1;
+  let preloadedHowl = null;
+
+  function preloadNextTrack() {
+    let validIndices = getValidIndices();
+    if (validIndices.length === 0) return;
+
+    let nextIndex = -1;
+    if (playMode === 1) {
+      if (validIndices.length === 1) nextIndex = validIndices[0];
+      else {
+        do { nextIndex = validIndices[Math.floor(Math.random() * validIndices.length)]; } 
+        while (nextIndex === currentTrackIndex);
+      }
+    } else {
+      let pos = validIndices.indexOf(currentTrackIndex);
+      if (pos !== -1) {
+        nextIndex = validIndices[(pos + 1) % validIndices.length];
+      } else {
+        let nextValid = validIndices.find(i => i > currentTrackIndex);
+        nextIndex = nextValid !== undefined ? nextValid : validIndices[0];
+      }
+    }
+
+    if (nextIndex === preloadedNextIndex && preloadedHowl) return;
+    if (preloadedHowl) preloadedHowl.unload();
+
+    preloadedNextIndex = nextIndex;
+    preloadedHowl = new Howl({
+      src: [playlist[nextIndex].src],
+      html5: true,
+      preload: true,
+      volume: 1
+    });
+  }
+
+  function bindHowlEvents(howlObj, autoStart) {
+    howlObj.on('load', function() {
+      const tTot = document.getElementById('p-time-total');
+      if (tTot) tTot.innerText = formatTime(this.duration());
+      if (autoStart) playTrack();
+    });
+    howlObj.on('play', function() {
+      isPlaying = true;
+      updateUI(true);
+      
+      this.fade(this.volume(), 1, 1000);
+
+      if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
+    });
+    howlObj.on('pause', function() { isPlaying = false; updateUI(false); });
+    howlObj.on('stop', function() { isPlaying = false; updateUI(false); });
+    howlObj.on('end', function() {
+      if (autoPlaySwitch && autoPlaySwitch.checked) playNext(true); 
+      else { isPlaying = false; updateUI(false); }
+    });
+    howlObj.on('loaderror', function(id, err) { console.error("音频加载失败:", err); });
+  }
+
   function loadTrack(index, autoStart = false) {
     if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
       console.warn("[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。");
@@ -1373,29 +1433,30 @@ function initApp() {
       currentHowl.unload();
     }
 
-    currentHowl = new Howl({
-      src: [track.src],
-      html5: true, 
-      autoplay: false, 
-      volume: volumeSlider ? volumeSlider.value / 100 : 0.3,
-      onload: function() {
-        if (tTot) tTot.innerText = formatTime(this.duration());
+    if (preloadedNextIndex === index && preloadedHowl) {
+      currentHowl = preloadedHowl;
+      preloadedHowl = null;
+      preloadedNextIndex = -1;
+      
+      currentHowl.off('load'); currentHowl.off('play'); currentHowl.off('pause');
+      currentHowl.off('stop'); currentHowl.off('end'); currentHowl.off('loaderror');
+      bindHowlEvents(currentHowl, autoStart);
+      
+      if (currentHowl.state() === 'loaded') {
+        if (tTot) tTot.innerText = formatTime(currentHowl.duration());
         if (autoStart) playTrack();
-      },
-      onplay: function() {
-        isPlaying = true;
-        updateUI(true);
-        if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
-        progressAnimationFrame = requestAnimationFrame(stepProgress);
-      },
-      onpause: function() { isPlaying = false; updateUI(false); },
-      onstop: function() { isPlaying = false; updateUI(false); },
-      onend: function() {
-        if (autoPlaySwitch && autoPlaySwitch.checked) playNext(true); 
-        else { isPlaying = false; updateUI(false); }
-      },
-      onloaderror: function(id, err) { console.error("音频加载失败:", err); }
-    });
+      }
+    } else {
+      currentHowl = new Howl({
+        src: [track.src],
+        html5: true, 
+        preload: true,
+        volume: autoStart ? 0 : 1
+      });
+      bindHowlEvents(currentHowl, autoStart);
+    }
+
+    preloadNextTrack();
   }
 
   const pBarEl = document.getElementById('p-bar');
@@ -1462,23 +1523,24 @@ function initApp() {
 
   function playTrack() { 
     if (!currentHowl) return;
-    const vol = volumeSlider ? volumeSlider.value / 100 : 0.3;
     currentHowl.off('fade'); 
-    currentHowl.volume(0);
-    currentHowl.play();
-    currentHowl.fade(0, vol, 1000); 
+    if (!currentHowl.playing()) {
+       currentHowl.volume(0); // 局部归零，通过 onplay 回调去触发 1000ms 的淡入到 1
+       currentHowl.play();
+    } else {
+       // 防止由于连续点击，已经在播放但处于极小音量时，强行淡入恢复
+       currentHowl.fade(currentHowl.volume(), 1, 1000);
+    }
   }
 
   function pauseTrack() {
     if (!currentHowl) return;
-    const vol = currentHowl.volume();
     isPlaying = false; 
     updateUI(false);
     currentHowl.off('fade');
-    currentHowl.fade(vol, 0, 800);
+    currentHowl.fade(currentHowl.volume(), 0, 800);
     currentHowl.once('fade', () => {
-      currentHowl.pause();
-      currentHowl.volume(volumeSlider ? volumeSlider.value / 100 : 0.3); 
+      if (!isPlaying) currentHowl.pause(); // 淡出完毕后真正暂停
     });
   }
 
@@ -1492,7 +1554,11 @@ function initApp() {
     if (auto && playMode === 2 && !isCurrentDisabled) {
        nextIndex = currentTrackIndex;
     } else {
-       nextIndex = getNextValidIndex(currentTrackIndex, 1);
+       if (preloadedNextIndex !== -1 && !playerSettings.disabled.includes(playlist[preloadedNextIndex].src)) {
+           nextIndex = preloadedNextIndex;
+       } else {
+           nextIndex = getNextValidIndex(currentTrackIndex, 1);
+       }
     }
     loadTrack(nextIndex, true);
   }
