@@ -168,7 +168,7 @@ function initApp() {
       <!-- 排版与文字 -->
       <p style="text-align:center; color: var(--text-main); font-weight: 800; margin-bottom: 5px; font-size: 15px;">这是一张 OH 卡</p>
       <p style="text-align:center; color: var(--text-ai); font-size: 13px; margin-bottom: 15px; opacity: 0.8;">请观察画面，你最先注意到的是什么？</p>
-      <button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">收起卡片</button>
+      <button class="close-overlay-btn" onclick="window.closeGlobalOverlay()">收起卡片</button>
     `;
     globalOverlay.appendChild(wrapper);
 
@@ -181,6 +181,21 @@ function initApp() {
       chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
     }
   }
+
+  // 全局：带离场动效的浮层关闭逻辑
+  window.closeGlobalOverlay = function() {
+    const overlay = document.getElementById('global-overlay');
+    if (!overlay || !overlay.firstElementChild) return;
+    
+    // 禁用指针事件以防重复点击，并覆盖行内样式触发退场动画
+    overlay.firstElementChild.style.pointerEvents = 'none';
+    overlay.firstElementChild.style.animation = 'handBackToTop 1s ease-in-out forwards';
+    
+    // 延时 950ms 等待动画临近结束时销毁 DOM
+    setTimeout(() => {
+      overlay.innerHTML = '';
+    }, 950);
+  };
 
   // JSON 量表引擎
   window.loadAndShowScale = async function(scaleId) {
@@ -211,7 +226,7 @@ function initApp() {
     ).join('');
 
     wrapper.innerHTML = `
-      <div class="scale-close-btn" onclick="document.getElementById('global-overlay').innerHTML=''">×</div>
+      <div class="scale-close-btn" onclick="window.closeGlobalOverlay()">×</div>
       
       <h1 class="scale-title">${scale.title}</h1>
       <div class="scale-desc">
@@ -279,11 +294,11 @@ function initApp() {
 
       globalOverlay.innerHTML = `
         <div class="scale-notebook" style="text-align:center; padding: 60px 40px;">
-          <div class="scale-close-btn" onclick="document.getElementById('global-overlay').innerHTML=''">×</div>
+          <div class="scale-close-btn" onclick="window.closeGlobalOverlay()">×</div>
           <h2 style="color:#2ecc71; margin-bottom:15px; font-family:'Caveat', cursive; font-size: 32px;">评估已完成 ✨</h2>
           <p style="font-size:16px; font-weight: bold; color:var(--text-main); margin-bottom:10px;">记录已同步给林医生。</p>
           <p style="font-size:14px; color:var(--text-ai); margin-bottom:30px; opacity: 0.8;">“辛苦了，接下来交给我吧。”</p>
-          <button class="notebook-btn submit-btn" onclick="document.getElementById('global-overlay').innerHTML=''">合上报告</button>
+          <button class="notebook-btn submit-btn" onclick="window.closeGlobalOverlay()">合上报告</button>
         </div>
       `;
     };

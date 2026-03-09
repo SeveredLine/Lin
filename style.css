@@ -213,6 +213,12 @@ body.dark-mode .input-wrapper input { color: #f0f0f0; }
   100% { transform: translateY(0) rotateX(0) scale(1); opacity: 1; }
 }
 
+@keyframes handBackToTop { 
+  0% { transform: translateY(0) rotateX(0) scale(1); opacity: 1; }
+  30% { transform: translateY(5vh) rotateX(-5deg) scale(1.05); opacity: 1; }
+  100% { transform: translateY(-120vh) rotateX(45deg) scale(0.8); opacity: 0; }
+}
+
 .oh-card-wrapper, .assessment-notebook { margin: auto; pointer-events: auto; flex-shrink: 0; }
 
 .oh-card-wrapper { position: relative; animation: handOverFromTop 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; box-shadow: 0 25px 50px rgba(0,0,0,0.3); background: #fff; border-radius: 12px; padding: 20px; max-width: 90vw; border: 1px solid rgba(0,0,0,0.1); }
