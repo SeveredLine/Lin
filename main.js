@@ -131,112 +131,140 @@ function initApp() {
     const randomWord = ohWords[Math.floor(Math.random() * ohWords.length)];
     const randomImage = ohImages[Math.floor(Math.random() * ohImages.length)];
     
+    const wordCardSize = "95%";  // 字卡（底图）大小
+    const imageCardSize = "65%"; // 图卡（内嵌图）大小
+
     const wrapper = document.createElement('div');
     wrapper.className = 'oh-card-wrapper';
     wrapper.innerHTML = `
-      <div style="position: relative; width: 220px; height: 320px; margin-bottom: 15px; cursor: pointer; perspective: 1000px;" onclick="this.querySelector('.oh-inner').style.transform = this.querySelector('.oh-inner').style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';">
-        <div class="oh-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d;">
-          <!-- 牌背 -->
-          <div style="position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, #a29bfe, #fd79a8); border: 8px solid #fcfcfc; box-sizing: border-box; border-radius: 12px; backface-visibility: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 0 8px 30px rgba(0,0,0,0.2); display:flex; justify-content:center; align-items:center; flex-direction:column; cursor: pointer;">
-            <div style="font-size: 32px; margin-bottom: 8px;">🌌</div>
-            <div style="color:rgba(255,255,255,0.9); font-weight:900; font-size:16px; letter-spacing:1px; font-family:sans-serif;">OH CARD</div>
-          </div>
-          <!-- 牌面 -->
-          <div style="position: absolute; width: 100%; height: 100%; transform: rotateY(180deg); backface-visibility: hidden; display: flex; justify-content: center; align-items: center; background:#fff; border-radius:12px; overflow:hidden;">
-            <img src="https://files.catbox.moe/${randomWord}.png" style="position: absolute; width: 92%; height: 92%; object-fit: contain; z-index: 1;">
-            <img src="https://files.catbox.moe/${randomImage}.jpg" style="position: absolute; width: 72%; height: 72%; object-fit: contain; z-index: 2; transition: transform 0.3s;" onmouseover="this.style.transform='rotate(5deg) scale(1.05)'" onmouseout="this.style.transform='rotate(0deg) scale(1)'">
+      <!-- 悬停倾斜外壳 -->
+      <div style="margin-bottom: 15px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;"
+           onmouseenter="this.style.transform='rotate(3deg) scale(1.04)'"
+           onmouseleave="this.style.transform='rotate(0deg) scale(1)'">
+           
+        <!-- 3D 翻转容器 -->
+        <div style="position: relative; width: 220px; height: 320px; perspective: 1000px;" 
+             onclick="const inner = this.querySelector('.oh-inner'); inner.style.transform = inner.style.transform === 'rotateY(180deg)' ? 'rotateY(0deg)' : 'rotateY(180deg)';">
+          
+          <div class="oh-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d;">
+            
+            <!-- 牌背 -->
+            <div class="oh-image-large" style="position: absolute; width: 100%; height: 100%; margin-bottom: 0; backface-visibility: hidden; box-sizing: border-box; font-family: 'Nunito', 'PingFang SC', sans-serif;">?</div>
+            
+            <!-- 牌面 -->
+            <div style="position: absolute; width: 100%; height: 100%; transform: rotateY(180deg); backface-visibility: hidden; display: flex; justify-content: center; align-items: center; background:#fff; border-radius:12px; overflow:hidden; border: 8px solid #fcfcfc; box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.15); box-sizing: border-box;">
+              
+              <!-- 字卡 (底图) -->
+              <img src="https://files.catbox.moe/${randomWord}.png" style="position: absolute; width: ${wordCardSize}; height: ${wordCardSize}; object-fit: contain; z-index: 1;">
+              
+              <!-- 图卡 (内图) -->
+              <img src="https://files.catbox.moe/${randomImage}.jpg" style="position: absolute; width: ${imageCardSize}; height: ${imageCardSize}; object-fit: contain; z-index: 2; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+              
+            </div>
           </div>
         </div>
       </div>
-      <p style="text-align:center; color: var(--text-main); font-weight: 600; margin-bottom: 5px;">你抽到了一张 OH 卡</p>
-      <p style="text-align:center; color: var(--text-ai); font-size: 13px; margin-bottom:15px;">请观察画面，你最先注意到的是什么？</p>
+
+      <!-- 排版与文字 -->
+      <p style="text-align:center; color: var(--text-main); font-weight: 800; margin-bottom: 5px; font-size: 15px;">这是一张 OH 卡</p>
+      <p style="text-align:center; color: var(--text-ai); font-size: 13px; margin-bottom: 15px; opacity: 0.8;">请观察画面，你最先注意到的是什么？</p>
       <button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">收起卡片</button>
     `;
     globalOverlay.appendChild(wrapper);
 
     const aiMsg = document.createElement('div');
     aiMsg.className = 'ai-msg';
-    aiMsg.innerText = "我递给了你一张OH卡，看看书本上方的浮层。点击卡牌可以翻面。";
+    aiMsg.innerText = "我递给了你一张OH卡，看看书本上方的浮层。";
     chatHistory.appendChild(aiMsg);
-    chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+    
+    if (chatPage) {
+      chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
+    }
   }
 
   // JSON 量表引擎
   window.loadAndShowScale = async function(scaleId) {
     try {
       const res = await fetch(`scales/${scaleId}.json`);
-      if (!res.ok) throw new Error("找不到量表文件");
+      if (!res.ok) throw new Error("找不到表单文件");
       const scale = await res.json();
-      renderScaleUI(scale);
+      window.renderScaleUI(scale);
     } catch (e) {
       console.error(e);
       const err = document.createElement('div'); err.className = 'ai-msg';
-      err.innerText = `[系统提示] 无法加载量表 ${scaleId}.json`;
-      chatHistory.appendChild(err);
+      err.innerText = `[系统提示] 无法加载表单 ${scaleId}.json`;
+      const chatHistory = document.getElementById('chat-history');
+      if(chatHistory) chatHistory.appendChild(err);
     }
   };
 
-  function renderScaleUI(scale) {
+  window.renderScaleUI = function(scale) {
+    const globalOverlay = document.getElementById('global-overlay');
+    if(!globalOverlay) return;
+    
     globalOverlay.innerHTML = '';
     const wrapper = document.createElement('div');
-    wrapper.className = 'scl-wrapper';
+    wrapper.className = 'scale-notebook';
     
-    let formHTML = `
-      <div class="scl-title">${scale.title}</div>
-      <div class="scl-desc">${scale.desc}</div>
-      <div style="max-height:60vh; overflow-y:auto; padding-right:10px; margin-bottom:15px;" id="scale-questions-container">
-    `;
-    
-    // 动态生成选项 Radio 组
     const optionsHTML = scale.options.map(opt => 
-      `<label><input type="radio" value="${opt.value}"><span>${opt.label}</span></label>`
+      `<label class="opt-label"><input type="radio" value="${opt.value}"><span>${opt.label}</span></label>`
     ).join('');
 
-    scale.questions.forEach((q, idx) => {
-      formHTML += `
-        <div class="scl-q">
-          <div class="scl-q-text">${idx+1}. ${q.q}</div>
-          <div class="scl-options" data-factor="${q.f || ''}" data-idx="${idx}">
-            ${optionsHTML.replace(/<input type="radio"/g, `<input type="radio" name="sq${idx}"`)}
+    wrapper.innerHTML = `
+      <div class="scale-close-btn" onclick="document.getElementById('global-overlay').innerHTML=''">×</div>
+      
+      <h1 class="scale-title">${scale.title}</h1>
+      <div class="scale-desc">
+        <strong>填写指引：</strong> ${scale.desc}
+      </div>
+      <div class="scale-questions-container">
+        ${scale.questions.map((q, idx) => `
+          <div class="scale-q" data-idx="${idx}">
+            <div class="scale-q-text">${idx+1}. ${q.q}</div>
+            <div class="scale-options" data-factor="${q.f || ''}" data-idx="${idx}">
+              ${optionsHTML.replace(/<input type="radio"/g, `<input type="radio" name="sq${idx}"`)}
+            </div>
           </div>
-        </div>
-      `;
-    });
+        `).join('')}
+      </div>
+      <button class="notebook-btn submit-btn" id="submitScaleBtn">完成评估，同步给林医生</button>
+    `;
 
-    formHTML += `</div><button class="close-overlay-btn" id="submitScaleBtn">提交量表并发送给医生</button>
-                 <button class="close-overlay-btn" style="background:transparent; color:#999; box-shadow:none;" onclick="document.getElementById('global-overlay').innerHTML=''">取消填写</button>`;
-    
-    wrapper.innerHTML = formHTML;
     globalOverlay.appendChild(wrapper);
 
-    // 默认选中第一项防呆
-    scale.questions.forEach((_, idx) => {
-      const firstRadio = document.querySelector(`input[name="sq${idx}"]`);
-      if (firstRadio) firstRadio.checked = true;
+    // 交互反馈：划掉题目 + 画治愈绿圈
+    wrapper.addEventListener('change', (e) => {
+      if (e.target.type === 'radio') {
+        const qDiv = e.target.closest('.scale-q');
+        qDiv.classList.add('answered'); 
+        const labels = qDiv.querySelectorAll('.opt-label');
+        labels.forEach(l => l.classList.remove('circled-option'));
+        e.target.closest('label').classList.add('circled-option');
+      }
     });
 
     document.getElementById('submitScaleBtn').onclick = () => {
-      let totalScore = 0; let posItems = 0;
-      let factorScores = {};
-      
-      // 初始化因子分数
-      if (scale.factors) {
-        for (let k in scale.factors) factorScores[k] = 0;
-      }
+      let totalScore = 0; let posItems = 0; let factorScores = {}; let allAnswered = true;
+      if (scale.factors) for (let k in scale.factors) factorScores[k] = 0;
 
       scale.questions.forEach((q, idx) => {
-        let val = parseInt(document.querySelector(`input[name="sq${idx}"]:checked`)?.value || 0);
+        const checkedInput = document.querySelector(`input[name="sq${idx}"]:checked`);
+        if (!checkedInput) { allAnswered = false; return; }
+        let val = parseInt(checkedInput.value);
         totalScore += val;
         if (val > 1) posItems++;
         if (q.f && factorScores[q.f] !== undefined) factorScores[q.f] += val;
       });
 
-      // 动态生成报告
+      if (!allAnswered) {
+        alert("📝 好像还有题目没划掉哦，请检查一下~");
+        return;
+      }
+
       let totalMean = (totalScore / scale.questions.length).toFixed(2);
       let posMean = posItems > 0 ? (totalScore / posItems).toFixed(2) : 0;
       
       let report = `${scale.title} 结果\n--------------------\n【总体情况】\n总分: ${totalScore}\n总均分: ${totalMean}\n阳性项目数: ${posItems}\n阳性症状均分: ${posMean}\n--------------------\n`;
-      
       if (scale.factors) {
         report += `【各症状因子分】\n`;
         for (let k in scale.factors) {
@@ -249,16 +277,17 @@ function initApp() {
         window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: `这是我的${scale.title}结果：\n${report}` }, '*');
       }
 
-      document.getElementById('global-overlay').innerHTML = `
-        <div class="scl-wrapper" style="text-align:center;">
-          <h3 style="color:#e74c3c; margin-bottom:15px;">测评已完成</h3>
-          <p style="font-size:14px; color:var(--text-main); margin-bottom:10px;">总分: ${totalScore}</p>
-          <p style="font-size:12px; color:var(--text-ai); margin-bottom:20px;">报告已同步给林医生，请等待她的分析。</p>
-          <button class="close-overlay-btn" onclick="document.getElementById('global-overlay').innerHTML=''">关闭面板</button>
+      globalOverlay.innerHTML = `
+        <div class="scale-notebook" style="text-align:center; padding: 60px 40px;">
+          <div class="scale-close-btn" onclick="document.getElementById('global-overlay').innerHTML=''">×</div>
+          <h2 style="color:#2ecc71; margin-bottom:15px; font-family:'Caveat', cursive; font-size: 32px;">评估已完成 ✨</h2>
+          <p style="font-size:16px; font-weight: bold; color:var(--text-main); margin-bottom:10px;">记录已同步给林医生。</p>
+          <p style="font-size:14px; color:var(--text-ai); margin-bottom:30px; opacity: 0.8;">“辛苦了，接下来交给我吧。”</p>
+          <button class="notebook-btn submit-btn" onclick="document.getElementById('global-overlay').innerHTML=''">合上报告</button>
         </div>
       `;
     };
-  }
+  };
 
   // 3. 聊天输入逻辑 & 状态控制
   let isGenerating = false;
