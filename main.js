@@ -1524,11 +1524,13 @@ function initApp() {
   function playTrack() { 
     if (!currentHowl) return;
     currentHowl.off('fade'); 
+    
     if (!currentHowl.playing()) {
        currentHowl.volume(0); // 局部归零，通过 onplay 回调去触发 1000ms 的淡入到 1
        currentHowl.play();
     } else {
-       // 防止由于连续点击，已经在播放但处于极小音量时，强行淡入恢复
+       isPlaying = true;
+       updateUI(true);
        currentHowl.fade(currentHowl.volume(), 1, 1000);
     }
   }
