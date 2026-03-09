@@ -1235,8 +1235,11 @@ function initApp() {
     else if (cfg.arch === 'vine') buildVine();
 
     svgContent += paths.join('') + organs.join('') + `</g></svg>`;
-    container.innerHTML = svgContent;
-    label.innerText = `${monthNames[month]} · ${cfg.name}`;
+
+    requestAnimationFrame(() => {
+      container.innerHTML = svgContent;
+      label.innerText = `${monthNames[month]} · ${cfg.name}`;
+    });
     plantGenerated = true;
   }
 
@@ -1601,6 +1604,10 @@ function initApp() {
     }
     animate();
 
+    setTimeout(() => {
+      if (!isStopping && window.stopConfetti) window.stopConfetti();
+    }, 12000);
+
     window.addEventListener('resize', () => {
       w = window.innerWidth;
       h = window.innerHeight;
@@ -1815,9 +1822,18 @@ function initApp() {
     present = new Present();
     scene.add(present.mesh);
 
+    let idleFrames = 0;
     function animate() {
       rafId = requestAnimationFrame(animate);
-      if (present) present.update();
+      if (present) {
+        present.update();
+        if (!present.opening && present.opened) {
+          idleFrames++;
+          if (idleFrames > 120) return;
+        } else {
+          idleFrames = 0;
+        }
+      }
       renderer.render(scene, camera);
     }
     animate();
@@ -2140,9 +2156,16 @@ function initApp() {
   const pTimeCurEl = document.getElementById('p-time-current');
   let lastTimeStr = '';
   let lastPercentStr = '';
+  let lastRafTime = 0;
 
-  function stepProgress() {
+  function stepProgress(timestamp) {
     if (!currentHowl || !isPlaying) return;
+
+    if (timestamp - lastRafTime < 100) {
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      return;
+    }
+    lastRafTime = timestamp;
 
     if (currentHowl.state() !== 'loaded') {
       progressAnimationFrame = requestAnimationFrame(stepProgress);
@@ -2577,6 +2600,11 @@ window.generateAllSucculents = function () {
     }
     ctx.restore();
     canvas.dataset.drawn = 'true';
+
+    const img = new Image();
+    img.src = canvas.toDataURL('image/png');
+    img.className = canvas.className;
+    canvas.replaceWith(img);
   });
 };
 

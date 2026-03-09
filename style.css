@@ -3,9 +3,9 @@
 :root {
   --turn-speed: 1s;
   --bg-color: #e4ebe8;
-  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   --notebook-bg: #fcfbfa;
-  --paper-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  --paper-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
   --line-color: rgba(180, 195, 188, 0.4);
   --text-main: #4a5568;
   --text-ai: #2d3748;
@@ -22,7 +22,7 @@
 
 body.dark-mode {
   --bg-color: #1a1b26;
-  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
   --notebook-bg: #8d8778;
   --line-color: rgba(100, 95, 80, 0.4);
   --text-main: #24283b;
@@ -128,7 +128,7 @@ body {
     15px 25px 45px var(--shadow-color),
     inset -2px 0 5px rgba(255, 255, 255, 0.5);
   z-index: 10;
-  transition: box-shadow 1.2s ease;
+  transition: background-color 1.2s ease;
 }
 
 .tabs-container {
@@ -315,7 +315,8 @@ body {
   mix-blend-mode: multiply;
   opacity: 0.85;
   pointer-events: none;
-  transform: rotate(-2deg);
+  transform: rotate(-2deg) translateZ(0);
+  will-change: transform;
   filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.05));
 }
 
@@ -1470,7 +1471,9 @@ body.dark-mode .p-progress-bar {
   width: 0%;
   border-radius: 3px;
   pointer-events: none;
-  transition: background-color 0.8s ease;
+  transition:
+    background-color 0.8s ease,
+    width 0.15s linear;
 }
 .p-bar::after {
   content: '';
@@ -1979,6 +1982,8 @@ body.dark-mode .cd-target {
   opacity: 0.9;
   filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1));
   pointer-events: none;
+  transform: translateZ(0);
+  will-change: transform;
   transition: transform 0.5s ease;
 }
 
