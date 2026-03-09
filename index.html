@@ -1,77 +1,84 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>林雨涵心理诊所</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>林雨涵心理诊所</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+  </head>
+  <body>
+    <!-- OH卡和表单的全局动画浮层 -->
+    <div id="global-overlay"></div>
 
-  <!-- OH卡和表单的全局动画浮层 -->
-  <div id="global-overlay"></div>
+    <!-- 暗黑模式拉绳 -->
+    <div class="pull-cord-container" id="lampCord">
+      <div class="cord"><div class="knob"></div></div>
+    </div>
 
-  <!-- 暗黑模式拉绳 -->
-  <div class="pull-cord-container" id="lampCord"><div class="cord"><div class="knob"></div></div></div>
+    <div class="app-container">
+      <div class="notebook">
+        <div class="spiral-container" id="spirals"></div>
 
-  <div class="app-container">
-    <div class="notebook">
-      <div class="spiral-container" id="spirals"></div>
-
-      <div class="pages-container" id="book-pages">
-
-        <!-- 封面与封底层级 -->
-        <div class="page" data-index="-1">
-          <div class="page-front cover-design">
-            <h1>林雨涵</h1>
-            <p>诊疗笔记</p>
+        <div class="pages-container" id="book-pages">
+          <!-- 封面与封底层级 -->
+          <div class="page" data-index="-1">
+            <div class="page-front cover-design">
+              <h1>林雨涵</h1>
+              <p>诊疗笔记</p>
+            </div>
+            <div class="page-back close-book-area">
+              <img src="doodles/doodle_1.webp" class="doodle-img" alt="妈妈超厉害！" />
+            </div>
           </div>
-          <div class="page-back close-book-area">
-            <img src="doodles/doodle_1.webp" class="doodle-img" alt="妈妈超厉害！">
-          </div>
-        </div>
 
-        <!-- 标签页容器 -->
-        <div class="page" data-index="0">
-          <div class="page-front" id="page-0"></div>
-          <div class="page-back close-book-area">
-            <img src="doodles/doodle_2.webp" class="doodle-img" alt="绿色奶龙">
+          <!-- 标签页容器 -->
+          <div class="page" data-index="0">
+            <div class="page-front" id="page-0"></div>
+            <div class="page-back close-book-area">
+              <img src="doodles/doodle_2.webp" class="doodle-img" alt="绿色奶龙" />
+            </div>
           </div>
-        </div>
 
-        <div class="page" data-index="1">
-          <div class="page-front" id="page-1"></div>
-          <div class="page-back close-book-area">
-            <img src="doodles/doodle_3.webp" class="doodle-img" alt="给叔叔/阿姨的开心药（不苦！）">
+          <div class="page" data-index="1">
+            <div class="page-front" id="page-1"></div>
+            <div class="page-back close-book-area">
+              <img
+                src="doodles/doodle_3.webp"
+                class="doodle-img"
+                alt="给叔叔/阿姨的开心药（不苦！）"
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="page" data-index="2">
-          <div class="page-front" id="page-2"></div>
-          <div class="page-back close-book-area">
-            <img src="doodles/doodle_4.webp" class="doodle-img" alt="休息一会儿吧！">
+          <div class="page" data-index="2">
+            <div class="page-front" id="page-2"></div>
+            <div class="page-back close-book-area">
+              <img src="doodles/doodle_4.webp" class="doodle-img" alt="休息一会儿吧！" />
+            </div>
           </div>
-        </div>
 
-        <div class="page" data-index="3">
-          <div class="page-front" id="page-3"></div>
-          <div class="page-back close-book-area">
-            <img src="doodles/doodle_5.webp" class="doodle-img" alt="涂鸦5">
+          <div class="page" data-index="3">
+            <div class="page-front" id="page-3"></div>
+            <div class="page-back close-book-area">
+              <img src="doodles/doodle_5.webp" class="doodle-img" alt="涂鸦5" />
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- 侧边标签栏 -->
+      <div class="tabs-container">
+        <div class="tab active" data-index="0">📝 诊室</div>
+        <div class="tab" data-index="1">📋 档案</div>
+        <div class="tab" data-index="2">🌿 桌面</div>
+        <div class="tab" data-index="3">⚙️ 设置</div>
+      </div>
     </div>
 
-    <!-- 侧边标签栏 -->
-    <div class="tabs-container">
-      <div class="tab active" data-index="0">📝 诊室</div>
-      <div class="tab" data-index="1">📋 档案</div>
-      <div class="tab" data-index="2">🌿 桌面</div>
-      <div class="tab" data-index="3">⚙️ 设置</div>
-    </div>
-  </div>
-
-  <script src="main.js"></script>
-</body>
+    <script src="main.js"></script>
+  </body>
 </html>

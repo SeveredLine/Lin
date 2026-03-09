@@ -1,22 +1,22 @@
-document.addEventListener("DOMContentLoaded", async () => {
-  const pages =['tab0.html', 'tab1.html', 'tab2.html', 'tab3.html'];
+document.addEventListener('DOMContentLoaded', async () => {
+  const pages = ['tab0.html', 'tab1.html', 'tab2.html', 'tab3.html'];
   let isHtmlLoaded = false;
-  
+
   try {
     const fetchPromises = pages.map((page, index) =>
       fetch(page)
-        .then(response => {
+        .then((response) => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           return response.text();
         })
-        .then(html => {
+        .then((html) => {
           document.getElementById(`page-${index}`).innerHTML = html;
-        })
+        }),
     );
     await Promise.all(fetchPromises);
     isHtmlLoaded = true;
   } catch (error) {
-    console.error("加载片段失败：", error);
+    console.error('加载片段失败：', error);
     document.body.innerHTML = `<h2 style="color:red; text-align:center; padding: 20px;">跨域错误或文件未找到。<br>请确保您正在通过 HTTP 服务运行此项目！</h2>`;
   }
 
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       initApp();
     } catch (e) {
-      console.error("应用初始化过程中出现非致命错误：", e);
+      console.error('应用初始化过程中出现非致命错误：', e);
     }
   }
 });
@@ -44,13 +44,13 @@ function initApp() {
   }
 
   // ====== 封面合上书本逻辑 ======
-  window.closeBook = function() {
-    tabs.forEach(t => t.classList.remove('active'));
-    pagesContainer.forEach(page => page.classList.remove('flipped'));
+  window.closeBook = function () {
+    tabs.forEach((t) => t.classList.remove('active'));
+    pagesContainer.forEach((page) => page.classList.remove('flipped'));
   };
 
   const backAreas = document.querySelectorAll('.close-book-area');
-  backAreas.forEach(area => {
+  backAreas.forEach((area) => {
     area.addEventListener('click', window.closeBook);
   });
 
@@ -62,14 +62,14 @@ function initApp() {
   // ====== 标签页切换逻辑 ======
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
+      tabs.forEach((t) => t.classList.remove('active'));
       tab.classList.add('active');
       const targetIndex = parseInt(tab.getAttribute('data-index'));
-      
+
       if (targetIndex === 2) {
-        generatePlant(); 
+        generatePlant();
       }
-      
+
       pagesContainer.forEach((page) => {
         const pageIndex = parseInt(page.getAttribute('data-index'));
         // 点击任意书页时，封面及其之前的页面必须保持翻开状态
@@ -86,7 +86,7 @@ function initApp() {
   const lampCord = document.getElementById('lampCord');
   let isDarkMode = false;
   const toggleDarkMode = (e) => {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     lampCord.classList.add('pulled');
     setTimeout(() => {
       lampCord.classList.remove('pulled');
@@ -95,14 +95,17 @@ function initApp() {
         if (isDarkMode) document.body.classList.add('dark-mode');
         else document.body.classList.remove('dark-mode');
       };
-      
+
       // 检测浏览器是否支持全新的 View Transitions 水波纹 API
       if (document.startViewTransition) {
         const rect = lampCord.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
         const y = rect.bottom - 200;
-        const maxRadius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-        
+        const maxRadius = Math.hypot(
+          Math.max(x, window.innerWidth - x),
+          Math.max(y, window.innerHeight - y),
+        );
+
         document.documentElement.style.setProperty('--ripple-x', `${x}px`);
         document.documentElement.style.setProperty('--ripple-y', `${y}px`);
         document.documentElement.style.setProperty('--ripple-r', `${maxRadius}px`);
@@ -123,16 +126,194 @@ function initApp() {
   const globalOverlay = document.getElementById('global-overlay');
 
   // 1. OH卡字卡和图卡图床数据
-  const ohWords =["8cuxn2","f2eyxf","ma8rol","ynq3b0","k3foo3","hd3568","i3o0xp","9lrdp9","68632e","uvr9tv","w0thk5","ujmmpo","q66smu","zyvinv","ia8mus","8knys3","077i0k","skos8v","3u1hv7","kowbr0","xnkky0","tfck9d","sjkl40","evboxw","ml853c","2lyqng","475w7u","1nath3","oed8o3","6cyy5v","5c33q8","bnp85w","ajk2sa","mrlu2c","uwu7bb","5w68r0","vut2kq","zaqb46","o0lkvy","0pt4ij","mynr0h","garhko","0j5370","nsd2e0","o9z0g0","4vke1u","vir293","2ncnww","tgodj4","ltsac7","3gskyd","2qa3mn","6bt92x","x4xa3m","oklbo5","0kidq6","0y57mk","am2kqg","v5uqh1","z87bjv","hq2lc6","g06q99","cw11bo","hytjao","ch3zhc","8w0hv6","nbpsfi","l597w7","n34zyi","f15yek","be2yv2","d4imbq","5fejh1","a4dsm1","44o0pa","21k2l2","qkaxrb","1u46i2","vc5lf6","6a1ktm","9rl12m","hl18q6","jfkj5s","s4x2j5","qgpxx0","yf8rwl","l26hfd","8o38z8"];
-  const ohImages =["t7nxvt","cbtwhq","k7tmry","sk8hvu","macnbz","49aiff","bwazsv","jcccmx","c00lc2","4d2px1","knvkbd","yux922","vhcjbb","upleiw","rxlk8x","7ywke2","013zs9","o9jvrp","slwxks","5pwwd5","6d25m3","22psds","hdgxtx","vksul3","dgvz2e","cztrdd","sx8va6","1fz3sp","e04m72","b2h400","bq1gwn","tv5ave","fcfvpq","e1m3bh","1mw4zo","ywv2v9","ie03kj","7eynf7","w9ucpp","rb4hux","rhwin1","5okqrp","h3j4k8","vcruzy","m12coa","s41zvs","9v5was","v2cvjw","77pbia","0nkcds","euw7g2","vze43r","8cc15t","9vm86f","u6czqn","8x1sd8","c5d43l","n68ngq","ewb4zu","vzwkm8","r2du4n","5bcvvk","tbrvza","wc5ujj","kdoe5h","fgn5fv","8usqhh","ccpkcx","gy9bx0","43eq4w","972dt9","f09sze","zdmzxq","9b6wfo","37pka1","od7bxy","82yiep","fbc7rw","oyo4nv","xhb8ox","m371uo","c4w4sy","l6gsz4","np2s61","ovwh0m","wl71lo","6ufv4h","qc6v18"];
+  const ohWords = [
+    '8cuxn2',
+    'f2eyxf',
+    'ma8rol',
+    'ynq3b0',
+    'k3foo3',
+    'hd3568',
+    'i3o0xp',
+    '9lrdp9',
+    '68632e',
+    'uvr9tv',
+    'w0thk5',
+    'ujmmpo',
+    'q66smu',
+    'zyvinv',
+    'ia8mus',
+    '8knys3',
+    '077i0k',
+    'skos8v',
+    '3u1hv7',
+    'kowbr0',
+    'xnkky0',
+    'tfck9d',
+    'sjkl40',
+    'evboxw',
+    'ml853c',
+    '2lyqng',
+    '475w7u',
+    '1nath3',
+    'oed8o3',
+    '6cyy5v',
+    '5c33q8',
+    'bnp85w',
+    'ajk2sa',
+    'mrlu2c',
+    'uwu7bb',
+    '5w68r0',
+    'vut2kq',
+    'zaqb46',
+    'o0lkvy',
+    '0pt4ij',
+    'mynr0h',
+    'garhko',
+    '0j5370',
+    'nsd2e0',
+    'o9z0g0',
+    '4vke1u',
+    'vir293',
+    '2ncnww',
+    'tgodj4',
+    'ltsac7',
+    '3gskyd',
+    '2qa3mn',
+    '6bt92x',
+    'x4xa3m',
+    'oklbo5',
+    '0kidq6',
+    '0y57mk',
+    'am2kqg',
+    'v5uqh1',
+    'z87bjv',
+    'hq2lc6',
+    'g06q99',
+    'cw11bo',
+    'hytjao',
+    'ch3zhc',
+    '8w0hv6',
+    'nbpsfi',
+    'l597w7',
+    'n34zyi',
+    'f15yek',
+    'be2yv2',
+    'd4imbq',
+    '5fejh1',
+    'a4dsm1',
+    '44o0pa',
+    '21k2l2',
+    'qkaxrb',
+    '1u46i2',
+    'vc5lf6',
+    '6a1ktm',
+    '9rl12m',
+    'hl18q6',
+    'jfkj5s',
+    's4x2j5',
+    'qgpxx0',
+    'yf8rwl',
+    'l26hfd',
+    '8o38z8',
+  ];
+  const ohImages = [
+    't7nxvt',
+    'cbtwhq',
+    'k7tmry',
+    'sk8hvu',
+    'macnbz',
+    '49aiff',
+    'bwazsv',
+    'jcccmx',
+    'c00lc2',
+    '4d2px1',
+    'knvkbd',
+    'yux922',
+    'vhcjbb',
+    'upleiw',
+    'rxlk8x',
+    '7ywke2',
+    '013zs9',
+    'o9jvrp',
+    'slwxks',
+    '5pwwd5',
+    '6d25m3',
+    '22psds',
+    'hdgxtx',
+    'vksul3',
+    'dgvz2e',
+    'cztrdd',
+    'sx8va6',
+    '1fz3sp',
+    'e04m72',
+    'b2h400',
+    'bq1gwn',
+    'tv5ave',
+    'fcfvpq',
+    'e1m3bh',
+    '1mw4zo',
+    'ywv2v9',
+    'ie03kj',
+    '7eynf7',
+    'w9ucpp',
+    'rb4hux',
+    'rhwin1',
+    '5okqrp',
+    'h3j4k8',
+    'vcruzy',
+    'm12coa',
+    's41zvs',
+    '9v5was',
+    'v2cvjw',
+    '77pbia',
+    '0nkcds',
+    'euw7g2',
+    'vze43r',
+    '8cc15t',
+    '9vm86f',
+    'u6czqn',
+    '8x1sd8',
+    'c5d43l',
+    'n68ngq',
+    'ewb4zu',
+    'vzwkm8',
+    'r2du4n',
+    '5bcvvk',
+    'tbrvza',
+    'wc5ujj',
+    'kdoe5h',
+    'fgn5fv',
+    '8usqhh',
+    'ccpkcx',
+    'gy9bx0',
+    '43eq4w',
+    '972dt9',
+    'f09sze',
+    'zdmzxq',
+    '9b6wfo',
+    '37pka1',
+    'od7bxy',
+    '82yiep',
+    'fbc7rw',
+    'oyo4nv',
+    'xhb8ox',
+    'm371uo',
+    'c4w4sy',
+    'l6gsz4',
+    'np2s61',
+    'ovwh0m',
+    'wl71lo',
+    '6ufv4h',
+    'qc6v18',
+  ];
 
   function sendOHCard() {
     globalOverlay.innerHTML = '';
     const randomWord = ohWords[Math.floor(Math.random() * ohWords.length)];
     const randomImage = ohImages[Math.floor(Math.random() * ohImages.length)];
-    
-    const wordCardSize = "95%";  // 字卡（底图）大小
-    const imageCardSize = "65%"; // 图卡（内嵌图）大小
+
+    const wordCardSize = '95%'; // 字卡（底图）大小
+    const imageCardSize = '65%'; // 图卡（内嵌图）大小
 
     const wrapper = document.createElement('div');
     wrapper.className = 'oh-card-wrapper';
@@ -174,23 +355,23 @@ function initApp() {
 
     const aiMsg = document.createElement('div');
     aiMsg.className = 'ai-msg';
-    aiMsg.innerText = "我递给了你一张OH卡，看看书本上方的浮层。";
+    aiMsg.innerText = '我递给了你一张OH卡，看看书本上方的浮层。';
     chatHistory.appendChild(aiMsg);
-    
+
     if (chatPage) {
       chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' });
     }
   }
 
   // 全局：带离场动效的浮层关闭逻辑
-  window.closeGlobalOverlay = function() {
+  window.closeGlobalOverlay = function () {
     const overlay = document.getElementById('global-overlay');
     if (!overlay || !overlay.firstElementChild) return;
-    
+
     // 禁用指针事件以防重复点击，并覆盖行内样式触发退场动画
     overlay.firstElementChild.style.pointerEvents = 'none';
     overlay.firstElementChild.style.animation = 'handBackToTop 1s ease-in-out forwards';
-    
+
     // 延时 950ms 等待动画临近结束时销毁 DOM
     setTimeout(() => {
       overlay.innerHTML = '';
@@ -198,32 +379,36 @@ function initApp() {
   };
 
   // JSON 量表引擎
-  window.loadAndShowScale = async function(scaleId) {
+  window.loadAndShowScale = async function (scaleId) {
     try {
       const res = await fetch(`scales/${scaleId}.json`);
-      if (!res.ok) throw new Error("找不到表单文件");
+      if (!res.ok) throw new Error('找不到表单文件');
       const scale = await res.json();
       window.renderScaleUI(scale);
     } catch (e) {
       console.error(e);
-      const err = document.createElement('div'); err.className = 'ai-msg';
+      const err = document.createElement('div');
+      err.className = 'ai-msg';
       err.innerText = `[系统提示] 无法加载表单 ${scaleId}.json`;
       const chatHistory = document.getElementById('chat-history');
-      if(chatHistory) chatHistory.appendChild(err);
+      if (chatHistory) chatHistory.appendChild(err);
     }
   };
 
-  window.renderScaleUI = function(scale) {
+  window.renderScaleUI = function (scale) {
     const globalOverlay = document.getElementById('global-overlay');
-    if(!globalOverlay) return;
-    
+    if (!globalOverlay) return;
+
     globalOverlay.innerHTML = '';
     const wrapper = document.createElement('div');
     wrapper.className = 'scale-notebook';
-    
-    const optionsHTML = scale.options.map(opt => 
-      `<label class="opt-label"><input type="radio" value="${opt.value}"><span>${opt.label}</span></label>`
-    ).join('');
+
+    const optionsHTML = scale.options
+      .map(
+        (opt) =>
+          `<label class="opt-label"><input type="radio" value="${opt.value}"><span>${opt.label}</span></label>`,
+      )
+      .join('');
 
     wrapper.innerHTML = `
       <div class="scale-close-btn" onclick="window.closeGlobalOverlay()">×</div>
@@ -233,14 +418,18 @@ function initApp() {
         <strong>填写指引：</strong> ${scale.desc}
       </div>
       <div class="scale-questions-container">
-        ${scale.questions.map((q, idx) => `
+        ${scale.questions
+          .map(
+            (q, idx) => `
           <div class="scale-q" data-idx="${idx}">
-            <div class="scale-q-text">${idx+1}. ${q.q}</div>
+            <div class="scale-q-text">${idx + 1}. ${q.q}</div>
             <div class="scale-options" data-factor="${q.f || ''}" data-idx="${idx}">
               ${optionsHTML.replace(/<input type="radio"/g, `<input type="radio" name="sq${idx}"`)}
             </div>
           </div>
-        `).join('')}
+        `,
+          )
+          .join('')}
       </div>
       <button class="notebook-btn submit-btn" id="submitScaleBtn">完成评估，同步给林医生</button>
     `;
@@ -251,20 +440,26 @@ function initApp() {
     wrapper.addEventListener('change', (e) => {
       if (e.target.type === 'radio') {
         const qDiv = e.target.closest('.scale-q');
-        qDiv.classList.add('answered'); 
+        qDiv.classList.add('answered');
         const labels = qDiv.querySelectorAll('.opt-label');
-        labels.forEach(l => l.classList.remove('circled-option'));
+        labels.forEach((l) => l.classList.remove('circled-option'));
         e.target.closest('label').classList.add('circled-option');
       }
     });
 
     document.getElementById('submitScaleBtn').onclick = () => {
-      let totalScore = 0; let posItems = 0; let factorScores = {}; let allAnswered = true;
+      let totalScore = 0;
+      let posItems = 0;
+      let factorScores = {};
+      let allAnswered = true;
       if (scale.factors) for (let k in scale.factors) factorScores[k] = 0;
 
       scale.questions.forEach((q, idx) => {
         const checkedInput = document.querySelector(`input[name="sq${idx}"]:checked`);
-        if (!checkedInput) { allAnswered = false; return; }
+        if (!checkedInput) {
+          allAnswered = false;
+          return;
+        }
         let val = parseInt(checkedInput.value);
         totalScore += val;
         if (val > 1) posItems++;
@@ -272,24 +467,30 @@ function initApp() {
       });
 
       if (!allAnswered) {
-        alert("📝 好像还有题目没划掉哦，请检查一下~");
+        alert('📝 好像还有题目没划掉哦，请检查一下~');
         return;
       }
 
       let totalMean = (totalScore / scale.questions.length).toFixed(2);
       let posMean = posItems > 0 ? (totalScore / posItems).toFixed(2) : 0;
-      
+
       let report = `${scale.title} 结果\n--------------------\n【总体情况】\n总分: ${totalScore}\n总均分: ${totalMean}\n阳性项目数: ${posItems}\n阳性症状均分: ${posMean}\n--------------------\n`;
       if (scale.factors) {
         report += `【各症状因子分】\n`;
         for (let k in scale.factors) {
-           let mean = (factorScores[k] / scale.factors[k].count).toFixed(2);
-           report += `${scale.factors[k].name}: ${mean}\n`;
+          let mean = (factorScores[k] / scale.factors[k].count).toFixed(2);
+          report += `${scale.factors[k].name}: ${mean}\n`;
         }
       }
 
       if (window.parent !== window) {
-        window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: `这是我的${scale.title}结果：\n${report}` }, '*');
+        window.parent.postMessage(
+          {
+            type: 'SEND_CHAT_TO_ST',
+            text: `这是我的${scale.title}结果：\n${report}`,
+          },
+          '*',
+        );
       }
 
       globalOverlay.innerHTML = `
@@ -323,15 +524,22 @@ function initApp() {
 
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
-      
+
       const tempNote = document.createElement('div');
       tempNote.className = 'user-note temp-note';
       tempNote.style.opacity = '0.5';
       tempNote.innerText = text;
       chatHistory.appendChild(tempNote);
-      
+
       if (chatPage) {
-        setTimeout(() => chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'smooth' }), 10);
+        setTimeout(
+          () =>
+            chatPage.scrollTo({
+              top: chatPage.scrollHeight,
+              behavior: 'smooth',
+            }),
+          10,
+        );
       }
     }
   }
@@ -343,7 +551,7 @@ function initApp() {
       sendMessage();
     }
   });
-  
+
   // 监听输入框变化，实时同步回酒馆底层
   chatInput.addEventListener('input', (e) => {
     if (window.parent !== window) {
@@ -351,75 +559,243 @@ function initApp() {
     }
   });
 
-
   // ================= SVG 植物生成引擎 =================
   let plantGenerated = false;
   function generatePlant() {
     if (plantGenerated) return;
     const container = document.getElementById('svgGarden');
-    if (container && container.dataset.presentActive === "true") return;
+    if (container && container.dataset.presentActive === 'true') return;
     const label = document.getElementById('gardenLabel');
     if (!container) return;
 
     const date = new Date();
     const month = date.getMonth();
-    
-    
+
     // 植物月份字典
-    const monthNames =["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+    const monthNames = [
+      '一月',
+      '二月',
+      '三月',
+      '四月',
+      '五月',
+      '六月',
+      '七月',
+      '八月',
+      '九月',
+      '十月',
+      '十一月',
+      '十二月',
+    ];
 
     // n=品名, c=颜色组, w=权重, tCol/lCol=枝干/叶片颜色，arch=架构, fType=花型, lShape=叶型
-    const pC =[
-      { arch: 'vine',  fType: 'jasmine', lShape: 'willow', tCol: '#4a5d23', lCol: '#5c7a1a',
-        vars: [{n: '金梅迎春', c:['#FFD700'], w: 7000}, {n: '小叶迎春', c:['#FFEA00'], w: 2500}, {n: '素馨迎春', c:['#F4C430'], w: 500}] },
-        
-      { arch: 'herb',  fType: 'cluster', lShape: 'tear',   tCol: '#5c4033', lCol: '#7a8f6a',
-        vars:[{n: '金边瑞香', c:['#E6A8D7'], w: 6000}, {n: '白花瑞香', c:['#FFFFFF', '#FFB7C5'], w: 3000}, {n: '蔷薇瑞香', c:['#DDA0DD'], w: 997.76}, 
-               {n: '林涵霁雨', c:['#00E5FF', '#B23AEE'], w: 2.24, tCol: '#E0E0E0', lCol: '#7FFFD4'}] }, 
+    const pC = [
+      {
+        arch: 'vine',
+        fType: 'jasmine',
+        lShape: 'willow',
+        tCol: '#4a5d23',
+        lCol: '#5c7a1a',
+        vars: [
+          { n: '金梅迎春', c: ['#FFD700'], w: 7000 },
+          { n: '小叶迎春', c: ['#FFEA00'], w: 2500 },
+          { n: '素馨迎春', c: ['#F4C430'], w: 500 },
+        ],
+      },
 
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#3E2F26', lCol: '#2d4c1e',
-        vars: [{n: '碧桃', c:['#FFB7C5', '#FF69B4'], w: 6000}, {n: '白花桃', c:['#FFFFFF', '#FFB7C5'], w: 3000}, {n: '绛桃', c:['#FF1493', '#C71585'], w: 900}, 
-               {n: '紫叶桃', c:['#FF69B4', '#FF1493'], w: 100, tCol: '#2c141d', m: { bProb: 0.95, fProb: 0.15 }}] },
+      {
+        arch: 'herb',
+        fType: 'cluster',
+        lShape: 'tear',
+        tCol: '#5c4033',
+        lCol: '#7a8f6a',
+        vars: [
+          { n: '金边瑞香', c: ['#E6A8D7'], w: 6000 },
+          { n: '白花瑞香', c: ['#FFFFFF', '#FFB7C5'], w: 3000 },
+          { n: '蔷薇瑞香', c: ['#DDA0DD'], w: 997.76 },
+          {
+            n: '林涵霁雨',
+            c: ['#00E5FF', '#B23AEE'],
+            w: 2.24,
+            tCol: '#E0E0E0',
+            lCol: '#7FFFD4',
+          },
+        ],
+      },
 
-      { arch: 'vine',  fType: 'rose',    lShape: 'sharp',  tCol: '#556B2F', lCol: '#3D5222',
-        vars:[{n: '粉团蔷薇', c:['#FFC0CB', '#FF69B4'], w: 4500}, {n: '七姊妹', c:['#E32636', '#800020'], w: 3500}, {n: '白玉堂', c:['#FFFFFF', '#F5F5F5'], w: 1500}, 
-               {n: '黄蔷薇', c:['#FFD700', '#FFA500'], w: 450}, {n: '珊瑚橘', c:['#FF7F50', '#FF4500'], w: 50}] },
+      {
+        arch: 'tree',
+        fType: 'peach',
+        lShape: 'none',
+        tCol: '#3E2F26',
+        lCol: '#2d4c1e',
+        baseLen: 85,
+        lenVar: 35,
+        vars: [
+          { n: '碧桃', c: ['#FFB7C5', '#FF69B4'], w: 6000 },
+          { n: '白花桃', c: ['#FFFFFF', '#FFB7C5'], w: 3000 },
+          { n: '绛桃', c: ['#FF1493', '#C71585'], w: 900 },
+          {
+            n: '紫叶桃',
+            c: ['#FF69B4', '#FF1493'],
+            w: 100,
+            tCol: '#2c141d',
+            m: { bProb: 0.95, fProb: 0.15 },
+          },
+        ],
+      },
 
-      { arch: 'basal', fType: 'iris',    lShape: 'sword',  tCol: '#4F7942', lCol: '#4F7942',
-        vars: [{n: '蓝蝴蝶', c:['#6A5ACD', '#E6E6FA'], w: 6000}, {n: '深紫鸢尾', c:['#4B0082', '#8A2BE2'], w: 2500}, {n: '白雪鸢尾', c:['#FFFFFF', '#F0F8FF'], w: 1000}, 
-               {n: '金脉鸢尾', c:['#FFD700', '#FFFACD'], w: 500}] },
+      {
+        arch: 'vine',
+        fType: 'rose',
+        lShape: 'sharp',
+        tCol: '#556B2F',
+        lCol: '#3D5222',
+        vars: [
+          { n: '粉团蔷薇', c: ['#FFC0CB', '#FF69B4'], w: 4500 },
+          { n: '七姊妹', c: ['#E32636', '#800020'], w: 3500 },
+          { n: '白玉堂', c: ['#FFFFFF', '#F5F5F5'], w: 1500 },
+          { n: '黄蔷薇', c: ['#FFD700', '#FFA500'], w: 450 },
+          { n: '珊瑚橘', c: ['#FF7F50', '#FF4500'], w: 50 },
+        ],
+      },
 
-      { arch: 'herb',  fType: 'simple',  lShape: 'round',  tCol: '#5C5448', lCol: '#2E472D',
-        vars:[{n: '大叶栀子', c:['#FFFFFF', '#F5F5F5'], w: 8000}, {n: '水栀子', c:['#FFFFF0', '#FFF8DC'], w: 2000}] },
+      {
+        arch: 'basal',
+        fType: 'iris',
+        lShape: 'sword',
+        tCol: '#4F7942',
+        lCol: '#4F7942',
+        vars: [
+          { n: '蓝蝴蝶', c: ['#6A5ACD', '#E6E6FA'], w: 6000 },
+          { n: '深紫鸢尾', c: ['#4B0082', '#8A2BE2'], w: 2500 },
+          { n: '白雪鸢尾', c: ['#FFFFFF', '#F0F8FF'], w: 1000 },
+          { n: '金脉鸢尾', c: ['#FFD700', '#FFFACD'], w: 500 },
+        ],
+      },
 
-      { arch: 'basal', fType: 'lotus',   lShape: 'lotus',  tCol: '#2E8B57', lCol: '#2E8B57',
-        vars:[{n: '红建莲', c:['#FF69B4', '#FFC0CB'], w: 6000}, {n: '白洋淀', c:['#FFFFFF', '#FFEC8B'], w: 3000}, 
-               {n: '千瓣莲', c:['#FF1493', '#C71585'], w: 1000, m: { layers: 5, dense: true }}] },
+      {
+        arch: 'herb',
+        fType: 'simple',
+        lShape: 'round',
+        tCol: '#5C5448',
+        lCol: '#2E472D',
+        vars: [
+          { n: '大叶栀子', c: ['#FFFFFF', '#F5F5F5'], w: 8000 },
+          { n: '水栀子', c: ['#FFFFF0', '#FFF8DC'], w: 2000 },
+        ],
+      },
 
-      { arch: 'tree',  fType: 'micro',   lShape: 'tear',   tCol: '#696969', lCol: '#355E3B',
-        vars:[{n: '金桂', c:['#FFD700'], w: 5500}, {n: '银桂', c:['#FFFACD'], w: 3500}, {n: '丹桂', c:['#FFA500'], w: 1000}] },
+      {
+        arch: 'basal',
+        fType: 'lotus',
+        lShape: 'lotus',
+        tCol: '#2E8B57',
+        lCol: '#2E8B57',
+        vars: [
+          { n: '红建莲', c: ['#FF69B4', '#FFC0CB'], w: 6000 },
+          { n: '白洋淀', c: ['#FFFFFF', '#FFEC8B'], w: 3000 },
+          {
+            n: '千瓣莲',
+            c: ['#FF1493', '#C71585'],
+            w: 1000,
+            m: { layers: 5, dense: true },
+          },
+        ],
+      },
 
-      { arch: 'herb',  fType: 'mum',     lShape: 'lobed',  tCol: '#6B8E23', lCol: '#556B2F',
-        vars:[{n: '秋菊', c:['#FFD700', '#DAA520'], w: 4500}, {n: '白菊', c:['#FFFFFF', '#D3D3D3'], w: 3000}, {n: '紫菊', c:['#D8BFD8', '#800080'], w: 1500}, 
-               {n: '墨菊', c:['#8B0000', '#4A0404'], w: 900, m: { cMod: 2.0, lDense: 2.5, fScale: 1.5, hMod: 0.8,  dense: true }}, {n: '绿菊', c:['#98FB98', '#2E8B57'], w: 100}] },
+      {
+        arch: 'tree',
+        fType: 'micro',
+        lShape: 'tear',
+        tCol: '#696969',
+        lCol: '#355E3B',
+        baseLen: 75,
+        lenVar: 35,
+        vars: [
+          { n: '金桂', c: ['#FFD700'], w: 5500 },
+          { n: '银桂', c: ['#FFFACD'], w: 3500 },
+          { n: '丹桂', c: ['#FFA500'], w: 1000 },
+        ],
+      },
 
-      { arch: 'tree',  fType: 'hibiscus',lShape: 'broad',  tCol: '#5E4B3C', lCol: '#4F7942',
-        vars:[{n: '晨白芙蓉', c:['#FFFFFF', '#FFB6C1'], w: 4500}, {n: '午粉芙蓉', c:['#FF69B4', '#FFF0F5'], w: 4000}, {n: '暮红芙蓉', c:['#DC143C', '#FF1493'], w: 1500}] },
+      {
+        arch: 'herb',
+        fType: 'mum',
+        lShape: 'lobed',
+        tCol: '#6B8E23',
+        lCol: '#556B2F',
+        vars: [
+          { n: '秋菊', c: ['#FFD700', '#DAA520'], w: 4500 },
+          { n: '白菊', c: ['#FFFFFF', '#D3D3D3'], w: 3000 },
+          { n: '紫菊', c: ['#D8BFD8', '#800080'], w: 1500 },
+          {
+            n: '墨菊',
+            c: ['#8B0000', '#4A0404'],
+            w: 900,
+            m: { cMod: 2.0, lDense: 2.5, fScale: 1.5, hMod: 0.8, dense: true },
+          },
+          { n: '绿菊', c: ['#98FB98', '#2E8B57'], w: 100 },
+        ],
+      },
 
-      { arch: 'tree',  fType: 'rose',    lShape: 'round',  tCol: '#3B3C36', lCol: '#004225',
-        vars:[{n: '赤丹', c:['#DC143C', '#8B0000'], w: 5000}, {n: '宫粉', c:['#FFC0CB', '#FFF0F5'], w: 3000}, {n: '白天鹅', c:['#FFFFFF', '#F5F5F5'], w: 1950}, 
-               {n: '十八学士', c:['#FF0000', '#FFFFFF'], w: 50, m: { phyllotaxis: true, petals: 34 }}] },
+      {
+        arch: 'tree',
+        fType: 'hibiscus',
+        lShape: 'broad',
+        tCol: '#5E4B3C',
+        lCol: '#4F7942',
+        baseLen: 70,
+        lenVar: 30,
+        vars: [
+          { n: '晨白芙蓉', c: ['#FFFFFF', '#FFB6C1'], w: 4500 },
+          { n: '午粉芙蓉', c: ['#FF69B4', '#FFF0F5'], w: 4000 },
+          { n: '暮红芙蓉', c: ['#DC143C', '#FF1493'], w: 1500 },
+        ],
+      },
 
-      { arch: 'tree',  fType: 'peach',   lShape: 'none',   tCol: '#2F2F2F', lCol: '#1C1C1C', sympodial: true,
-        vars: [{n: '素心腊梅', c:['#FFFF00', '#FFD700'], w: 7500}, {n: '狗牙腊梅', c:['#FFFACD', '#8B008B'], w: 2500}] }
+      {
+        arch: 'tree',
+        fType: 'rose',
+        lShape: 'round',
+        tCol: '#3B3C36',
+        lCol: '#004225',
+        baseLen: 65,
+        lenVar: 25,
+        vars: [
+          { n: '赤丹', c: ['#DC143C', '#8B0000'], w: 5000 },
+          { n: '宫粉', c: ['#FFC0CB', '#FFF0F5'], w: 3000 },
+          { n: '白天鹅', c: ['#FFFFFF', '#F5F5F5'], w: 1950 },
+          {
+            n: '十八学士',
+            c: ['#FF0000', '#FFFFFF'],
+            w: 50,
+            m: { phyllotaxis: true, petals: 34 },
+          },
+        ],
+      },
+
+      {
+        arch: 'tree',
+        fType: 'peach',
+        lShape: 'none',
+        tCol: '#2F2F2F',
+        lCol: '#1C1C1C',
+        sympodial: true,
+        baseLen: 60,
+        lenVar: 25,
+        vars: [
+          { n: '素心腊梅', c: ['#FFFF00', '#FFD700'], w: 7500 },
+          { n: '狗牙腊梅', c: ['#FFFACD', '#8B008B'], w: 2500 },
+        ],
+      },
     ];
 
     const cfg = Object.assign({}, pC[month]);
-    
+
     let selectedVar = null;
-    
+
     if (month === 1 && date.getDate() === 24) {
-      selectedVar = cfg.vars.find(v => v.n === '林涵霁雨');
+      selectedVar = cfg.vars.find((v) => v.n === '林涵霁雨');
     }
 
     if (!selectedVar) {
@@ -457,31 +833,35 @@ function initApp() {
       <g transform="translate(200, 420)">
     `;
 
-    let paths = []; let organs =[];
-    
+    let paths = [];
+    let organs = [];
+
     // --- 核心绘图辅助函数 ---
     function addStem(x1, y1, cx, cy, x2, y2, width, color, delay) {
-      let len = Math.hypot(x2-x1, y2-y1) * 1.2;
-      paths.push(`<path class="botany-stem" d="M ${x1.toFixed(1)},${y1.toFixed(1)} Q ${cx.toFixed(1)},${cy.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}" style="stroke:${color}; stroke-width:${width.toFixed(1)}px; stroke-dasharray:${len}; stroke-dashoffset:${len}; animation-delay:${delay}s;" />`);
+      let len = Math.hypot(x2 - x1, y2 - y1) * 1.2;
+      paths.push(
+        `<path class="botany-stem" d="M ${x1.toFixed(1)},${y1.toFixed(1)} Q ${cx.toFixed(1)},${cy.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}" style="stroke:${color}; stroke-width:${width.toFixed(1)}px; stroke-dasharray:${len}; stroke-dashoffset:${len}; animation-delay:${delay}s;" />`,
+      );
     }
 
     // 生成叶片 SVG 路径
     function getLeafPath(shape) {
       const dict = {
         willow: 'M0,0 C-4,-15 -4,-35 0,-45 C4,-35 4,-15 0,0 Z',
-        sword:  'M0,0 Q-10,-40 0,-100 Q10,-40 0,0 Z',
-        lotus:  'M0,-10 C-35,-10 -45,-35 0,-45 C45,-35 35,-10 0,-10 Z',
-        lobed:  'M0,0 C-10,-10 -20,-5 -15,-20 C-25,-25 -10,-35 0,-40 C10,-35 25,-25 15,-20 C20,-5 10,-10 0,0 Z',
-        broad:  'M0,0 C-20,-10 -25,-30 0,-45 C25,-30 20,-10 0,0 Z',
-        round:  'M0,0 C-15,-8 -18,-22 0,-30 C18,-22 15,-8 0,0 Z',
-        tear:   'M0,0 C-6,-8 -8,-20 0,-25 C8,-20 6,-8 0,0 Z',
-        sharp:  'M0,0 L-8,-15 L0,-28 L8,-15 Z'
+        sword: 'M0,0 Q-10,-40 0,-100 Q10,-40 0,0 Z',
+        lotus: 'M0,-10 C-35,-10 -45,-35 0,-45 C45,-35 35,-10 0,-10 Z',
+        lobed:
+          'M0,0 C-10,-10 -20,-5 -15,-20 C-25,-25 -10,-35 0,-40 C10,-35 25,-25 15,-20 C20,-5 10,-10 0,0 Z',
+        broad: 'M0,0 C-20,-10 -25,-30 0,-45 C25,-30 20,-10 0,0 Z',
+        round: 'M0,0 C-15,-8 -18,-22 0,-30 C18,-22 15,-8 0,0 Z',
+        tear: 'M0,0 C-6,-8 -8,-20 0,-25 C8,-20 6,-8 0,0 Z',
+        sharp: 'M0,0 L-8,-15 L0,-28 L8,-15 Z',
       };
       return dict[shape] || '';
     }
 
     function addLeaf(x, y, angle, scale, delay) {
-      if(cfg.lShape === 'none') return;
+      if (cfg.lShape === 'none') return;
       let path = getLeafPath(cfg.lShape);
       organs.push(`<g class="botany-leaf" style="--tx:${x.toFixed(1)}px; --ty:${y.toFixed(1)}px; --rot:${angle.toFixed(1)}deg; --sc:${scale.toFixed(2)}; animation-delay:${delay}s;">
         <path d="${path}" fill="${cfg.lCol}" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
@@ -491,67 +871,74 @@ function initApp() {
     // 生成花朵构造
     function addFlower(x, y, angle, scale, delay) {
       let fHtml = '';
-      let c1 = cfg.fCol[0]; let c2 = cfg.fCol[1] || c1;
-      
+      let c1 = cfg.fCol[0];
+      let c2 = cfg.fCol[1] || c1;
+
       if (cfg.fType === 'peach') {
         // 5瓣桃花/腊梅 (贴着枝干生长)
-        for(let i=0; i<5; i++) {
-          fHtml += `<path d="M0,0 C-6,-10 -10,-18 0,-22 C10,-18 6,-10 0,0 Z" fill="${c1}" transform="rotate(${i*72})" opacity="0.9"/>`;
+        for (let i = 0; i < 5; i++) {
+          fHtml += `<path d="M0,0 C-6,-10 -10,-18 0,-22 C10,-18 6,-10 0,0 Z" fill="${c1}" transform="rotate(${i * 72})" opacity="0.9"/>`;
         }
         fHtml += `<circle r="3" fill="${c2}" />`;
-      } 
-      else if (cfg.fType === 'lotus') {
+      } else if (cfg.fType === 'lotus') {
         // 恢复侧面碗状结构，结合参数化层数
-        let layers = cfg.m.layers || 3; 
-        for(let l = layers; l >= 1; l--) {
-           let count = l * 2 + 1; 
-           let s = 1 - ((layers - l) * 0.15); 
-           let pC = (l % 2 === 0) ? c2 : c1;
-           let spread = 25 + l * 12; // 扇形展开角度
-           for(let i = 0; i < count; i++) {
-             let rot = -spread + (spread * 2 / (count - 1 || 1)) * i + (Math.random()*4-2); // 扇形排布+微调
-             let shape = cfg.m.dense ? `M0,0 C-5,-20 -3,-45 0,-50 C3,-45 5,-20 0,0 Z` : `M0,0 C-10,-15 -8,-45 0,-50 C8,-45 10,-15 0,0 Z`;
-             fHtml += `<path d="${shape}" fill="${pC}" transform="rotate(${rot}) scale(${s})" opacity="0.9"/>`;
-           }
+        let layers = cfg.m.layers || 3;
+        for (let l = layers; l >= 1; l--) {
+          let count = l * 2 + 1;
+          let s = 1 - (layers - l) * 0.15;
+          let pC = l % 2 === 0 ? c2 : c1;
+          let spread = 25 + l * 12; // 扇形展开角度
+          for (let i = 0; i < count; i++) {
+            let rot = -spread + ((spread * 2) / (count - 1 || 1)) * i + (Math.random() * 4 - 2); // 扇形排布+微调
+            let shape = cfg.m.dense
+              ? `M0,0 C-5,-20 -3,-45 0,-50 C3,-45 5,-20 0,0 Z`
+              : `M0,0 C-10,-15 -8,-45 0,-50 C8,-45 10,-15 0,0 Z`;
+            fHtml += `<path d="${shape}" fill="${pC}" transform="rotate(${rot}) scale(${s})" opacity="0.9"/>`;
+          }
         }
         // 底部加一个小莲蓬
         fHtml += `<ellipse cx="0" cy="-8" rx="6" ry="3" fill="#FFD700" opacity="0.85"/>`;
-      }
-      else if (cfg.fType === 'mum') {
+      } else if (cfg.fType === 'mum') {
         // 菊花：加入随机长短的错落感与双层管状花瓣
         let mDense = cfg.m.dense ? 40 : 24;
-        for(let i=0; i<mDense; i++) {
+        for (let i = 0; i < mDense; i++) {
           let r = 1 - Math.random() * 0.35; // 花瓣长短不一
           let rot = i * (360 / mDense) + Math.random() * 8;
           // 外层长瓣
-          fHtml += `<path d="M0,0 Q-4,-20 0,-${40*r} Q4,-20 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
+          fHtml += `<path d="M0,0 Q-4,-20 0,-${40 * r} Q4,-20 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
           // 内层短心
-          fHtml += `<path d="M0,0 Q-2,-10 0,-${20*r} Q2,-10 0,0 Z" fill="${c2}" transform="rotate(${rot+15})" opacity="0.95"/>`;
+          fHtml += `<path d="M0,0 Q-2,-10 0,-${20 * r} Q2,-10 0,0 Z" fill="${c2}" transform="rotate(${rot + 15})" opacity="0.95"/>`;
         }
         fHtml += `<circle r="4" fill="${c2}" />`;
-      }
-      else if (cfg.fType === 'iris') {
-        fHtml += `<path d="M0,0 C-15,-20 -20,-40 0,-45 C20,-40 15,-20 0,0 Z" fill="${c2}" transform="rotate(0)" opacity="0.9"/>`; 
-        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(60)" opacity="0.9"/>`; 
+      } else if (cfg.fType === 'iris') {
+        fHtml += `<path d="M0,0 C-15,-20 -20,-40 0,-45 C20,-40 15,-20 0,0 Z" fill="${c2}" transform="rotate(0)" opacity="0.9"/>`;
+        fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(60)" opacity="0.9"/>`;
         fHtml += `<path d="M0,0 C-20,10 -25,35 0,40 C25,35 20,10 0,0 Z" fill="${c1}" transform="rotate(-60)" opacity="0.9"/>`;
-      }
-      else if (cfg.fType === 'rose') {
+      } else if (cfg.fType === 'rose') {
         let count = cfg.m.petals || 8;
-        for(let i=1; i<=count; i++) {
-          let s, rot, cx=0, cy=-6, c;
+        for (let i = 1; i <= count; i++) {
+          let s,
+            rot,
+            cx = 0,
+            cy = -6,
+            c;
           if (cfg.m.phyllotaxis) {
-            let r = 2.0 * Math.sqrt(i); rot = i * 137.5;
-            cx = r * Math.sin(rot * Math.PI / 180); cy = -r * Math.cos(rot * Math.PI / 180);
-            s = 1.2 - (i * (1.0 / count)); c = i > count/2 ? c2 : c1;
+            let r = 2.0 * Math.sqrt(i);
+            rot = i * 137.5;
+            cx = r * Math.sin((rot * Math.PI) / 180);
+            cy = -r * Math.cos((rot * Math.PI) / 180);
+            s = 1.2 - i * (1.0 / count);
+            c = i > count / 2 ? c2 : c1;
           } else {
-            s = 1 - (i*0.08); rot = i * 65; c = i % 2 === 0 ? c1 : c2;
+            s = 1 - i * 0.08;
+            rot = i * 65;
+            c = i % 2 === 0 ? c1 : c2;
           }
           fHtml += `<circle cx="${cx}" cy="${cy}" r="10" fill="${c}" transform="rotate(${rot}) scale(${s})" opacity="0.95"/>`;
         }
-      }
-      else if (cfg.fType === 'hibiscus') {
+      } else if (cfg.fType === 'hibiscus') {
         // 芙蓉：宽大重叠的波浪感花瓣，与生动的立体花蕊
-        for(let i=0; i<5; i++) {
+        for (let i = 0; i < 5; i++) {
           let rot = i * 72 + (Math.random() * 10 - 5);
           // 宽大透明的外层
           fHtml += `<path d="M0,0 C-25,-10 -35,-40 0,-45 C35,-40 25,-10 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
@@ -563,123 +950,175 @@ function initApp() {
         fHtml += `<circle cx="0" cy="-28" r="2.5" fill="#FFA500"/>`;
         fHtml += `<circle cx="-2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
         fHtml += `<circle cx="2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
-      }
-      else if (cfg.fType === 'jasmine' || cfg.fType === 'simple') {
+      } else if (cfg.fType === 'jasmine' || cfg.fType === 'simple') {
         // 简单4-5瓣花
-        for(let i=0; i<4; i++) {
-          fHtml += `<path d="M0,0 Q-8,-15 0,-20 Q8,-15 0,0 Z" fill="${c1}" transform="rotate(${i*90})"/>`;
+        for (let i = 0; i < 4; i++) {
+          fHtml += `<path d="M0,0 Q-8,-15 0,-20 Q8,-15 0,0 Z" fill="${c1}" transform="rotate(${i * 90})"/>`;
         }
         fHtml += `<circle r="2" fill="#FFD700" />`;
-      }
-      else if (cfg.fType === 'cluster' || cfg.fType === 'micro') {
+      } else if (cfg.fType === 'cluster' || cfg.fType === 'micro') {
         // 细碎簇生花 (桂花/瑞香)
-        for(let i=0; i<5; i++) {
-          let ox = (Math.random()-0.5)*15; let oy = (Math.random()-0.5)*15;
+        for (let i = 0; i < 5; i++) {
+          let ox = (Math.random() - 0.5) * 15;
+          let oy = (Math.random() - 0.5) * 15;
           fHtml += `<circle cx="${ox}" cy="${oy}" r="3" fill="${c1}" />`;
-          fHtml += `<circle cx="${ox+3}" cy="${oy}" r="3" fill="${c1}" />`;
+          fHtml += `<circle cx="${ox + 3}" cy="${oy}" r="3" fill="${c1}" />`;
         }
       }
 
-      let filterStr = (cfg.name === '林涵霁雨') ? `filter="drop-shadow(0 0 8px ${c1})"` : '';
+      let filterStr = cfg.name === '林涵霁雨' ? `filter="drop-shadow(0 0 8px ${c1})"` : '';
 
-      organs.push(`<g class="botany-flower" style="--tx:${x.toFixed(1)}px; --ty:${y.toFixed(1)}px; --rot:${angle.toFixed(1)}deg; --sc:${scale.toFixed(2)}; animation-delay:${delay}s;" ${filterStr}>${fHtml}</g>`);
+      organs.push(
+        `<g class="botany-flower" style="--tx:${x.toFixed(1)}px; --ty:${y.toFixed(1)}px; --rot:${angle.toFixed(1)}deg; --sc:${scale.toFixed(2)}; animation-delay:${delay}s;" ${filterStr}>${fHtml}</g>`,
+      );
     }
 
     // ================= 生成算法 =================
 
-    // 木本分形树 (桃花, 芙蓉, 山茶, 腊梅)
+    // 木本分形树 (桃花, 芙蓉, 山茶, 腊梅, 桂花)
     function buildTree(x, y, angle, length, depth, width, delay) {
       if (depth === 0) return;
       let x2 = x + Math.sin(angle) * length;
       let y2 = y - Math.cos(angle) * length;
-      
+
       let isSympodial = cfg.sympodial && depth < 5;
-      let cx = x + Math.sin(angle + (isSympodial ? 0.4 : (Math.random()-0.5)*0.4)) * length * 0.5;
-      let cy = y - Math.cos(angle + (isSympodial ? 0.4 : (Math.random()-0.5)*0.4)) * length * 0.5;
+      let cx =
+        x + Math.sin(angle + (isSympodial ? 0.4 : (Math.random() - 0.5) * 0.4)) * length * 0.5;
+      let cy =
+        y - Math.cos(angle + (isSympodial ? 0.4 : (Math.random() - 0.5) * 0.4)) * length * 0.5;
 
       addStem(x, y, cx, cy, x2, y2, width, cfg.tCol, delay);
-      let isEndpoint = (depth === 1);
-      
+      let isEndpoint = depth === 1;
+
       // 提高花朵繁茂度 (簇生花可以在末端一次爆出多朵)
-      let fProb = cfg.m.fProb !== undefined ? cfg.m.fProb : 0.6; 
-      
+      let fProb = cfg.m.fProb !== undefined ? cfg.m.fProb : 0.6;
+
+      // 让大树结出更大的花朵和叶片 (在基础缩放上再放大30%)
+      let organScale = 1.3;
+
       if (cfg.fType === 'peach' || cfg.fType === 'micro') {
         if (depth <= 4 && Math.random() < fProb) {
           // 几率产生多朵花簇拥
           let blooms = Math.floor(Math.random() * 3) + 1;
-          for(let b=0; b<blooms; b++) {
-            addFlower(x2 + (Math.random()*10-5), y2 + (Math.random()*10-5), Math.random()*360, 0.6 + Math.random()*0.5, delay + 0.5 + b*0.1);
+          for (let b = 0; b < blooms; b++) {
+            // 根据树干的粗细适当扩大簇生花的偏移范围，避免挤在一起
+            let ox = (Math.random() - 0.5) * 16;
+            let oy = (Math.random() - 0.5) * 16;
+            addFlower(
+              x2 + ox,
+              y2 + oy,
+              Math.random() * 360,
+              (0.6 + Math.random() * 0.5) * organScale,
+              delay + 0.5 + b * 0.1,
+            );
           }
         }
       } else {
-        if (isEndpoint) addFlower(x2, y2, angle * 180 / Math.PI + (Math.random()*60-30), 1.0 + Math.random()*0.4, delay + 0.6);
+        if (isEndpoint)
+          addFlower(
+            x2,
+            y2,
+            (angle * 180) / Math.PI + (Math.random() * 60 - 30),
+            (1.0 + Math.random() * 0.4) * organScale,
+            delay + 0.6,
+          );
       }
 
       if (!isEndpoint && cfg.lShape !== 'none' && Math.random() < 0.8) {
-        addLeaf(x2, y2, (angle*180/Math.PI) + 50 + Math.random()*30, 0.7 + Math.random()*0.4, delay + 0.3);
-        addLeaf(x2, y2, (angle*180/Math.PI) - 50 - Math.random()*30, 0.7 + Math.random()*0.4, delay + 0.3);
+        addLeaf(
+          x2,
+          y2,
+          (angle * 180) / Math.PI + 50 + Math.random() * 30,
+          (0.7 + Math.random() * 0.4) * organScale,
+          delay + 0.3,
+        );
+        addLeaf(
+          x2,
+          y2,
+          (angle * 180) / Math.PI - 50 - Math.random() * 30,
+          (0.7 + Math.random() * 0.4) * organScale,
+          delay + 0.3,
+        );
       }
 
       // 底层干可生2-4枝，中层可生0-3枝
       let bProb = cfg.m.bProb !== undefined ? cfg.m.bProb : 0.65;
       let maxBranches = 1;
-      if (depth === 5) maxBranches = 2 + Math.floor(Math.random() * 3); // 根部 2~4 枝
+      if (depth === 5)
+        maxBranches = 2 + Math.floor(Math.random() * 3); // 根部 2~4 枝
       else {
         let r = Math.random();
-        if (r < bProb - 0.3) maxBranches = 3;      // 茂盛变异
-        else if (r < bProb) maxBranches = 2;       // 正常分叉
+        if (r < bProb - 0.3)
+          maxBranches = 3; // 茂盛变异
+        else if (r < bProb)
+          maxBranches = 2; // 正常分叉
         else if (r > 0.9 && depth < 3) maxBranches = 0; // 自然枯顶
       }
-      
+
       for (let i = 0; i < maxBranches; i++) {
         // 让分支散得更开更随机
-        let dir = (i % 2 === 0) ? -1 : 1;
-        let spread = maxBranches === 1 ? (Math.random()*0.6 - 0.3) : (dir * (0.3 + i*0.15));
-        let newAngle = angle + (isSympodial ? dir * 0.5 : spread) + (Math.random()*0.4 - 0.2);
+        let dir = i % 2 === 0 ? -1 : 1;
+        let spread = maxBranches === 1 ? Math.random() * 0.6 - 0.3 : dir * (0.3 + i * 0.15);
+        let newAngle = angle + (isSympodial ? dir * 0.5 : spread) + (Math.random() * 0.4 - 0.2);
         // 分叉越多，子枝干越倾向于缩短，形成自然的树冠穹顶
         let lengthDrop = maxBranches > 2 ? 0.5 : 0.65;
         let newLength = length * (lengthDrop + Math.random() * 0.3);
-        
+
         buildTree(x2, y2, newAngle, newLength, depth - 1, width * 0.65, delay + 0.15);
       }
     }
 
     // 基生/丛生型 (荷花, 鸢尾)
     function buildBasal() {
-      let numStems = cfg.fType === 'lotus' ? (4 + Math.floor(Math.random()*3)) : (5 + Math.floor(Math.random()*4));
+      let numStems =
+        cfg.fType === 'lotus'
+          ? 4 + Math.floor(Math.random() * 3)
+          : 5 + Math.floor(Math.random() * 4);
       for (let i = 0; i < numStems; i++) {
         let angle = (Math.random() - 0.5) * 0.8; // 随机发散角
-        let length = 90 + Math.random() * 80;    // 随机高度
+        let length = 90 + Math.random() * 80; // 随机高度
         let x2 = Math.sin(angle) * length;
         let y2 = -Math.cos(angle) * length;
         let delay = i * 0.15 + Math.random() * 0.1;
-        
+
         if (cfg.fType === 'lotus') {
           // 荷花直立茎带微随机弯曲
           let cx = x2 * 0.5 + (Math.random() - 0.5) * 30;
           let cy = y2 * 0.5;
-          addStem(0, 0, cx, cy, x2, y2, 3 + Math.random()*2, cfg.tCol, delay);
-          
+          addStem(0, 0, cx, cy, x2, y2, 3 + Math.random() * 2, cfg.tCol, delay);
+
           if (i < 2 || Math.random() > 0.6) {
-             addLeaf(x2, y2, angle*180/Math.PI + (Math.random()-0.5)*20, 1.0 + Math.random()*0.8, delay + 0.4);
+            addLeaf(
+              x2,
+              y2,
+              (angle * 180) / Math.PI + (Math.random() - 0.5) * 20,
+              1.0 + Math.random() * 0.8,
+              delay + 0.4,
+            );
           } else {
-             addFlower(x2, y2, angle*180/Math.PI + (Math.random()-0.5)*15, 1.2 + Math.random()*0.6, delay + 0.5);
+            addFlower(
+              x2,
+              y2,
+              (angle * 180) / Math.PI + (Math.random() - 0.5) * 15,
+              1.2 + Math.random() * 0.6,
+              delay + 0.5,
+            );
           }
         } else {
           // 鸢尾：中心长花，两侧长叶
-          if (i === Math.floor(numStems/2) || (numStems > 6 && i === 0)) { 
-            let fLen = length * (1.1 + Math.random()*0.3);
+          if (i === Math.floor(numStems / 2) || (numStems > 6 && i === 0)) {
+            let fLen = length * (1.1 + Math.random() * 0.3);
             let cx = (Math.random() - 0.5) * 40; // 花葶随机歪曲
             let cy = -fLen * 0.5;
             let fx = Math.sin(angle) * fLen * 0.3;
             let fy = -fLen;
-            addStem(0, 0, cx, cy, fx, fy, 4 + Math.random()*2, cfg.tCol, delay);
-            addFlower(fx, fy, (Math.random() - 0.5) * 30, 1.2 + Math.random()*0.5, delay + 0.5);
+            addStem(0, 0, cx, cy, fx, fy, 4 + Math.random() * 2, cfg.tCol, delay);
+            addFlower(fx, fy, (Math.random() - 0.5) * 30, 1.2 + Math.random() * 0.5, delay + 0.5);
           } else {
             // 弯曲剑叶
-            let cx = x2 * (1.2 + Math.random()*0.8); 
-            let cy = y2 * (0.3 + Math.random()*0.4);
-            addStem(0, 0, cx, cy, x2, y2, 6 + Math.random()*4, cfg.lCol, delay);
+            let cx = x2 * (1.2 + Math.random() * 0.8);
+            let cy = y2 * (0.3 + Math.random() * 0.4);
+            addStem(0, 0, cx, cy, x2, y2, 6 + Math.random() * 4, cfg.lCol, delay);
           }
         }
       }
@@ -688,77 +1127,110 @@ function initApp() {
     // 草本单轴型 (菊花, 栀子, 瑞香)
     function buildHerb() {
       // 从 cfg.m 读取形态学变异参数，若无则使用默认值 1.0
-      let hMod = cfg.m.hMod || 1.0;       // 高度乘数
-      let cMod = cfg.m.cMod || 1.0;       // 弯曲度(蛇形)乘数
-      let lDense = cfg.m.lDense || 1.0;   // 叶片密度乘数
-      let fScale = cfg.m.fScale || 1.0;   // 花朵大小乘数
+      let hMod = cfg.m.hMod || 1.0; // 高度乘数
+      let cMod = cfg.m.cMod || 1.0; // 弯曲度(蛇形)乘数
+      let lDense = cfg.m.lDense || 1.0; // 叶片密度乘数
+      let fScale = cfg.m.fScale || 1.0; // 花朵大小乘数
 
-      let height = (180 + Math.random() * 70) * hMod; 
+      let height = (180 + Math.random() * 70) * hMod;
       let curveX = (Math.random() - 0.5) * 80 * cMod; // 控制茎干的弯曲极值
       let endX = curveX * 0.5 + (Math.random() - 0.5) * 40 * cMod; // 顶端偏移
-      
-      addStem(0, 0, curveX, -height*0.5, endX, -height, 6 + Math.random()*3, cfg.tCol, 0);
-      
-      let baseSteps = 4 + Math.floor(Math.random() * 4); 
+
+      addStem(0, 0, curveX, -height * 0.5, endX, -height, 6 + Math.random() * 3, cfg.tCol, 0);
+
+      let baseSteps = 4 + Math.floor(Math.random() * 4);
       let steps = Math.floor(baseSteps * lDense); // 应用叶片密度变异
-      
-      for(let i=1; i<steps; i++) {
+
+      for (let i = 1; i < steps; i++) {
         // 利用二次贝塞尔方程，计算叶子在弯曲茎干上的坐标
         let t = i / steps;
         let mt = 1 - t;
-        let px = mt*mt*0 + 2*mt*t*curveX + t*t*endX;
-        let py = mt*mt*0 + 2*mt*t*(-height*0.5) + t*t*(-height);
+        let px = mt * mt * 0 + 2 * mt * t * curveX + t * t * endX;
+        let py = mt * mt * 0 + 2 * mt * t * (-height * 0.5) + t * t * -height;
         let delay = i * 0.15 + Math.random() * 0.1;
-        
-        let lAng = (i % 2 === 0) ? -70 : 70;
-        lAng += (Math.random() - 0.5) * 40; 
-        let lScale = 0.8 + Math.random() * 0.6; 
+
+        let lAng = i % 2 === 0 ? -70 : 70;
+        lAng += (Math.random() - 0.5) * 40;
+        let lScale = 0.8 + Math.random() * 0.6;
 
         addLeaf(px, py, lAng, lScale, delay);
         // 如果是 simple 类型或触发几率，则对生/多生
-        if (cfg.fType === 'simple' || Math.random() > 0.7) { 
-          addLeaf(px, py, -lAng + (Math.random()-0.5)*30, lScale * (0.8+Math.random()*0.3), delay); 
+        if (cfg.fType === 'simple' || Math.random() > 0.7) {
+          addLeaf(
+            px,
+            py,
+            -lAng + (Math.random() - 0.5) * 30,
+            lScale * (0.8 + Math.random() * 0.3),
+            delay,
+          );
         }
       }
-      
+
       // 生成顶端花朵，并应用缩放乘数
-      addFlower(endX, -height, (Math.random() - 0.5) * 40, (1.5 + Math.random() * 0.7) * fScale, 1.0);
+      addFlower(
+        endX,
+        -height,
+        (Math.random() - 0.5) * 40,
+        (1.5 + Math.random() * 0.7) * fScale,
+        1.0,
+      );
     }
 
     // 藤本垂枝型 (迎春, 蔷薇)
     function buildVine() {
       let numVines = 3 + Math.floor(Math.random() * 4); // 3 到 6 根藤条
-      for(let i = 0; i < numVines; i++) {
-        let sign = (i % 2 === 0) ? 1 : -1;
+      for (let i = 0; i < numVines; i++) {
+        let sign = i % 2 === 0 ? 1 : -1;
         let angle = sign * (0.2 + Math.random() * 0.6); // 随机抛射角
         let len = 140 + Math.random() * 100; // 随机藤条长度
-        
+
         // 生成受重力拉扯的贝塞尔曲线
-        let cx = Math.sin(angle) * len * (1 + Math.random()*0.5); 
-        let cy = -Math.cos(angle) * len * (1 + Math.random()*0.5);
-        let x2 = cx + sign * len * (0.1 + Math.random()*0.5); // 末端自然下坠
-        let y2 = cy + len * (0.4 + Math.random()*0.7);
-        
+        let cx = Math.sin(angle) * len * (1 + Math.random() * 0.5);
+        let cy = -Math.cos(angle) * len * (1 + Math.random() * 0.5);
+        let x2 = cx + sign * len * (0.1 + Math.random() * 0.5); // 末端自然下坠
+        let y2 = cy + len * (0.4 + Math.random() * 0.7);
+
         let delay = i * 0.2 + Math.random() * 0.15;
-        addStem(0, 0, cx, cy, x2, y2, 3 + Math.random()*2, cfg.tCol, delay);
-        
+        addStem(0, 0, cx, cy, x2, y2, 3 + Math.random() * 2, cfg.tCol, delay);
+
         let numNodes = 3 + Math.floor(Math.random() * 5); // 每根藤条随机节点数
-        for(let k = 1; k <= numNodes; k++) {
+        for (let k = 1; k <= numNodes; k++) {
           let t = k / (numNodes + 1) + (Math.random() - 0.5) * 0.1; // 沿途节点加入微调抖动
           if (t <= 0 || t >= 1) continue;
           let mt = 1 - t;
-          let px = mt*mt*0 + 2*mt*t*cx + t*t*x2;
-          let py = mt*mt*0 + 2*mt*t*cy + t*t*y2;
-          
-          if(Math.random() > 0.1) addLeaf(px, py, sign*90 + (Math.random()*60-30), 0.6 + Math.random()*0.5, delay + t);
-          if(Math.random() > 0.3) addFlower(px, py, sign*45 + (Math.random()*50-25), 0.5 + Math.random()*0.5, delay + t + 0.2);
+          let px = mt * mt * 0 + 2 * mt * t * cx + t * t * x2;
+          let py = mt * mt * 0 + 2 * mt * t * cy + t * t * y2;
+
+          if (Math.random() > 0.1)
+            addLeaf(
+              px,
+              py,
+              sign * 90 + (Math.random() * 60 - 30),
+              0.6 + Math.random() * 0.5,
+              delay + t,
+            );
+          if (Math.random() > 0.3)
+            addFlower(
+              px,
+              py,
+              sign * 45 + (Math.random() * 50 - 25),
+              0.5 + Math.random() * 0.5,
+              delay + t + 0.2,
+            );
         }
       }
     }
 
-    // 路由分发 (为 Tree 架构也注入初始角度与长度的随机性)
-    if (cfg.arch === 'tree') buildTree(0, 0, (Math.random()-0.5)*0.2, 55 + Math.random()*15, 5, 12 + Math.random()*3, 0.2);
-    else if (cfg.arch === 'basal') buildBasal();
+    // 路由分发
+    if (cfg.arch === 'tree') {
+      let bLen = cfg.baseLen || 70; // 读取当前物种的基础高度
+      let lVar = cfg.lenVar || 30; // 读取当前物种的高度变异范围
+      let tLength = bLen + Math.random() * lVar;
+
+      // 树干粗细与生成的高度成正比联动，同时加上微小的粗糙随机
+      let tWidth = tLength * 0.16 + Math.random() * 4;
+      buildTree(0, 0, (Math.random() - 0.5) * 0.2, tLength, 5, tWidth, 0.2);
+    } else if (cfg.arch === 'basal') buildBasal();
     else if (cfg.arch === 'herb') buildHerb();
     else if (cfg.arch === 'vine') buildVine();
 
@@ -771,91 +1243,125 @@ function initApp() {
   // ================= 音乐播放器系统 (Howler.js) =================
   // 前端JS由于安全限制无法读取文件系统结构，这里将结构映射为JSON
   const filesMap = {
-    morning:[
-      "atlasaudio-corporate-491319.mp3", "atlasaudio-jazz-490623.mp3", "atlasaudio-upbeat-491082.mp3",
-      "paulyudin-piano-music-piano-485929.mp3", "paulyudin-technology-tech-technology-484304.mp3",
-      "prettyjohn1-emotional-piano-487334.mp3", "prettyjohn1-medical-doctor-clinic-background-487928.mp3",
-      "the_mountain-chill-485562.mp3", "the_mountain-luxury-luxury-music-490006.mp3",
-      "the_mountain-news-news-music-490008.mp3", "the_mountain-presentation-presentation-music-490011.mp3",
-      "the_mountain-relaxing-relaxing-music-492810.mp3", "the_mountain-successful-492812.mp3", "the_mountain-wedding-487025.mp3"
+    morning: [
+      'atlasaudio-corporate-491319.mp3',
+      'atlasaudio-jazz-490623.mp3',
+      'atlasaudio-upbeat-491082.mp3',
+      'paulyudin-piano-music-piano-485929.mp3',
+      'paulyudin-technology-tech-technology-484304.mp3',
+      'prettyjohn1-emotional-piano-487334.mp3',
+      'prettyjohn1-medical-doctor-clinic-background-487928.mp3',
+      'the_mountain-chill-485562.mp3',
+      'the_mountain-luxury-luxury-music-490006.mp3',
+      'the_mountain-news-news-music-490008.mp3',
+      'the_mountain-presentation-presentation-music-490011.mp3',
+      'the_mountain-relaxing-relaxing-music-492810.mp3',
+      'the_mountain-successful-492812.mp3',
+      'the_mountain-wedding-487025.mp3',
     ],
-    afternoon:[
-      "apalonbeats-afrobeat-afro-beat-2-491432.mp3", "maksym_dudchyk-lost-in-love-hip-hop-background-music-for-video-stories-43-second-490026.mp3",
-      "mondamusic-background-music-491692.mp3", "mondamusic-promo-advertising-music-491682.mp3",
-      "mondamusic-upbeat-491686.mp3", "paulyudin-no-copyright-music-482400.mp3",
-      "the_mountain-advertising-advertising-music-492799.mp3", "the_mountain-hopeful-hopeful-music-492806.mp3",
-      "the_mountain-meditation-meditation-music-490007.mp3", "the_mountain-piano-background-music-487020.mp3",
-      "the_mountain-soft-background-music-492811.mp3", "the_mountain-upbeat-upbeat-background-music-487024.mp3"
+    afternoon: [
+      'apalonbeats-afrobeat-afro-beat-2-491432.mp3',
+      'maksym_dudchyk-lost-in-love-hip-hop-background-music-for-video-stories-43-second-490026.mp3',
+      'mondamusic-background-music-491692.mp3',
+      'mondamusic-promo-advertising-music-491682.mp3',
+      'mondamusic-upbeat-491686.mp3',
+      'paulyudin-no-copyright-music-482400.mp3',
+      'the_mountain-advertising-advertising-music-492799.mp3',
+      'the_mountain-hopeful-hopeful-music-492806.mp3',
+      'the_mountain-meditation-meditation-music-490007.mp3',
+      'the_mountain-piano-background-music-487020.mp3',
+      'the_mountain-soft-background-music-492811.mp3',
+      'the_mountain-upbeat-upbeat-background-music-487024.mp3',
     ],
-    evening:[
-      "eliveta-corporate-491206.mp3", "mondamusic-asian-491695.mp3", "mondamusic-chill-491681.mp3",
-      "mondamusic-chill-beats-chill-491676.mp3", "mondamusic-dark-ambient-soundscape-dreamscape-2-487315.mp3",
-      "mondamusic-dark-ambient-soundscape-dreamscape-2-491706.mp3", "mondamusic-educational-presentation-tutorial-music-491691.mp3",
-      "mondamusic-lofi-chill-491719.mp3", "mondamusic-lofi-lofi-chill-lofi-girl-491690.mp3",
-      "mondamusic-lounge-491696.mp3", "mondamusic-lounge-jazz-elevator-music-487312.mp3",
-      "mondamusic-minimal-491664.mp3", "mondamusic-positive-house-491683.mp3", "mondamusic-vlogs-vlog-youtube-491672.mp3",
-      "prettyjohn1-lofi-lofi-chill-lofi-girl-490466.mp3", "prettyjohn1-sad-background-music-489875.mp3", "the_mountain-emotional-emotional-music-490002.mp3"
-    ]
+    evening: [
+      'eliveta-corporate-491206.mp3',
+      'mondamusic-asian-491695.mp3',
+      'mondamusic-chill-491681.mp3',
+      'mondamusic-chill-beats-chill-491676.mp3',
+      'mondamusic-dark-ambient-soundscape-dreamscape-2-487315.mp3',
+      'mondamusic-dark-ambient-soundscape-dreamscape-2-491706.mp3',
+      'mondamusic-educational-presentation-tutorial-music-491691.mp3',
+      'mondamusic-lofi-chill-491719.mp3',
+      'mondamusic-lofi-lofi-chill-lofi-girl-491690.mp3',
+      'mondamusic-lounge-491696.mp3',
+      'mondamusic-lounge-jazz-elevator-music-487312.mp3',
+      'mondamusic-minimal-491664.mp3',
+      'mondamusic-positive-house-491683.mp3',
+      'mondamusic-vlogs-vlog-youtube-491672.mp3',
+      'prettyjohn1-lofi-lofi-chill-lofi-girl-490466.mp3',
+      'prettyjohn1-sad-background-music-489875.mp3',
+      'the_mountain-emotional-emotional-music-490002.mp3',
+    ],
   };
 
   // 根据当前时间判断时段
   const hour = new Date().getHours();
-  let timePeriod = "morning";
+  let timePeriod = 'morning';
   if (hour >= 12 && hour < 18) {
-    timePeriod = "afternoon";
+    timePeriod = 'afternoon';
   } else if (hour >= 18 || hour < 5) {
-    timePeriod = "evening";
+    timePeriod = 'evening';
   }
 
   // 解析文件名功能：第一个 - 之前为歌手，最后一个 - 之后为ID，中间为歌名
   function parseFileName(filename) {
     const rawName = filename.replace('.mp3', '');
     const parts = rawName.split('-');
-    
+
     if (parts.length < 3) {
-      return { artist: "未知艺术家", title: rawName };
+      return { artist: '未知艺术家', title: rawName };
     }
-    
+
     const artist = parts[0].replace(/_/g, ' ').toUpperCase();
     const title = parts.slice(1, -1).join(' ').replace(/_/g, ' ');
     return { artist: artist, title: title };
   }
 
   // 组装当前播放列表
-  let playlist = filesMap[timePeriod].map(filename => {
+  let playlist = filesMap[timePeriod].map((filename) => {
     const info = parseFileName(filename);
-    return { artist: info.artist, name: info.title, src: `/Lin/music/${timePeriod}/${encodeURIComponent(filename)}` };
+    return {
+      artist: info.artist,
+      name: info.title,
+      src: `/Lin/music/${timePeriod}/${encodeURIComponent(filename)}`,
+    };
   });
 
   // 读取本地存储的播放器设置（针对当前时段）
   const storageKey = `LinAudio_${timePeriod}`;
-  let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || { mode: 1, disabled:[], vol: 30 };
+  let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || {
+    mode: 1,
+    disabled: [],
+    vol: 30,
+  };
   let playMode = playerSettings.mode; // 0: 列表循环, 1: 随机播放, 2: 单曲循环
-  
+
   function savePlayerSettings() {
     localStorage.setItem(storageKey, JSON.stringify(playerSettings));
   }
 
   // ================= 🎂 生日彩蛋特效引擎 =================
-  window.activateBirthdayMode = function() {
-    console.log("🎂 生日彩蛋触发！特别曲目已加入歌单。");
-    
+  window.activateBirthdayMode = function () {
+    console.log('🎂 生日彩蛋触发！特别曲目已加入歌单。');
+
     // 1. 音乐逻辑
-    const bdayTracks =[
-      "the_mountain-birthday-490600.mp3",
-      "the_mountain-cartoon-cartoon-music-489996.mp3"
-    ].map(f => ({
-      artist: parseFileName(f).artist, name: parseFileName(f).title, src: `/Lin/music/birthday/${encodeURIComponent(f)}`
+    const bdayTracks = [
+      'the_mountain-birthday-490600.mp3',
+      'the_mountain-cartoon-cartoon-music-489996.mp3',
+    ].map((f) => ({
+      artist: parseFileName(f).artist,
+      name: parseFileName(f).title,
+      src: `/Lin/music/birthday/${encodeURIComponent(f)}`,
     }));
     playlist.unshift(...bdayTracks);
-    
+
     const albumArt = document.getElementById('album-art');
     if (albumArt) albumArt.className = 'p-album-art birthday';
-    
-    if(typeof renderPlaylist === 'function') renderPlaylist(); 
-    if(currentHowl) {
-        currentHowl.stop();
-        loadTrack(0, true);
+
+    if (typeof renderPlaylist === 'function') renderPlaylist();
+    if (currentHowl) {
+      currentHowl.stop();
+      loadTrack(0, true);
     }
 
     // 2. 触发满屏飘带纸屑 (2D Canvas)
@@ -863,7 +1369,7 @@ function initApp() {
 
     // 3. 动态加载 Three.js 并在此处渲染 3D 礼盒，替换植物
     const gardenLabel = document.getElementById('gardenLabel');
-    if (gardenLabel) gardenLabel.innerText = "生日快乐！点击拆开礼物 🎁";
+    if (gardenLabel) gardenLabel.innerText = '生日快乐！点击拆开礼物 🎁';
     loadAndShowPresent();
   };
 
@@ -874,114 +1380,153 @@ function initApp() {
 
     const canvas = document.createElement('canvas');
     canvas.id = 'confetti-canvas';
-    
-    canvas.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:99999; pointer-events:none; opacity:0; transition:opacity 0.8s ease;';
+
+    canvas.style.cssText =
+      'position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:99999; pointer-events:none; opacity:0; transition:opacity 0.8s ease;';
     document.body.appendChild(canvas);
-    
+
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => { canvas.style.opacity = '1'; });
+      requestAnimationFrame(() => {
+        canvas.style.opacity = '1';
+      });
     });
 
     const ctx = canvas.getContext('2d');
-    const retina = Math.min(2, window.devicePixelRatio || 1); 
-    let w = window.innerWidth; let h = window.innerHeight;
-    canvas.width = w * retina; canvas.height = h * retina;
+    const retina = Math.min(2, window.devicePixelRatio || 1);
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    canvas.width = w * retina;
+    canvas.height = h * retina;
 
     const DEG_TO_RAD = Math.PI / 180;
-    const colors = [["#df0049", "#660671"],["#00e857", "#005291"], ["#2bebbc", "#05798a"],["#ffd200", "#b06c00"]];
-    
+    const colors = [
+      ['#df0049', '#660671'],
+      ['#00e857', '#005291'],
+      ['#2bebbc', '#05798a'],
+      ['#ffd200', '#b06c00'],
+    ];
+
     class Vector2 {
-       constructor(x, y) { this.x = x; this.y = y; }
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+      }
     }
     class EulerMass {
-       constructor(x, y, mass, drag) {
-           this.pos = new Vector2(x, y);
-           this.mass = mass; this.drag = drag;
-           this.force = new Vector2(0,0); this.vel = new Vector2(0,0);
-       }
-       AddForce(fx, fy) { this.force.x += fx; this.force.y += fy; }
-       Integrate(dt) {
-           let speed = Math.sqrt(this.vel.x*this.vel.x + this.vel.y*this.vel.y);
-           let accX = (this.force.x - this.drag * this.mass * this.vel.x * speed) / this.mass;
-           let accY = (this.force.y - this.drag * this.mass * this.vel.y * speed) / this.mass;
-           this.pos.x += this.vel.x * dt; this.pos.y += this.vel.y * dt;
-           this.vel.x += accX * dt; this.vel.y += accY * dt;
-           this.force.x = 0; this.force.y = 0;
-       }
+      constructor(x, y, mass, drag) {
+        this.pos = new Vector2(x, y);
+        this.mass = mass;
+        this.drag = drag;
+        this.force = new Vector2(0, 0);
+        this.vel = new Vector2(0, 0);
+      }
+      AddForce(fx, fy) {
+        this.force.x += fx;
+        this.force.y += fy;
+      }
+      Integrate(dt) {
+        let speed = Math.sqrt(this.vel.x * this.vel.x + this.vel.y * this.vel.y);
+        let accX = (this.force.x - this.drag * this.mass * this.vel.x * speed) / this.mass;
+        let accY = (this.force.y - this.drag * this.mass * this.vel.y * speed) / this.mass;
+        this.pos.x += this.vel.x * dt;
+        this.pos.y += this.vel.y * dt;
+        this.vel.x += accX * dt;
+        this.vel.y += accY * dt;
+        this.force.x = 0;
+        this.force.y = 0;
+      }
     }
 
     class ConfettiRibbon {
-       constructor(x, y) {
-           this.particleCount = 20;
-           this.particleDist = 8.0;
-           this.particles =[];
-           const ci = Math.floor(Math.random() * colors.length);
-           this.front = colors[ci][0]; this.back = colors[ci][1];
-           this.xOff = Math.cos(45 * DEG_TO_RAD) * 8.0;
-           this.yOff = Math.sin(45 * DEG_TO_RAD) * 8.0;
-           this.pos = new Vector2(x, y);
-           this.prevPos = new Vector2(x, y);
-           this.velInherit = Math.random() * 2 + 4;
-           this.time = Math.random() * 100;
-           this.oscSpeed = Math.random() * 2 + 2;
-           this.oscDist = Math.random() * 40 + 40;
-           this.ySpeed = Math.random() * 40 + 80;
-           for(let i=0; i<this.particleCount; i++) {
-               this.particles.push(new EulerMass(x, y - i * this.particleDist, 1, 0.05));
-           }
-       }
-       update(dt) {
-           this.time += dt * this.oscSpeed;
-           this.pos.y += this.ySpeed * dt;
-           this.pos.x += Math.cos(this.time) * this.oscDist * dt;
-           this.particles[0].pos.x = this.pos.x;
-           this.particles[0].pos.y = this.pos.y;
-           let dx = this.prevPos.x - this.pos.x;
-           let dy = this.prevPos.y - this.pos.y;
-           let delta = Math.sqrt(dx*dx + dy*dy);
-           this.prevPos.x = this.pos.x; this.prevPos.y = this.pos.y;
+      constructor(x, y) {
+        this.particleCount = 20;
+        this.particleDist = 8.0;
+        this.particles = [];
+        const ci = Math.floor(Math.random() * colors.length);
+        this.front = colors[ci][0];
+        this.back = colors[ci][1];
+        this.xOff = Math.cos(45 * DEG_TO_RAD) * 8.0;
+        this.yOff = Math.sin(45 * DEG_TO_RAD) * 8.0;
+        this.pos = new Vector2(x, y);
+        this.prevPos = new Vector2(x, y);
+        this.velInherit = Math.random() * 2 + 4;
+        this.time = Math.random() * 100;
+        this.oscSpeed = Math.random() * 2 + 2;
+        this.oscDist = Math.random() * 40 + 40;
+        this.ySpeed = Math.random() * 40 + 80;
+        for (let i = 0; i < this.particleCount; i++) {
+          this.particles.push(new EulerMass(x, y - i * this.particleDist, 1, 0.05));
+        }
+      }
+      update(dt) {
+        this.time += dt * this.oscSpeed;
+        this.pos.y += this.ySpeed * dt;
+        this.pos.x += Math.cos(this.time) * this.oscDist * dt;
+        this.particles[0].pos.x = this.pos.x;
+        this.particles[0].pos.y = this.pos.y;
+        let dx = this.prevPos.x - this.pos.x;
+        let dy = this.prevPos.y - this.pos.y;
+        let delta = Math.sqrt(dx * dx + dy * dy);
+        this.prevPos.x = this.pos.x;
+        this.prevPos.y = this.pos.y;
 
-           for(let i=1; i<this.particleCount; i++) {
-               let dirX = this.particles[i-1].pos.x - this.particles[i].pos.x;
-               let dirY = this.particles[i-1].pos.y - this.particles[i].pos.y;
-               let len = Math.sqrt(dirX*dirX + dirY*dirY);
-               if(len>0){ dirX/=len; dirY/=len; }
-               this.particles[i].AddForce(dirX * (delta/dt) * this.velInherit, dirY * (delta/dt) * this.velInherit);
-           }
-           for(let i=1; i<this.particleCount; i++) this.particles[i].Integrate(dt);
-           for(let i=1; i<this.particleCount; i++) {
-               let rpX = this.particles[i].pos.x - this.particles[i-1].pos.x;
-               let rpY = this.particles[i].pos.y - this.particles[i-1].pos.y;
-               let len = Math.sqrt(rpX*rpX + rpY*rpY);
-               if(len>0){ rpX/=len; rpY/=len; }
-               this.particles[i].pos.x = this.particles[i-1].pos.x + rpX * this.particleDist;
-               this.particles[i].pos.y = this.particles[i-1].pos.y + rpY * this.particleDist;
-           }
-           if(this.pos.y > h + this.particleDist * this.particleCount) {
-               this.pos.y = -Math.random() * h; this.pos.x = Math.random() * w;
-               this.prevPos.x = this.pos.x; this.prevPos.y = this.pos.y;
-               for(let i=0; i<this.particleCount; i++) {
-                   this.particles[i].pos.x = this.pos.x;
-                   this.particles[i].pos.y = this.pos.y - i * this.particleDist;
-               }
-           }
-       }
-       draw() {
-           for(let i=0; i<this.particleCount-1; i++) {
-               let p0x = this.particles[i].pos.x + this.xOff, p0y = this.particles[i].pos.y + this.yOff;
-               let p1x = this.particles[i+1].pos.x + this.xOff, p1y = this.particles[i+1].pos.y + this.yOff;
-               let side = (this.particles[i].pos.x - this.particles[i+1].pos.x)*(p1y - this.particles[i+1].pos.y) - 
-                          (this.particles[i].pos.y - this.particles[i+1].pos.y)*(p1x - this.particles[i+1].pos.x);
-               ctx.fillStyle = side < 0 ? this.front : this.back;
-               ctx.beginPath();
-               ctx.moveTo(this.particles[i].pos.x * retina, this.particles[i].pos.y * retina);
-               ctx.lineTo(this.particles[i+1].pos.x * retina, this.particles[i+1].pos.y * retina);
-               ctx.lineTo(p1x * retina, p1y * retina);
-               ctx.lineTo(p0x * retina, p0y * retina);
-               ctx.closePath();
-               ctx.fill();
-           }
-       }
+        for (let i = 1; i < this.particleCount; i++) {
+          let dirX = this.particles[i - 1].pos.x - this.particles[i].pos.x;
+          let dirY = this.particles[i - 1].pos.y - this.particles[i].pos.y;
+          let len = Math.sqrt(dirX * dirX + dirY * dirY);
+          if (len > 0) {
+            dirX /= len;
+            dirY /= len;
+          }
+          this.particles[i].AddForce(
+            dirX * (delta / dt) * this.velInherit,
+            dirY * (delta / dt) * this.velInherit,
+          );
+        }
+        for (let i = 1; i < this.particleCount; i++) this.particles[i].Integrate(dt);
+        for (let i = 1; i < this.particleCount; i++) {
+          let rpX = this.particles[i].pos.x - this.particles[i - 1].pos.x;
+          let rpY = this.particles[i].pos.y - this.particles[i - 1].pos.y;
+          let len = Math.sqrt(rpX * rpX + rpY * rpY);
+          if (len > 0) {
+            rpX /= len;
+            rpY /= len;
+          }
+          this.particles[i].pos.x = this.particles[i - 1].pos.x + rpX * this.particleDist;
+          this.particles[i].pos.y = this.particles[i - 1].pos.y + rpY * this.particleDist;
+        }
+        if (this.pos.y > h + this.particleDist * this.particleCount) {
+          this.pos.y = -Math.random() * h;
+          this.pos.x = Math.random() * w;
+          this.prevPos.x = this.pos.x;
+          this.prevPos.y = this.pos.y;
+          for (let i = 0; i < this.particleCount; i++) {
+            this.particles[i].pos.x = this.pos.x;
+            this.particles[i].pos.y = this.pos.y - i * this.particleDist;
+          }
+        }
+      }
+      draw() {
+        for (let i = 0; i < this.particleCount - 1; i++) {
+          let p0x = this.particles[i].pos.x + this.xOff,
+            p0y = this.particles[i].pos.y + this.yOff;
+          let p1x = this.particles[i + 1].pos.x + this.xOff,
+            p1y = this.particles[i + 1].pos.y + this.yOff;
+          let side =
+            (this.particles[i].pos.x - this.particles[i + 1].pos.x) *
+              (p1y - this.particles[i + 1].pos.y) -
+            (this.particles[i].pos.y - this.particles[i + 1].pos.y) *
+              (p1x - this.particles[i + 1].pos.x);
+          ctx.fillStyle = side < 0 ? this.front : this.back;
+          ctx.beginPath();
+          ctx.moveTo(this.particles[i].pos.x * retina, this.particles[i].pos.y * retina);
+          ctx.lineTo(this.particles[i + 1].pos.x * retina, this.particles[i + 1].pos.y * retina);
+          ctx.lineTo(p1x * retina, p1y * retina);
+          ctx.lineTo(p0x * retina, p0y * retina);
+          ctx.closePath();
+          ctx.fill();
+        }
+      }
     }
 
     class Paper {
@@ -996,10 +1541,11 @@ function initApp() {
         this.ySpeed = Math.random() * 60 + 50.0;
         this.time = Math.random();
         const ci = Math.floor(Math.random() * colors.length);
-        this.front = colors[ci][0]; this.back = colors[ci][1];
-        this.corners = Array.from({length: 4}, (_, i) => ({
+        this.front = colors[ci][0];
+        this.back = colors[ci][1];
+        this.corners = Array.from({ length: 4 }, (_, i) => ({
           x: Math.cos(this.angle + DEG_TO_RAD * (i * 90 + 45)),
-          y: Math.sin(this.angle + DEG_TO_RAD * (i * 90 + 45))
+          y: Math.sin(this.angle + DEG_TO_RAD * (i * 90 + 45)),
         }));
       }
       update(dt) {
@@ -1007,7 +1553,10 @@ function initApp() {
         this.rotation += this.rotationSpeed * dt;
         this.pos.x += Math.cos(this.time * this.oscSpeed) * this.xSpeed * dt;
         this.pos.y += this.ySpeed * dt;
-        if (this.pos.y > h) { this.pos.x = Math.random() * w; this.pos.y = -50; }
+        if (this.pos.y > h) {
+          this.pos.x = Math.random() * w;
+          this.pos.y = -50;
+        }
       }
       draw() {
         const cosA = Math.cos(DEG_TO_RAD * this.rotation);
@@ -1022,12 +1571,13 @@ function initApp() {
         ctx.fill();
       }
     }
-    
-    const entities =[];
+
+    const entities = [];
     const paperCount = w < 768 ? 20 : 40;
     const ribbonCount = w < 768 ? 8 : 16;
     for (let i = 0; i < paperCount; i++) entities.push(new Paper());
-    for (let i = 0; i < ribbonCount; i++) entities.push(new ConfettiRibbon(Math.random() * w, -Math.random() * h * 2));
+    for (let i = 0; i < ribbonCount; i++)
+      entities.push(new ConfettiRibbon(Math.random() * w, -Math.random() * h * 2));
 
     let lastTime = Date.now();
     let rafId;
@@ -1037,20 +1587,25 @@ function initApp() {
       const now = Date.now();
       let dt = (now - lastTime) / 1000;
       lastTime = now;
-      
-      if (dt <= 0.001) dt = 0.001; 
+
+      if (dt <= 0.001) dt = 0.001;
       dt = Math.min(dt, 0.05);
-      
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      entities.forEach(p => { p.update(dt); p.draw(); });
-      
+      entities.forEach((p) => {
+        p.update(dt);
+        p.draw();
+      });
+
       if (!isStopping) rafId = requestAnimationFrame(animate);
     }
     animate();
 
     window.addEventListener('resize', () => {
-      w = window.innerWidth; h = window.innerHeight;
-      canvas.width = w * retina; canvas.height = h * retina;
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w * retina;
+      canvas.height = h * retina;
     });
 
     window.stopConfetti = () => {
@@ -1058,7 +1613,7 @@ function initApp() {
       setTimeout(() => {
         isStopping = true;
         cancelAnimationFrame(rafId);
-        if (document.body.contains(canvas)) canvas.remove(); 
+        if (document.body.contains(canvas)) canvas.remove();
       }, 800);
     };
   }
@@ -1066,48 +1621,48 @@ function initApp() {
   async function loadAndShowPresent() {
     const container = document.getElementById('svgGarden');
     if (!container) return;
-    
-    container.dataset.presentActive = "true"; 
 
-    if (window.THREE) { 
-      initPresent(container, window.THREE); 
-      return; 
+    container.dataset.presentActive = 'true';
+
+    if (window.THREE) {
+      initPresent(container, window.THREE);
+      return;
     }
 
     container.innerHTML = `<div style="display:flex; height:100%; align-items:center; justify-content:center; color:var(--text-main); font-size:12px; font-weight:bold; opacity:0.6; animation: eqPulse 1s infinite alternate;">正在打包礼物...</div>`;
 
     try {
       const THREE = await import('https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js');
-      window.THREE = THREE; 
+      window.THREE = THREE;
       initPresent(container, THREE);
     } catch (e) {
-      console.error("[Lin] 3D 彩蛋引擎加载失败:", e);
+      console.error('[Lin] 3D 彩蛋引擎加载失败:', e);
       container.innerHTML = `<div style="text-align:center; padding-top:40px; color:#e74c3c; font-size:12px; font-weight:bold;">礼物被快递弄丢了 (网络阻断)</div>`;
     }
   }
 
   function initPresent(container, THREE) {
-    container.innerHTML = ''; 
+    container.innerHTML = '';
     let scene, camera, renderer, present, rafId;
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
-    let intersects =[];
+    let intersects = [];
 
     scene = new THREE.Scene();
-    
+
     let cw = container.clientWidth || 300;
     let ch = container.clientHeight || 200;
-    
+
     camera = new THREE.PerspectiveCamera(60, cw / ch, 0.1, 1000);
-    camera.position.set(22, 22, 22); 
+    camera.position.set(22, 22, 22);
     camera.lookAt(scene.position);
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setClearColor(0x000000, 0); 
+    renderer.setClearColor(0x000000, 0);
     renderer.setSize(cw, ch);
-    
+
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap; 
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     container.appendChild(renderer.domElement);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -1115,91 +1670,142 @@ function initApp() {
     const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
     dirLight.position.set(10, 20, 0);
     dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = window.innerWidth < 768 ? 256 : 512; 
+    dirLight.shadow.mapSize.width = window.innerWidth < 768 ? 256 : 512;
     dirLight.shadow.mapSize.height = window.innerWidth < 768 ? 256 : 512;
     scene.add(dirLight);
 
     class Present {
       constructor() {
         this.mesh = new THREE.Object3D();
-        this.opening = false; this.opened = false;
-        this.openTime = 0; this.opacity = 1;
-        this.pieces =[];
-        
-        const S = 8, HS = S/2, divs = 3, fracS = S/divs, HD = divs/2;
-        
+        this.opening = false;
+        this.opened = false;
+        this.openTime = 0;
+        this.opacity = 1;
+        this.pieces = [];
+
+        const S = 8,
+          HS = S / 2,
+          divs = 3,
+          fracS = S / divs,
+          HD = divs / 2;
+
         const geo = new THREE.PlaneGeometry(fracS, fracS);
-        const wrapMat = new THREE.MeshStandardMaterial({ color: 0xffe6e6, side: THREE.DoubleSide, transparent: true }); 
-        const ribMat = new THREE.MeshStandardMaterial({ color: 0xff4d79, side: THREE.DoubleSide, transparent: true }); 
+        const wrapMat = new THREE.MeshStandardMaterial({
+          color: 0xffe6e6,
+          side: THREE.DoubleSide,
+          transparent: true,
+        });
+        const ribMat = new THREE.MeshStandardMaterial({
+          color: 0xff4d79,
+          side: THREE.DoubleSide,
+          transparent: true,
+        });
 
         const rand = (min, max) => Math.random() * (max - min) + min;
 
         for (let s = 0; s < 6; ++s) {
           let side = new THREE.Object3D();
-          if(s===0) { side.position.set(0,-HS,0); side.rotation.x = Math.PI/2; }
-          else if(s===1) { side.position.set(0,0,-HS); side.rotation.y = Math.PI; }
-          else if(s===2) { side.position.set(-HS,0,0); side.rotation.y = -Math.PI/2; }
-          else if(s===3) { side.position.set(HS,0,0); side.rotation.y = Math.PI/2; }
-          else if(s===4) { side.position.set(0,0,HS); }
-          else { side.position.set(0,HS,0); side.rotation.x = -Math.PI/2; }
+          if (s === 0) {
+            side.position.set(0, -HS, 0);
+            side.rotation.x = Math.PI / 2;
+          } else if (s === 1) {
+            side.position.set(0, 0, -HS);
+            side.rotation.y = Math.PI;
+          } else if (s === 2) {
+            side.position.set(-HS, 0, 0);
+            side.rotation.y = -Math.PI / 2;
+          } else if (s === 3) {
+            side.position.set(HS, 0, 0);
+            side.rotation.y = Math.PI / 2;
+          } else if (s === 4) {
+            side.position.set(0, 0, HS);
+          } else {
+            side.position.set(0, HS, 0);
+            side.rotation.x = -Math.PI / 2;
+          }
 
           for (let h = -HD; h < HD; h++) {
             for (let w = -HD; w < HD; w++) {
-              let isM = (w >= -1 && w <= 0) || (h >= -1 && h <= 0 && (s===0||s===5));
+              let isM = (w >= -1 && w <= 0) || (h >= -1 && h <= 0 && (s === 0 || s === 5));
               let piece = new THREE.Mesh(geo, isM ? ribMat.clone() : wrapMat.clone());
               piece.receiveShadow = true;
-              piece.firstPos = { x: fracS*w + fracS/2, y: fracS*h + fracS/2, z: 0 };
+              piece.firstPos = {
+                x: fracS * w + fracS / 2,
+                y: fracS * h + fracS / 2,
+                z: 0,
+              };
               piece.position.set(piece.firstPos.x, piece.firstPos.y, 0);
-              
-              piece.vel = new THREE.Vector3(rand(0.5, 1.5) * (Math.random()<0.5?-1:1), rand(0.5, 1.5) * (Math.random()<0.5?-1:1), rand(0.5, 1.5) * (Math.random()<0.5?-1:1));
-              piece.rotSpeed = new THREE.Vector3(rand(0.05,0.15)*(Math.random()<0.5?-1:1), rand(0.05,0.15)*(Math.random()<0.5?-1:1), rand(0.05,0.15)*(Math.random()<0.5?-1:1));
-              side.add(piece); this.pieces.push(piece);
+
+              piece.vel = new THREE.Vector3(
+                rand(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1),
+                rand(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1),
+                rand(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1),
+              );
+              piece.rotSpeed = new THREE.Vector3(
+                rand(0.05, 0.15) * (Math.random() < 0.5 ? -1 : 1),
+                rand(0.05, 0.15) * (Math.random() < 0.5 ? -1 : 1),
+                rand(0.05, 0.15) * (Math.random() < 0.5 ? -1 : 1),
+              );
+              side.add(piece);
+              this.pieces.push(piece);
             }
           }
           this.mesh.add(side);
         }
-        
+
         const bowGeo = new THREE.DodecahedronGeometry(2);
         this.bow = new THREE.Mesh(bowGeo, ribMat.clone());
         this.bow.castShadow = true;
         this.bow.firstPos = { y: HS + 1 };
         this.bow.position.set(0, this.bow.firstPos.y, 0);
-        this.bow.vel = new THREE.Vector3(rand(0.5,1.5)*(Math.random()<0.5?-1:1), 1.5, rand(0.5,1.5)*(Math.random()<0.5?-1:1));
-        this.bow.rotSpeed = new THREE.Vector3(rand(0.1,0.2), rand(0.1,0.2), rand(0.1,0.2));
+        this.bow.vel = new THREE.Vector3(
+          rand(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1),
+          1.5,
+          rand(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1),
+        );
+        this.bow.rotSpeed = new THREE.Vector3(rand(0.1, 0.2), rand(0.1, 0.2), rand(0.1, 0.2));
         this.mesh.add(this.bow);
-        
+
         this.mesh.rotation.y = Math.PI / 4;
       }
 
       update() {
-        if(!this.opening && !this.opened) {
-           this.mesh.rotation.y += 0.01; 
+        if (!this.opening && !this.opened) {
+          this.mesh.rotation.y += 0.01;
         } else if (this.opening) {
-          let scaleBy = 1 - (0.05 * Math.sin(8 * Math.PI * this.openTime/100));
+          let scaleBy = 1 - 0.05 * Math.sin((8 * Math.PI * this.openTime) / 100);
           this.mesh.scale.set(scaleBy, scaleBy, scaleBy);
           this.openTime += 5;
-          if (this.openTime >= 100) { this.opening = false; this.opened = true; }
+          if (this.openTime >= 100) {
+            this.opening = false;
+            this.opened = true;
+          }
         } else if (this.opened) {
           if (this.opacity > 0) {
             this.opacity -= 0.03;
-            this.pieces.forEach(e => {
+            this.pieces.forEach((e) => {
               e.position.add(e.vel);
-              e.rotation.x += e.rotSpeed.x; e.rotation.y += e.rotSpeed.y; e.rotation.z += e.rotSpeed.z;
+              e.rotation.x += e.rotSpeed.x;
+              e.rotation.y += e.rotSpeed.y;
+              e.rotation.z += e.rotSpeed.z;
               e.material.opacity = this.opacity;
             });
             this.bow.position.add(this.bow.vel);
-            this.bow.rotation.x += this.bow.rotSpeed.x; this.bow.rotation.y += this.bow.rotSpeed.y;
+            this.bow.rotation.x += this.bow.rotSpeed.x;
+            this.bow.rotation.y += this.bow.rotSpeed.y;
             this.bow.material.opacity = this.opacity;
           } else {
-            this.opacity = 1; this.opened = false; this.openTime = 0;
-            this.mesh.scale.set(1,1,1);
-            this.pieces.forEach(e => {
+            this.opacity = 1;
+            this.opened = false;
+            this.openTime = 0;
+            this.mesh.scale.set(1, 1, 1);
+            this.pieces.forEach((e) => {
               e.position.set(e.firstPos.x, e.firstPos.y, e.firstPos.z);
-              e.rotation.set(0,0,0);
+              e.rotation.set(0, 0, 0);
               e.material.opacity = 1;
             });
             this.bow.position.set(0, this.bow.firstPos.y, 0);
-            this.bow.rotation.set(0,0,0);
+            this.bow.rotation.set(0, 0, 0);
             this.bow.material.opacity = 1;
           }
         }
@@ -1211,7 +1817,7 @@ function initApp() {
 
     function animate() {
       rafId = requestAnimationFrame(animate);
-      if(present) present.update();
+      if (present) present.update();
       renderer.render(scene, camera);
     }
     animate();
@@ -1219,35 +1825,37 @@ function initApp() {
     const handleInteract = (e) => {
       let cx = e.clientX || (e.touches && e.touches[0].clientX);
       let cy = e.clientY || (e.touches && e.touches[0].clientY);
-      if(!cx || !cy) return;
-      
+      if (!cx || !cy) return;
+
       const bcr = renderer.domElement.getBoundingClientRect();
       pointer.x = ((cx - bcr.left) / bcr.width) * 2 - 1;
       pointer.y = -((cy - bcr.top) / bcr.height) * 2 + 1;
-      
+
       raycaster.setFromCamera(pointer, camera);
       intersects = raycaster.intersectObjects(present.mesh.children, true);
-      
+
       if (intersects.length > 0) {
-          e.preventDefault(); 
-          if (!present.opening && !present.opened) {
-              present.opening = true;
-              if(window.stopConfetti) window.stopConfetti();
-          }
+        e.preventDefault();
+        if (!present.opening && !present.opened) {
+          present.opening = true;
+          if (window.stopConfetti) window.stopConfetti();
+        }
       }
     };
 
-    renderer.domElement.addEventListener("mousedown", handleInteract);
-    renderer.domElement.addEventListener("touchstart", handleInteract, {passive: false});
-    
-    const resizeObserver = new ResizeObserver(entries => {
+    renderer.domElement.addEventListener('mousedown', handleInteract);
+    renderer.domElement.addEventListener('touchstart', handleInteract, {
+      passive: false,
+    });
+
+    const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         let ew = entry.contentRect.width;
         let eh = entry.contentRect.height;
         if (ew > 0 && eh > 0) {
-            camera.aspect = ew / eh;
-            camera.updateProjectionMatrix();
-            renderer.setSize(ew, eh);
+          camera.aspect = ew / eh;
+          camera.updateProjectionMatrix();
+          renderer.setSize(ew, eh);
         }
       }
     });
@@ -1273,14 +1881,14 @@ function initApp() {
   const volumeSlider = document.getElementById('volumeSlider');
   const autoPlaySwitch = document.getElementById('autoPlaySwitch');
   const albumArt = document.getElementById('album-art');
-  
+
   // 设置唱片机根据时段分配外观颜色
   if (albumArt) albumArt.className = `p-album-art ${timePeriod}`;
   if (volumeSlider) volumeSlider.value = playerSettings.vol;
 
   // 格式化时间为 MM:SS
   function formatTime(secs) {
-    if (isNaN(secs) || secs < 0) return "00:00";
+    if (isNaN(secs) || secs < 0) return '00:00';
     const minutes = Math.floor(secs / 60);
     const seconds = Math.floor(secs % 60);
     return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -1290,11 +1898,12 @@ function initApp() {
   function renderPlaylist() {
     const container = document.getElementById('playlist-container');
     if (!container) return;
-    container.innerHTML = playlist.map((track, idx) => {
-      const isDisabled = playerSettings.disabled.includes(track.src);
-      const isActive = idx === currentTrackIndex;
-      const eyeIcon = isDisabled ? '🙉' : '🎵️';
-      return `
+    container.innerHTML = playlist
+      .map((track, idx) => {
+        const isDisabled = playerSettings.disabled.includes(track.src);
+        const isActive = idx === currentTrackIndex;
+        const eyeIcon = isDisabled ? '🙉' : '🎵️';
+        return `
         <div class="playlist-item ${isDisabled ? 'disabled' : ''} ${isActive ? 'active' : ''}" data-idx="${idx}">
           <div class="playlist-item-info">
             <span class="li-title">${track.name}</span>
@@ -1303,37 +1912,38 @@ function initApp() {
           <div class="li-toggle" data-idx="${idx}" title="${isDisabled ? '解除拉黑' : '拉黑此歌曲'}">${eyeIcon}</div>
         </div>
       `;
-    }).join('');
+      })
+      .join('');
 
     // 绑定点击事件
-    container.querySelectorAll('.playlist-item').forEach(item => {
+    container.querySelectorAll('.playlist-item').forEach((item) => {
       item.addEventListener('click', (e) => {
         const idx = parseInt(item.getAttribute('data-idx'));
         const trackSrc = playlist[idx].src;
 
         if (e.target.closest('.li-toggle')) {
-          e.stopPropagation(); 
+          e.stopPropagation();
           if (playerSettings.disabled.includes(trackSrc)) {
-            playerSettings.disabled = playerSettings.disabled.filter(src => src !== trackSrc);
+            playerSettings.disabled = playerSettings.disabled.filter((src) => src !== trackSrc);
             console.log(`[Lin Debug][恢复] ${playlist[idx].name}`);
           } else {
             playerSettings.disabled.push(trackSrc);
             console.log(`[Lin Debug][拉黑] ${playlist[idx].name}`);
-            
+
             if (idx === currentTrackIndex) {
               let nextValid = getNextValidIndex(currentTrackIndex, 1);
               if (nextValid !== -1) {
-                  loadTrack(nextValid, isPlaying);
+                loadTrack(nextValid, isPlaying);
               } else {
-                  pauseTrack();
+                pauseTrack();
               }
             }
           }
           savePlayerSettings();
-          renderPlaylist(); 
+          renderPlaylist();
           return;
         }
-        
+
         if (playerSettings.disabled.includes(trackSrc)) return; // 拦截被拉黑歌曲的点击播放
         if (idx !== currentTrackIndex) loadTrack(idx, true);
         else togglePlay();
@@ -1342,19 +1952,23 @@ function initApp() {
   }
 
   function getValidIndices() {
-    let valid =[];
-    playlist.forEach((t, i) => { if (!playerSettings.disabled.includes(t.src)) valid.push(i); });
+    let valid = [];
+    playlist.forEach((t, i) => {
+      if (!playerSettings.disabled.includes(t.src)) valid.push(i);
+    });
     return valid;
   }
 
   function getNextValidIndex(currentIndex, direction = 1) {
     let valid = getValidIndices();
     if (valid.length === 0) return -1;
-    
+
     if (playMode === 1) {
       if (valid.length === 1) return valid[0];
       let rnd;
-      do { rnd = valid[Math.floor(Math.random() * valid.length)]; } while (rnd === currentIndex);
+      do {
+        rnd = valid[Math.floor(Math.random() * valid.length)];
+      } while (rnd === currentIndex);
       return rnd;
     } else {
       let pos = valid.indexOf(currentIndex);
@@ -1362,10 +1976,13 @@ function initApp() {
         return valid[(pos + direction + valid.length) % valid.length];
       } else {
         if (direction === 1) {
-          let nextValid = valid.find(i => i > currentIndex);
+          let nextValid = valid.find((i) => i > currentIndex);
           return nextValid !== undefined ? nextValid : valid[0];
         } else {
-          let prevValid = valid.slice().reverse().find(i => i < currentIndex);
+          let prevValid = valid
+            .slice()
+            .reverse()
+            .find((i) => i < currentIndex);
           return prevValid !== undefined ? prevValid : valid[valid.length - 1];
         }
       }
@@ -1401,15 +2018,16 @@ function initApp() {
     if (playMode === 1) {
       if (validIndices.length === 1) nextIndex = validIndices[0];
       else {
-        do { nextIndex = validIndices[Math.floor(Math.random() * validIndices.length)]; } 
-        while (nextIndex === currentTrackIndex);
+        do {
+          nextIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+        } while (nextIndex === currentTrackIndex);
       }
     } else {
       let pos = validIndices.indexOf(currentTrackIndex);
       if (pos !== -1) {
         nextIndex = validIndices[(pos + 1) % validIndices.length];
       } else {
-        let nextValid = validIndices.find(i => i > currentTrackIndex);
+        let nextValid = validIndices.find((i) => i > currentTrackIndex);
         nextIndex = nextValid !== undefined ? nextValid : validIndices[0];
       }
     }
@@ -1422,39 +2040,50 @@ function initApp() {
       src: [playlist[nextIndex].src],
       html5: true,
       preload: true,
-      volume: 1
+      volume: 1,
     });
   }
 
   function bindHowlEvents(howlObj, autoStart) {
-    howlObj.on('load', function() {
+    howlObj.on('load', function () {
       const tTot = document.getElementById('p-time-total');
       if (tTot) tTot.innerText = formatTime(this.duration());
       if (autoStart) playTrack();
     });
-    howlObj.on('play', function() {
+    howlObj.on('play', function () {
       isPlaying = true;
       updateUI(true);
-      
+
       this.fade(this.volume(), 1, 1000);
 
       if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
       progressAnimationFrame = requestAnimationFrame(stepProgress);
     });
-    howlObj.on('pause', function() { isPlaying = false; updateUI(false); });
-    howlObj.on('stop', function() { isPlaying = false; updateUI(false); });
-    howlObj.on('end', function() {
-      if (autoPlaySwitch && autoPlaySwitch.checked) playNext(true); 
-      else { isPlaying = false; updateUI(false); }
+    howlObj.on('pause', function () {
+      isPlaying = false;
+      updateUI(false);
     });
-    howlObj.on('loaderror', function(id, err) { console.error("音频加载失败:", err); });
+    howlObj.on('stop', function () {
+      isPlaying = false;
+      updateUI(false);
+    });
+    howlObj.on('end', function () {
+      if (autoPlaySwitch && autoPlaySwitch.checked) playNext(true);
+      else {
+        isPlaying = false;
+        updateUI(false);
+      }
+    });
+    howlObj.on('loaderror', function (id, err) {
+      console.error('音频加载失败:', err);
+    });
   }
 
   function loadTrack(index, autoStart = false) {
     if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
-      console.warn("[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。");
-      if(trackArtist) trackArtist.innerText = "系统离线";
-      if(trackName) trackName.innerText = "网络异常或 CDN 被拦截，音乐不可用";
+      console.warn('[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。');
+      if (trackArtist) trackArtist.innerText = '系统离线';
+      if (trackName) trackName.innerText = '网络异常或 CDN 被拦截，音乐不可用';
       return;
     }
 
@@ -1462,15 +2091,15 @@ function initApp() {
     const track = playlist[index];
     trackArtist.innerText = track.artist;
     trackName.innerText = track.name;
-    
+
     const barEl = document.getElementById('p-bar');
     const tCur = document.getElementById('p-time-current');
     const tTot = document.getElementById('p-time-total');
     if (barEl) barEl.style.width = '0%';
-    if (tCur) tCur.innerText = "00:00";
-    if (tTot) tTot.innerText = "00:00";
-    
-    renderPlaylist(); 
+    if (tCur) tCur.innerText = '00:00';
+    if (tTot) tTot.innerText = '00:00';
+
+    renderPlaylist();
 
     if (currentHowl) {
       currentHowl.stop();
@@ -1481,11 +2110,15 @@ function initApp() {
       currentHowl = preloadedHowl;
       preloadedHowl = null;
       preloadedNextIndex = -1;
-      
-      currentHowl.off('load'); currentHowl.off('play'); currentHowl.off('pause');
-      currentHowl.off('stop'); currentHowl.off('end'); currentHowl.off('loaderror');
+
+      currentHowl.off('load');
+      currentHowl.off('play');
+      currentHowl.off('pause');
+      currentHowl.off('stop');
+      currentHowl.off('end');
+      currentHowl.off('loaderror');
       bindHowlEvents(currentHowl, autoStart);
-      
+
       if (currentHowl.state() === 'loaded') {
         if (tTot) tTot.innerText = formatTime(currentHowl.duration());
         if (autoStart) playTrack();
@@ -1493,9 +2126,9 @@ function initApp() {
     } else {
       currentHowl = new Howl({
         src: [track.src],
-        html5: true, 
+        html5: true,
         preload: true,
-        volume: autoStart ? 0 : 1
+        volume: autoStart ? 0 : 1,
       });
       bindHowlEvents(currentHowl, autoStart);
     }
@@ -1505,46 +2138,46 @@ function initApp() {
 
   const pBarEl = document.getElementById('p-bar');
   const pTimeCurEl = document.getElementById('p-time-current');
-  let lastTimeStr = "";
-  let lastPercentStr = "";
+  let lastTimeStr = '';
+  let lastPercentStr = '';
 
   function stepProgress() {
     if (!currentHowl || !isPlaying) return;
 
     if (currentHowl.state() !== 'loaded') {
-        progressAnimationFrame = requestAnimationFrame(stepProgress);
-        return;
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      return;
     }
-    
+
     let seek = currentHowl.seek();
     const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
     if (typeof seek !== 'number') {
-        seek = node ? node.currentTime : 0;
+      seek = node ? node.currentTime : 0;
     }
 
     let duration = currentHowl.duration() || 0;
     if (duration === 0 && node && node.duration) {
-        duration = node.duration;
+      duration = node.duration;
     }
 
     if (isNaN(duration) || duration <= 0) {
-        progressAnimationFrame = requestAnimationFrame(stepProgress);
-        return;
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      return;
     }
 
     let percent = duration > 0 ? (seek / duration) * 100 : 0;
     let percentStr = percent.toFixed(2) + '%';
     let timeStr = formatTime(seek);
-    
+
     if (pBarEl && lastPercentStr !== percentStr) {
-        pBarEl.style.width = percentStr;
-        lastPercentStr = percentStr;
+      pBarEl.style.width = percentStr;
+      lastPercentStr = percentStr;
     }
     if (pTimeCurEl && lastTimeStr !== timeStr) {
-        pTimeCurEl.innerText = timeStr;
-        lastTimeStr = timeStr;
+      pTimeCurEl.innerText = timeStr;
+      lastTimeStr = timeStr;
     }
-    
+
     progressAnimationFrame = requestAnimationFrame(stepProgress);
   }
 
@@ -1562,26 +2195,27 @@ function initApp() {
 
   function togglePlay() {
     if (!currentHowl) return;
-    if (isPlaying) pauseTrack(); else playTrack();
+    if (isPlaying) pauseTrack();
+    else playTrack();
   }
 
-  function playTrack() { 
+  function playTrack() {
     if (!currentHowl) return;
-    currentHowl.off('fade'); 
-    
+    currentHowl.off('fade');
+
     if (!currentHowl.playing()) {
-       currentHowl.volume(0); // 局部归零，通过 onplay 回调去触发 1000ms 的淡入到 1
-       currentHowl.play();
+      currentHowl.volume(0); // 局部归零，通过 onplay 回调去触发 1000ms 的淡入到 1
+      currentHowl.play();
     } else {
-       isPlaying = true;
-       updateUI(true);
-       currentHowl.fade(currentHowl.volume(), 1, 1000);
+      isPlaying = true;
+      updateUI(true);
+      currentHowl.fade(currentHowl.volume(), 1, 1000);
     }
   }
 
   function pauseTrack() {
     if (!currentHowl) return;
-    isPlaying = false; 
+    isPlaying = false;
     updateUI(false);
     currentHowl.off('fade');
     currentHowl.fade(currentHowl.volume(), 0, 800);
@@ -1596,15 +2230,18 @@ function initApp() {
 
     const isCurrentDisabled = playerSettings.disabled.includes(playlist[currentTrackIndex].src);
     let nextIndex = currentTrackIndex;
-    
+
     if (auto && playMode === 2 && !isCurrentDisabled) {
-       nextIndex = currentTrackIndex;
+      nextIndex = currentTrackIndex;
     } else {
-       if (preloadedNextIndex !== -1 && !playerSettings.disabled.includes(playlist[preloadedNextIndex].src)) {
-           nextIndex = preloadedNextIndex;
-       } else {
-           nextIndex = getNextValidIndex(currentTrackIndex, 1);
-       }
+      if (
+        preloadedNextIndex !== -1 &&
+        !playerSettings.disabled.includes(playlist[preloadedNextIndex].src)
+      ) {
+        nextIndex = preloadedNextIndex;
+      } else {
+        nextIndex = getNextValidIndex(currentTrackIndex, 1);
+      }
     }
     loadTrack(nextIndex, true);
   }
@@ -1625,23 +2262,26 @@ function initApp() {
       const rect = pProgressBar.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       const targetTime = percent * currentHowl.duration();
-      
+
       const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
       if (node) {
-         node.currentTime = targetTime;
+        node.currentTime = targetTime;
       } else {
-         currentHowl.seek(targetTime);
+        currentHowl.seek(targetTime);
       }
     });
   }
 
-  if(playlist.length > 0) {
-    renderPlaylist(); 
-    
+  if (playlist.length > 0) {
+    renderPlaylist();
+
     let validIndices = getValidIndices();
     let startIdx = 0;
     if (validIndices.length > 0) {
-        startIdx = playMode === 1 ? validIndices[Math.floor(Math.random() * validIndices.length)] : validIndices[0];
+      startIdx =
+        playMode === 1
+          ? validIndices[Math.floor(Math.random() * validIndices.length)]
+          : validIndices[0];
     }
 
     const initPlay = () => {
@@ -1649,13 +2289,13 @@ function initApp() {
       document.removeEventListener('click', initPlay);
     };
     document.addEventListener('click', initPlay);
-    
-    loadTrack(startIdx, false); 
+
+    loadTrack(startIdx, false);
     if (typeof Howler !== 'undefined') {
-        Howler.volume(volumeSlider ? volumeSlider.value / 100 : 0.3);
+      Howler.volume(volumeSlider ? volumeSlider.value / 100 : 0.3);
     }
   } else {
-    trackArtist.innerText = "无音乐";
+    trackArtist.innerText = '无音乐';
     trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
   }
 
@@ -1665,16 +2305,16 @@ function initApp() {
   const resetSettingsBtn = document.getElementById('resetSettingsBtn');
   const fsBtn = document.getElementById('fsBtn');
 
-  if(fsBtn) {
+  if (fsBtn) {
     fsBtn.addEventListener('click', () => {
       document.querySelector('.app-container').classList.toggle('fullscreen-mode');
     });
   }
 
-  if(volumeSlider) {
+  if (volumeSlider) {
     volumeSlider.addEventListener('input', (e) => {
       let vol = e.target.value;
-      Howler.volume(vol / 100); 
+      Howler.volume(vol / 100);
       // 存储音量设置
       if (typeof playerSettings !== 'undefined') {
         playerSettings.vol = vol;
@@ -1683,32 +2323,32 @@ function initApp() {
     });
   }
 
-  if(fontSizeSlider) {
+  if (fontSizeSlider) {
     fontSizeSlider.addEventListener('input', (e) => {
       root.style.setProperty('--base-font-size', e.target.value + 'px');
     });
   }
 
-  if(turnSpeedSlider) {
+  if (turnSpeedSlider) {
     turnSpeedSlider.addEventListener('input', (e) => {
-      let speed = Math.max(0.2, 2.2 - (e.target.value * 0.2)).toFixed(2);
+      let speed = Math.max(0.2, 2.2 - e.target.value * 0.2).toFixed(2);
       root.style.setProperty('--turn-speed', speed + 's');
     });
   }
 
-  if(resetSettingsBtn) {
+  if (resetSettingsBtn) {
     resetSettingsBtn.addEventListener('click', () => {
-      if(fontSizeSlider) fontSizeSlider.value = 15;
-      if(volumeSlider) volumeSlider.value = 30;
-      if(turnSpeedSlider) turnSpeedSlider.value = 6;
-      if(autoPlaySwitch) autoPlaySwitch.checked = true;
+      if (fontSizeSlider) fontSizeSlider.value = 15;
+      if (volumeSlider) volumeSlider.value = 30;
+      if (turnSpeedSlider) turnSpeedSlider.value = 6;
+      if (autoPlaySwitch) autoPlaySwitch.checked = true;
       root.style.setProperty('--base-font-size', '15px');
       root.style.setProperty('--turn-speed', '1s');
       Howler.volume(0.3);
       if (typeof playerSettings !== 'undefined') {
         playerSettings.vol = 30;
         playerSettings.mode = 1;
-        playerSettings.disabled =[];
+        playerSettings.disabled = [];
         savePlayerSettings();
         if (typeof updateModeUI === 'function') updateModeUI();
         if (typeof renderPlaylist === 'function') renderPlaylist();
@@ -1717,7 +2357,6 @@ function initApp() {
   }
 }
 
-
 // ================= 接收 SillyTavern 跨域数据 =================
 window.addEventListener('message', (event) => {
   if (!event.data) return;
@@ -1725,8 +2364,11 @@ window.addEventListener('message', (event) => {
   // 1. 同步 12 项状态栏
   if (event.data.type === 'SYNC_STATUS') {
     const d = event.data.data;
-    const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val || '暂无数据'; };
-    
+    const setT = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = val || '暂无数据';
+    };
+
     setT('s-state', d['病历状态']);
     setT('s-current', d['本次记录']);
     setT('s-last', d['上次互动']);
@@ -1738,9 +2380,10 @@ window.addEventListener('message', (event) => {
     setT('s-impact', d['影响评估']);
     setT('s-plan', d['干预方案']);
     setT('s-action', d['执行事项']);
-    
+
     const targetEl = document.getElementById('s-target');
-    if (targetEl) targetEl.innerHTML = `🎯 <strong>预期目标：</strong>${d['预期目标'] || '暂未设定'}`;
+    if (targetEl)
+      targetEl.innerHTML = `🎯 <strong>预期目标：</strong>${d['预期目标'] || '暂未设定'}`;
   }
 
   // 2. 触发动态量表引擎
@@ -1763,25 +2406,30 @@ window.addEventListener('message', (event) => {
 
     // 简单 Markdown 解析器（处理加粗、斜体、真实换行）
     const parseMD = (str) => {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n/g, '<br>');
     };
 
-    document.querySelectorAll('.temp-note').forEach(el => el.remove());
+    document.querySelectorAll('.temp-note').forEach((el) => el.remove());
 
-    const existingNodes = Array.from(chatHistory.children).filter(el => 
-      (el.classList.contains('ai-msg') || el.classList.contains('user-note')) && el.id !== 'typing-bubble'
+    const existingNodes = Array.from(chatHistory.children).filter(
+      (el) =>
+        (el.classList.contains('ai-msg') || el.classList.contains('user-note')) &&
+        el.id !== 'typing-bubble',
     );
 
     msgs.forEach((m, i) => {
       const isAI = m.role === 'ai';
       const className = isAI ? 'ai-msg' : 'user-note';
       const contentHTML = parseMD(m.text);
-      
+
       let node = existingNodes[i];
-      
+
       if (node) {
         if (node.className !== className) {
           const newNode = document.createElement('div');
@@ -1801,7 +2449,7 @@ window.addEventListener('message', (event) => {
       }
     });
 
-    const allNodes = Array.from(chatHistory.children).filter(el => el.id !== 'typing-bubble');
+    const allNodes = Array.from(chatHistory.children).filter((el) => el.id !== 'typing-bubble');
     if (allNodes.length > msgs.length) {
       for (let i = msgs.length; i < allNodes.length; i++) {
         allNodes[i].remove();
@@ -1823,8 +2471,8 @@ window.addEventListener('message', (event) => {
   // 6. 生成状态控制 (把发送按钮变成停止按钮)
   if (event.data.type === 'GEN_STATE') {
     isGenerating = event.data.state;
-    sendBtn.innerHTML = isGenerating 
-      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-top:2px;"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>` 
+    sendBtn.innerHTML = isGenerating
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-top:2px;"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>`
       : '↑';
     sendBtn.style.background = '';
   }
@@ -1833,16 +2481,17 @@ window.addEventListener('message', (event) => {
   if (event.data.type === 'STREAM_UPDATE') {
     const chatPage = document.getElementById('page-0');
     let typingBubble = document.getElementById('typing-bubble');
-    
+
     if (!typingBubble) {
       typingBubble = document.createElement('div');
       typingBubble.id = 'typing-bubble';
       typingBubble.className = 'ai-msg';
       chatHistory.appendChild(typingBubble);
     }
-    
-    typingBubble.innerHTML = parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
-    
+
+    typingBubble.innerHTML =
+      parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
+
     // AI 正在打字时，始终让视口吸附在容器最底部，平滑跟随后续文字
     if (chatPage) {
       chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'auto' });
@@ -1850,25 +2499,25 @@ window.addEventListener('message', (event) => {
   }
 });
 
-window.generateAllSucculents = function() {
+window.generateAllSucculents = function () {
   const canvases = document.querySelectorAll('.mini-succulent');
-  canvases.forEach(canvas => {
-    if (canvas.dataset.drawn === "true") return; 
-    
+  canvases.forEach((canvas) => {
+    if (canvas.dataset.drawn === 'true') return;
+
     const ctx = canvas.getContext('2d');
     const w = canvas.width;
     const h = canvas.height;
     ctx.clearRect(0, 0, w, h);
 
-    const variations =[
-      { grad:['#0a3d62', '#b8e994'], border: '#ffaaaa' },
-      { grad:['#5a6852', '#cbdbe1'], border: '#cbdbe1' },
-      { grad:['#1f572f', '#8ed089'], border: '#8ed089' },
-      { grad:['#1b361a', '#50844d'], border: '#6b956b' },
+    const variations = [
+      { grad: ['#0a3d62', '#b8e994'], border: '#ffaaaa' },
+      { grad: ['#5a6852', '#cbdbe1'], border: '#cbdbe1' },
+      { grad: ['#1f572f', '#8ed089'], border: '#8ed089' },
+      { grad: ['#1b361a', '#50844d'], border: '#6b956b' },
       { grad: ['#281616', '#483033'], border: '#9a9b95' },
-      { grad:['#266261', '#bde6f0'], border: '#bde6f0' }
+      { grad: ['#266261', '#bde6f0'], border: '#bde6f0' },
     ];
-    
+
     const v = variations[Math.floor(Math.random() * variations.length)];
     const count = 25 + Math.floor(Math.random() * 20);
     const maxRadius = 3 * Math.sqrt(count);
@@ -1877,7 +2526,7 @@ window.generateAllSucculents = function() {
 
     ctx.save();
     ctx.translate(w / 2, h / 2);
-    ctx.scale(w / 140, h / 140); 
+    ctx.scale(w / 140, h / 140);
 
     for (let i = count; i > 0; i--) {
       const a = i * 137.5 * (Math.PI / 180);
@@ -1885,26 +2534,26 @@ window.generateAllSucculents = function() {
       const x = r * Math.sin(a);
       const y = r * Math.cos(a);
 
-      const scaleX = 0.2 + (0.8 * (r / maxRadius));
+      const scaleX = 0.2 + 0.8 * (r / maxRadius);
       const scaleY = 1 * (r / maxRadius);
-      const rotation = 180 - (i * 137.5);
+      const rotation = 180 - i * 137.5;
 
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(rotation * Math.PI / 180);
+      ctx.rotate((rotation * Math.PI) / 180);
       ctx.scale(scaleX, scaleY);
 
       ctx.beginPath();
       const res = 40;
       const size = 35;
       for (let j = 0; j <= res; j++) {
-        let phi = (Math.PI * 2) * j / res;
-        let t1 = Math.pow(Math.abs(Math.cos(3 * phi / 4)), petalPoint);
-        let t2 = Math.pow(Math.abs(Math.sin(3 * phi / 4)), petalPoint);
+        let phi = (Math.PI * 2 * j) / res;
+        let t1 = Math.pow(Math.abs(Math.cos((3 * phi) / 4)), petalPoint);
+        let t2 = Math.pow(Math.abs(Math.sin((3 * phi) / 4)), petalPoint);
         let rad = Math.pow(t1 + t2, 1 / petalCurve);
         rad = rad === 0 ? 0 : 1 / rad;
         let px = rad * Math.cos(phi) * size;
-        let py = rad * Math.sin(phi) * size - (size * 0.2);
+        let py = rad * Math.sin(phi) * size - size * 0.2;
         if (j === 0) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
       }
@@ -1927,10 +2576,10 @@ window.generateAllSucculents = function() {
       ctx.restore();
     }
     ctx.restore();
-    canvas.dataset.drawn = "true";
+    canvas.dataset.drawn = 'true';
   });
 };
 
 setTimeout(() => {
-    if(typeof window.generateAllSucculents === 'function') window.generateAllSucculents();
-  }, 500);
+  if (typeof window.generateAllSucculents === 'function') window.generateAllSucculents();
+}, 500);
