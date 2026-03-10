@@ -1,11 +1,11 @@
-<div style="position: relative">
-  <div class="archive-title" style="position: relative; z-index: 1">病历档案 📋</div>
-  <!-- 右上角点缀一朵多肉 -->
-  <canvas class="mini-succulent decor-top-right" width="70" height="70"></canvas>
+<!-- 顶部标题与听诊器装饰 -->
+<div class="archive-header">
+  <div class="archive-title">病历档案 📋</div>
+  <img src="assets/stethoscope.webp" class="decor-stethoscope" alt="听诊器" />
 </div>
 
 <div class="clean-dossier">
-  <!-- 模块 1：基础信息 (整齐卡片阵列) -->
+  <!-- 模块 1：基础信息 -->
   <div class="cd-section">
     <h3 class="cd-title">🔍 评估</h3>
     <div class="cd-grid">
@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <!-- 模块 2：深度解析 (专业划线与重点标记) -->
+  <!-- 模块 2：深度解析 -->
   <div class="cd-section">
     <h3 class="cd-title">🧠 解析</h3>
     <ul class="cd-list">
@@ -42,8 +42,8 @@
     </div>
   </div>
 
-  <!-- 模块 3：干预计划 (目标框定) -->
-  <div class="cd-section" style="margin-bottom: 30px">
+  <!-- 模块 3：干预计划 -->
+  <div class="cd-section" style="margin-bottom: 20px">
     <h3 class="cd-title">🛠️ 干预与目标</h3>
     <ul class="cd-list">
       <li><strong>干预方案：</strong> <span id="s-plan">加载中...</span></li>
@@ -51,17 +51,13 @@
     </ul>
     <div class="cd-target">🎯 <strong>预期目标：</strong> <span id="s-target">加载中...</span></div>
   </div>
-  <canvas class="mini-succulent decor-bottom-center" width="60" height="60"></canvas>
-  <div
-    style="
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-main);
-      opacity: 0.5;
-      margin-top: -5px;
-      letter-spacing: 2px;
-    "
-  >
-    林
+
+  <!-- 底部专属签名区 -->
+  <div class="signature-section">
+    <img src="assets/glasses.webp" class="decor-glasses" alt="金边眼镜" />
+    <div class="doctor-signature">
+      <span class="sign-text">林 雨 涵</span>
+      <span class="sign-date">Lin Yuhan · Clinical Psychology</span>
+    </div>
   </div>
 </div>

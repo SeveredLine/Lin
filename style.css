@@ -2003,34 +2003,91 @@ body.dark-mode .cd-target {
   border-color: rgba(163, 217, 177, 0.3);
 }
 
-.mini-succulent {
-  mix-blend-mode: multiply;
+/* 顶部标题栏弹性布局 */
+.archive-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.archive-header .archive-title {
+  margin-bottom: 0; /* 覆盖原来的 mb-20 */
+}
+
+/* 听诊器装饰 (右上角) */
+.decor-stethoscope {
+  width: 55px;
+  height: auto;
   opacity: 0.9;
-  filter: drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.1));
-  pointer-events: none;
-  transform: translateZ(0);
-  will-change: transform;
-  transition: transform 0.5s ease;
+  filter: drop-shadow(0px 3px 5px rgba(0, 0, 0, 0.12));
+  transform: rotate(8deg);
+  transition: transform 0.3s ease;
+}
+.decor-stethoscope:hover {
+  transform: rotate(0deg) scale(1.05);
+}
+body.dark-mode .decor-stethoscope {
+  opacity: 0.85;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
 }
 
-body.dark-mode .mini-succulent {
-  mix-blend-mode: normal;
-  opacity: 0.8;
-  filter: drop-shadow(0px 2px 5px rgba(0, 0, 0, 0.4)) brightness(0.85);
+/* 底部签名区块容器 */
+.signature-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  gap: 8px;
 }
 
-.decor-top-right {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  transform: rotate(15deg);
-  z-index: 0;
+/* 恶魔眼镜装饰 */
+.decor-glasses {
+  width: 150px;
+  height: auto;
+  opacity: 0.85;
+  filter: drop-shadow(0px 3px 4px rgba(0, 0, 0, 0.1));
+  transform: rotate(-3deg);
+  z-index: 2;
+}
+body.dark-mode .decor-glasses {
+  opacity: 0.9;
+  filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.5));
 }
 
-.decor-bottom-center {
+/* 全新设计的签名排版 */
+.doctor-signature {
+  text-align: center;
+  position: relative;
+}
+.doctor-signature .sign-text {
   display: block;
-  margin: 10px auto 0 auto;
-  opacity: 0.6;
+  font-family: 'Caveat', 'Georgia', cursive;
+  font-size: 26px;
+  color: var(--text-main);
+  font-weight: 800;
+  letter-spacing: 4px;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+.doctor-signature .sign-date {
+  display: block;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10px;
+  color: var(--text-ai);
+  opacity: 0.4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+body.dark-mode .doctor-signature .sign-text {
+  color: #e2e8f0;
+  opacity: 0.9;
+}
+body.dark-mode .doctor-signature .sign-date {
+  opacity: 0.5;
 }
 
 /* 生日彩蛋：满屏纸屑画布 */
