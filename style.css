@@ -3,9 +3,9 @@
 :root {
   --turn-speed: 1s;
   --bg-color: #e4ebe8;
-  --bg-noise: url("textures/crisp-paper-ruffles.png");
+  --bg-noise: url('textures/crisp-paper-ruffles.png');
   --notebook-bg: #fcfbfa;
-  --paper-noise: url("textures/cream-paper.png");
+  --paper-noise: url('textures/cream-paper.png');
   --line-color: rgba(180, 195, 188, 0.4);
   --text-main: #4a5568;
   --text-ai: #2d3748;
@@ -22,7 +22,7 @@
 
 body.dark-mode {
   --bg-color: #1a1b26;
-  --bg-noise: url("textures/crisp-paper-ruffles.png");
+  --bg-noise: url('textures/crisp-paper-ruffles.png');
   --notebook-bg: #8d8778;
   --line-color: rgba(100, 95, 80, 0.4);
   --text-main: #24283b;
@@ -273,8 +273,7 @@ body {
 .page-front {
   z-index: 2;
   background-image:
-    var(--spotlight),
-    var(--paper-noise),
+    var(--spotlight), var(--paper-noise),
     repeating-linear-gradient(
       transparent 0,
       transparent 34px,
@@ -289,10 +288,7 @@ body {
     100% 100%,
     auto,
     100% auto;
-  background-repeat:
-    no-repeat,
-    repeat,
-    repeat;
+  background-repeat: no-repeat, repeat, repeat;
   background-color: var(--notebook-bg);
   padding: 25px 20px 90px 20px;
   box-shadow:
