@@ -45,6 +45,13 @@ body.dark-mode {
 body {
   background-color: var(--bg-color);
   font-family: 'Nunito', 'PingFang SC', sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transform: translateZ(0);
+  will-change: background-color;
 }
 /* 将背景纹理抽离到全局固定伪元素，GPU只需渲染一次，避开重绘 */
 body::before {
@@ -301,7 +308,6 @@ body.dark-mode::before {
     inset 15px 0 25px rgba(0, 0, 0, 0.06),
     inset 2px 0 4px rgba(0, 0, 0, 0.04);
   transition: background-color 1.2s ease;
-  position: relative;
 }
 
 /* 独立的纸张纹理图层，CPU不用做合并计算 */
@@ -331,7 +337,6 @@ body.dark-mode::before {
   flex-direction: column;
   box-shadow: inset -15px 0 25px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  position: relative;
 }
 .page-back::before {
   content: '';
