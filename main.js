@@ -1893,6 +1893,7 @@ function initApp() {
   }
 
   let currentTrackIndex = 0;
+  let playHistory = [];
   let currentHowl = null;
   let currentSoundId = null;
   let isPlaying = false;
@@ -2109,12 +2110,19 @@ function initApp() {
     });
   }
 
-  function loadTrack(index, autoStart = false) {
+  // 增加 isPrev 参数，判断是否为“返回上一首”操作
+  function loadTrack(index, autoStart = false, isPrev = false) {
     if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
       console.warn('[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。');
       if (trackArtist) trackArtist.innerText = '系统离线';
       if (trackName) trackName.innerText = '网络异常或 CDN 被拦截，音乐不可用';
       return;
+    }
+
+    // 如果不是在按“上一首”，且存在有效的上一首歌曲，则记录进历史栈
+    if (currentHowl && !isPrev && currentTrackIndex !== index) {
+      playHistory.push(currentTrackIndex);
+      if (playHistory.length > 50) playHistory.shift(); // 最多追溯 50 首歌，防内存溢出
     }
 
     currentTrackIndex = index;
@@ -2132,8 +2140,18 @@ function initApp() {
     renderPlaylist();
 
     if (currentHowl) {
-      currentHowl.stop();
-      currentHowl.unload();
+      if (isPlaying) {
+        const fadingHowl = currentHowl;
+        fadingHowl.off();
+        fadingHowl.fade(fadingHowl.volume(), 0, 800);
+        fadingHowl.once('fade', () => {
+          fadingHowl.stop();
+          fadingHowl.unload();
+        });
+      } else {
+        currentHowl.stop();
+        currentHowl.unload();
+      }
     }
 
     if (preloadedNextIndex === index && preloadedHowl) {
@@ -2289,7 +2307,25 @@ function initApp() {
   function playPrev() {
     let validIndices = getValidIndices();
     if (validIndices.length === 0) return pauseTrack();
-    loadTrack(getNextValidIndex(currentTrackIndex, -1), true);
+
+    let prevIndex = -1;
+    // 优先从历史记录栈中回溯
+    while (playHistory.length > 0) {
+      let idx = playHistory.pop();
+      // 必须确保历史记录中的这首歌没有在刚才被拉黑
+      if (!playerSettings.disabled.includes(playlist[idx].src)) {
+        prevIndex = idx;
+        break;
+      }
+    }
+
+    // 如果历史栈被掏空（或者都是被拉黑的歌），则按照现有模式（顺序/随机）给个上一首
+    if (prevIndex === -1) {
+      prevIndex = getNextValidIndex(currentTrackIndex, -1);
+    }
+
+    // 传入 isPrev = true 标志，防止这次后退操作又被错误记入历史
+    loadTrack(prevIndex, true, true);
   }
 
   if (pPlayBtn) pPlayBtn.addEventListener('click', togglePlay);
