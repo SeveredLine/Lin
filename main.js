@@ -445,19 +445,60 @@ function initApp() {
           )
           .join('')}
       </div>
-      <button class="notebook-btn submit-btn" id="submitScaleBtn">完成评估，同步给林医生</button>
+      <button class="notebook-btn submit-btn incomplete" id="submitScaleBtn" disabled>还有 ${scale.questions.length} 道题未完成...</button>
     `;
 
     globalOverlay.appendChild(wrapper);
 
-    // 交互反馈：划掉题目 + 画治愈绿圈
+    // 划掉题目 + 画绿圈
     wrapper.addEventListener('change', (e) => {
       if (e.target.type === 'radio') {
         const qDiv = e.target.closest('.scale-q');
         qDiv.classList.add('answered');
+
+        // 清除其他选项的选中状态和随机样式
         const labels = qDiv.querySelectorAll('.opt-label');
-        labels.forEach((l) => l.classList.remove('circled-option'));
-        e.target.closest('label').classList.add('circled-option');
+        labels.forEach((l) => {
+          l.classList.remove('circled-option');
+          l.style.removeProperty('--rand-rot');
+          l.style.removeProperty('--rand-w');
+          l.style.removeProperty('--rand-h');
+          l.style.removeProperty('--rand-br');
+        });
+
+        const label = e.target.closest('label');
+
+        // 随机生成涂鸦参数
+        const rot = (Math.random() * 16 - 8).toFixed(1); // -8度 到 8度的随机倾斜
+        const w = (Math.random() * 15 + 105).toFixed(1); // 105% 到 120% 的随机宽度
+        const h = (Math.random() * 20 + 120).toFixed(1); // 120% 到 140% 的随机高度
+
+        // 随机生成 8 个 40%~60% 的值，构建极其不规则的圆角 (手绘感)
+        const r = () => Math.floor(Math.random() * 20 + 40);
+        const br = `${r()}% ${r()}% ${r()}% ${r()}% / ${r()}% ${r()}% ${r()}% ${r()}%`;
+
+        // 将随机变量注入到当前 Label 的行内样式中
+        label.style.setProperty('--rand-rot', `${rot}deg`);
+        label.style.setProperty('--rand-w', `${w}%`);
+        label.style.setProperty('--rand-h', `${h}%`);
+        label.style.setProperty('--rand-br', br);
+        
+        label.classList.add('circled-option');
+
+        // 实时检查是否全部做完，更新提交按钮状态与文本
+        const totalQs = scale.questions.length;
+        const answeredQs = wrapper.querySelectorAll('.scale-q.answered').length;
+        const submitBtn = document.getElementById('submitScaleBtn');
+        
+        if (answeredQs === totalQs) {
+          submitBtn.classList.remove('incomplete');
+          submitBtn.removeAttribute('disabled');
+          submitBtn.innerText = '完成评估，同步给林医生';
+        } else {
+          submitBtn.classList.add('incomplete');
+          submitBtn.setAttribute('disabled', 'true');
+          submitBtn.innerText = `还有 ${totalQs - answeredQs} 道题未完成...`;
+        }
       }
     });
 
@@ -480,10 +521,7 @@ function initApp() {
         if (q.f && factorScores[q.f] !== undefined) factorScores[q.f] += val;
       });
 
-      if (!allAnswered) {
-        alert('📝 好像还有题目没划掉哦，请检查一下~');
-        return;
-      }
+      if (!allAnswered) return;
 
       let totalMean = (totalScore / scale.questions.length).toFixed(2);
       let posMean = posItems > 0 ? (totalScore / posItems).toFixed(2) : 0;
