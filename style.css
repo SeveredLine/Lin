@@ -56,7 +56,6 @@ body {
   align-items: center;
   overflow: hidden;
   transform: translateZ(0);
-  will-change: background-color;
 }
 
 @keyframes floating {
@@ -129,7 +128,6 @@ body {
     15px 25px 45px var(--shadow-color),
     inset -2px 0 5px rgba(255, 255, 255, 0.5);
   z-index: 10;
-  transition: background-color 1.2s ease;
 }
 
 .tabs-container {
@@ -294,7 +292,6 @@ body {
   box-shadow:
     inset 15px 0 25px rgba(0, 0, 0, 0.06),
     inset 2px 0 4px rgba(0, 0, 0, 0.04);
-  transition: background-color 1.2s ease;
 }
 
 /* 翻过去后的背面设计 */
@@ -1476,9 +1473,7 @@ body.dark-mode .p-progress-bar {
   width: 0%;
   border-radius: 3px;
   pointer-events: none;
-  transition:
-    background-color 0.8s ease,
-    width 0.15s linear;
+  transition: width 0.15s linear;
 }
 .p-bar::after {
   content: '';
@@ -1711,9 +1706,6 @@ body.dark-mode .playlist-item:hover {
 .playlist-item.active {
   background: var(--player-bg-active);
   border-left: 3px solid var(--player-theme);
-  transition:
-    background 0.8s ease,
-    border-color 0.8s ease;
 }
 body.dark-mode .playlist-item.active {
   background: var(--player-bg-active-dark);
@@ -1778,6 +1770,9 @@ body.dark-mode .playlist-item.active {
 }
 
 /* 水波纹日夜切换特效 */
+::view-transition-group(root) {
+  animation-duration: 1s;
+}
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -1788,9 +1783,11 @@ body.dark-mode .playlist-item.active {
 }
 ::view-transition-new(root) {
   z-index: 2;
+  contain: paint;
+  isolation: isolate;
   clip-path: circle(0px at var(--ripple-x, 85vw) var(--ripple-y, 80px));
   will-change: clip-path;
-  animation: theme-ripple 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: theme-ripple 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
 }
 @keyframes theme-ripple {
   to {

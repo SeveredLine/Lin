@@ -109,9 +109,23 @@ function initApp() {
         document.documentElement.style.setProperty('--ripple-x', `${x}px`);
         document.documentElement.style.setProperty('--ripple-y', `${y}px`);
         document.documentElement.style.setProperty('--ripple-r', `${maxRadius}px`);
+
         document.startViewTransition(switchTheme);
       } else {
+        // 兼容不支持水波纹的旧浏览器，临时赋予CSS渐变
+        document.body.style.transition = 'background-color 1.2s ease';
+        const notebook = document.querySelector('.notebook');
+        const pageFronts = document.querySelectorAll('.page-front');
+        if (notebook) notebook.style.transition = 'background-color 1.2s ease';
+        pageFronts.forEach((p) => (p.style.transition = 'background-color 1.2s ease'));
+
         switchTheme();
+
+        setTimeout(() => {
+          document.body.style.transition = '';
+          if (notebook) notebook.style.transition = '';
+          pageFronts.forEach((p) => (p.style.transition = ''));
+        }, 1200);
       }
     }, 350);
   };
