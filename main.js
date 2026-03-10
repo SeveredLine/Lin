@@ -2247,6 +2247,9 @@ function initApp() {
       isPlaying = true;
       updateUI(true);
       currentHowl.fade(currentHowl.volume(), 1, 1000);
+
+      if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
+      progressAnimationFrame = requestAnimationFrame(stepProgress);
     }
   }
 
