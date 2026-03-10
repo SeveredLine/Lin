@@ -1426,26 +1426,50 @@ body.dark-mode .player-info {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: calc(100% - 65px);
 }
 .p-name {
   display: block;
   color: var(--text-ai);
   font-size: 11px;
-  margin-bottom: 2px;
+  margin-bottom: 10px;
   opacity: 0.8;
   font-family: 'Courier New', Courier, monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: calc(100% - 65px);
 }
 .p-time-display {
   font-size: 9px;
   color: var(--text-main);
   font-family: 'Courier New', Courier, monospace;
-  text-align: right;
-  margin-top: -12px;
-  margin-bottom: 4px;
+  position: absolute;
+  right: 15px;
+  top: 26px;
+  margin: 0;
   opacity: 0.6;
+}
+
+@media (max-width: 380px) {
+  .player-info {
+    padding-left: 85px;
+  }
+  .p-controls {
+    padding: 0 10px 0 80px;
+  }
+  .p-album-art {
+    width: 60px;
+    height: 60px;
+    top: -8px;
+    left: 10px;
+  }
+  .player-control-panel.active .p-album-art {
+    transform: scale(1.02);
+  }
+  .p-btn {
+    margin: 0 2px;
+  }
 }
 
 .p-progress-bar {
