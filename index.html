@@ -68,15 +68,101 @@
               <img src="doodles/doodle_5.webp" class="doodle-img" alt="涂鸦5" />
             </div>
           </div>
+
+          <!-- 隐藏的开发者模式页面 -->
+          <div class="page" data-index="4" id="page-4-wrapper" style="display: none">
+            <div class="page-front" id="page-4" style="padding: 25px 15px 90px 15px">
+              <div class="archive-title" style="color: #e74c3c; margin-bottom: 5px">
+                开发者控制台 🛠️
+              </div>
+
+              <div class="dev-panel">
+                <!-- OH 卡与量表 -->
+                <div class="dev-group">
+                  <h4>UI 组件测试</h4>
+                  <div class="dev-row">
+                    <button onclick="window.devTestOH()" class="dev-btn">卡牌渲染</button>
+                    <button onclick="window.devTestScale()" class="dev-btn">表单渲染</button>
+                  </div>
+                </div>
+
+                <!-- 植物引擎 -->
+                <div class="dev-group">
+                  <h4>植物引擎测试</h4>
+                  <div class="dev-row">
+                    <select id="dev-plant-month" class="dev-select">
+                      <option value="0">1月 - 迎春</option>
+                      <option value="1">2月 - 瑞香</option>
+                      <option value="2">3月 - 桃花</option>
+                      <option value="3">4月 - 蔷薇</option>
+                      <option value="4">5月 - 鸢尾</option>
+                      <option value="5">6月 - 栀子</option>
+                      <option value="6">7月 - 荷花</option>
+                      <option value="7">8月 - 桂花</option>
+                      <option value="8">9月 - 菊花</option>
+                      <option value="9">10月- 芙蓉</option>
+                      <option value="10">11月- 山茶</option>
+                      <option value="11">12月- 腊梅</option>
+                    </select>
+                    <select id="dev-plant-variant" class="dev-select">
+                      <option value="-1">🎲 随机品种</option>
+                    </select>
+                  </div>
+                  <div class="dev-row">
+                    <button
+                      onclick="window.devTestPlant(false)"
+                      class="dev-btn"
+                      style="background: #2ecc71; color: #fff"
+                    >
+                      按设定生成
+                    </button>
+                    <button
+                      onclick="window.toggleAutoPlant()"
+                      id="autoPlantBtn"
+                      class="dev-btn"
+                      style="background: #f39c12; color: #fff"
+                    >
+                      自动随机轮播
+                    </button>
+                  </div>
+                  <div id="dev-plant-container" class="dev-garden-frame"></div>
+                </div>
+
+                <!-- 消息测试 -->
+                <div class="dev-group">
+                  <h4>对话流渲染测试</h4>
+                  <div class="dev-row">
+                    <button onclick="window.devTestStream()" class="dev-btn">流式打字</button>
+                    <button onclick="window.devTestNonStream()" class="dev-btn">非流式插入</button>
+                  </div>
+                  <div id="dev-chat-output" class="dev-chat-box"></div>
+                </div>
+              </div>
+            </div>
+            <div class="page-back close-book-area">
+              <div
+                style="
+                  text-align: center;
+                  padding-top: 60%;
+                  color: #aaa;
+                  font-size: 14px;
+                  font-weight: bold;
+                "
+              >
+                === 越过此处即是虚无 ===
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- 侧边标签栏 -->
       <div class="tabs-container">
-        <div class="tab active" data-index="0">📝 诊室</div>
+        <div class="tab" data-index="0">📝 诊室</div>
         <div class="tab" data-index="1">📋 档案</div>
         <div class="tab" data-index="2">🌿 桌面</div>
         <div class="tab" data-index="3">⚙️ 设置</div>
+        <div class="tab" data-index="4" id="tab-dev" style="display: none">🛠️ 调试</div>
       </div>
     </div>
 

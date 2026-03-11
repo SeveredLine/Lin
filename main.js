@@ -365,8 +365,8 @@ function initApp() {
       </div>
 
       <!-- 排版与文字 -->
-      <p style="text-align:center; color: var(--text-main); font-weight: 800; margin-bottom: 5px; font-size: 15px;">这是一张 OH 卡</p>
-      <p style="text-align:center; color: var(--text-ai); font-size: 13px; margin-bottom: 15px; opacity: 0.8;">请观察画面，你最先注意到的是什么？</p>
+      <p class="oh-title" style="text-align:center; font-weight: 800; margin-bottom: 5px; font-size: 15px;">这是一张 OH 卡</p>
+      <p class="oh-desc" style="text-align:center; font-size: 13px; margin-bottom: 15px; opacity: 0.8;">请观察画面，你最先注意到的是什么？</p>
       <button class="close-overlay-btn" onclick="window.closeGlobalOverlay()">收起卡片</button>
     `;
     globalOverlay.appendChild(wrapper);
@@ -615,8 +615,49 @@ function initApp() {
     }
   });
 
+  // 动态标签页溢出计算
+  window.adjustTabs = function () {
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const notebook = document.querySelector('.notebook');
+    if (!notebook) return;
+
+    tabs.forEach((tab) => {
+      tab.classList.remove('is-top-tab');
+      tab.style.left = '';
+    });
+
+    const maxBottom = notebook.getBoundingClientRect().bottom - 15;
+
+    let topOffset = 60;
+    let isOverflowing = false;
+
+    tabs.forEach((tab) => {
+      if (tab.style.display === 'none') return;
+
+      if (!isOverflowing) {
+        const tabBottom = tab.getBoundingClientRect().bottom;
+        if (tabBottom > maxBottom) {
+          isOverflowing = true;
+        }
+      }
+
+      if (isOverflowing) {
+        tab.classList.add('is-top-tab');
+        tab.style.left = topOffset + 'px';
+
+        const currentWidth = tab.offsetWidth || 90;
+        topOffset += currentWidth + 8;
+      }
+    });
+  };
+  window.addEventListener('resize', window.adjustTabs);
+  setTimeout(window.adjustTabs, 50);
+  setTimeout(window.adjustTabs, 500);
+
   // ================= SVG 植物生成引擎 =================
   let plantGenerated = false;
+  window.__devPlantOverride = null; // 用于测试特定品种的注入点
+
   function generatePlant() {
     if (plantGenerated) return;
     const container = document.getElementById('svgGarden');
@@ -846,11 +887,19 @@ function initApp() {
       },
     ];
 
+    window.PLANT_CONFIG = pC;
     const cfg = Object.assign({}, pC[month]);
 
     let selectedVar = null;
 
-    if (month === 1 && date.getDate() === 24) {
+    if (window.__devPlantOverride && window.__devPlantOverride.month === month) {
+      const vIdx = window.__devPlantOverride.variant;
+      if (vIdx !== -1 && cfg.vars[vIdx]) {
+        selectedVar = cfg.vars[vIdx];
+      }
+    }
+
+    if (!selectedVar && month === 1 && date.getDate() === 24) {
       selectedVar = cfg.vars.find((v) => v.n === '林涵霁雨');
     }
 
@@ -2491,6 +2540,183 @@ function initApp() {
       }
     });
   }
+
+  // ================= 开发者模式 =================
+  window.devTestOH = sendOHCard;
+
+  window.devTestScale = function () {
+    const mockScale = {
+      title: '开发者测试量表',
+      desc: '这是一份由代码直接注入的虚拟量表，用于测试 UI 渲染和交互反馈是否正常。',
+      questions: [
+        { q: '我感觉我的代码里隐藏着 Bug', f: 'A' },
+        { q: '我今天想喝一杯冰奶茶', f: 'B' },
+        { q: '我觉得这套 UI 交互做得很顺滑', f: 'A' },
+      ],
+      options: [
+        { label: '完全没有', value: 0 },
+        { label: '偶尔', value: 1 },
+        { label: '经常', value: 2 },
+        { label: '总是', value: 3 },
+      ],
+      factors: {
+        A: { name: '工作压力', count: 2 },
+        B: { name: '生活欲望', count: 1 },
+      },
+    };
+    window.renderScaleUI(mockScale);
+  };
+
+  const monthSelect = document.getElementById('dev-plant-month');
+  const variantSelect = document.getElementById('dev-plant-variant');
+  if (monthSelect && variantSelect) {
+    monthSelect.addEventListener('change', () => {
+      const m = parseInt(monthSelect.value);
+      variantSelect.innerHTML = '<option value="-1">🎲 随机品种</option>';
+
+      if (!window.PLANT_CONFIG) {
+        let tempFlag = plantGenerated;
+        plantGenerated = false;
+        const backupGetId = document.getElementById;
+        document.getElementById = () => null;
+        generatePlant();
+        document.getElementById = backupGetId;
+        plantGenerated = tempFlag;
+      }
+
+      if (window.PLANT_CONFIG && window.PLANT_CONFIG[m]) {
+        window.PLANT_CONFIG[m].vars.forEach((v, i) => {
+          variantSelect.innerHTML += `<option value="${i}">${v.n}</option>`;
+        });
+      }
+    });
+    setTimeout(() => monthSelect.dispatchEvent(new Event('change')), 500);
+  }
+
+  window.devTestPlant = function (isRandom = false) {
+    let targetMonth = parseInt(monthSelect.value);
+    let targetVariant = parseInt(variantSelect.value);
+
+    if (isRandom) {
+      targetMonth = Math.floor(Math.random() * 12);
+      monthSelect.value = targetMonth;
+      monthSelect.dispatchEvent(new Event('change'));
+      targetVariant = -1;
+    }
+
+    window.__devPlantOverride = { month: targetMonth, variant: targetVariant };
+
+    let originFlag = plantGenerated;
+    plantGenerated = false;
+
+    const origGetId = document.getElementById.bind(document);
+    document.getElementById = function (id) {
+      if (id === 'svgGarden') return origGetId('dev-plant-container');
+      if (id === 'gardenLabel') return { innerText: '' };
+      return origGetId(id);
+    };
+
+    const origGetMonth = Date.prototype.getMonth;
+    Date.prototype.getMonth = () => targetMonth;
+
+    generatePlant();
+
+    document.getElementById = origGetId;
+    Date.prototype.getMonth = origGetMonth;
+    plantGenerated = originFlag;
+    window.__devPlantOverride = null;
+  };
+
+  let autoPlantTimer = null;
+  window.toggleAutoPlant = function () {
+    const btn = document.getElementById('autoPlantBtn');
+    if (autoPlantTimer) {
+      clearInterval(autoPlantTimer);
+      autoPlantTimer = null;
+      btn.innerText = '自动随机轮播';
+      btn.style.background = '#f39c12';
+    } else {
+      btn.innerText = '停止轮播';
+      btn.style.background = '#e74c3c';
+      window.devTestPlant(true);
+      autoPlantTimer = setInterval(() => {
+        window.devTestPlant(true);
+      }, 3500);
+    }
+  };
+
+  let streamTimeout = null;
+  window.devTestStream = function () {
+    if (streamTimeout) clearTimeout(streamTimeout);
+    const box = document.getElementById('dev-chat-output');
+    box.innerHTML = '';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'ai-msg';
+    bubble.style.marginBottom = '0';
+    bubble.style.fontSize = '14px';
+    box.appendChild(bubble);
+
+    let text =
+      '这是一条测试流式生成的模拟消息。你看，现在我真的在「一个字一个字」地往外吐了！\n\n而且我加入了真实的随机延迟逻辑：有时候我会很快，有时候会稍微卡顿一下……这就和真实大模型的网络请求一模一样。完美！';
+    let index = 0;
+
+    function typeNext() {
+      if (index <= text.length) {
+        let currentText = text.substring(0, index).replace(/\n/g, '<br>');
+        bubble.innerHTML = currentText + '<span style="animation: blink 1s infinite;">▌</span>';
+        index++;
+        box.scrollTop = box.scrollHeight;
+
+        let delay = Math.random() * 60 + 20;
+        if (Math.random() < 0.05) {
+          delay += Math.random() * 200 + 200;
+        }
+
+        streamTimeout = setTimeout(typeNext, delay);
+      } else {
+        bubble.innerHTML = text.replace(/\n/g, '<br>');
+        streamTimeout = null;
+      }
+    }
+
+    typeNext();
+  };
+
+  window.devTestNonStream = function () {
+    const box = document.getElementById('dev-chat-output');
+    box.innerHTML = `
+      <div class="user-note" style="transform: rotate(2deg); margin: 5px 0 15px auto; font-size: 14px; padding: 10px 14px;">测试渲染排版</div>
+      <div class="ai-msg" style="margin-bottom:0; font-size: 14px;">这是一条<strong>非流式</strong>的测试消息，直接整体插入 DOM，用于检查对话气泡在窄屏环境下的压缩效果。</div>
+    `;
+    box.scrollTop = box.scrollHeight;
+  };
+
+  let stethClicks = 0;
+  let glassesClicks = 0;
+  let devUnlocked = false;
+
+  document.body.addEventListener('click', (e) => {
+    if (e.target.classList.contains('decor-stethoscope')) {
+      stethClicks++;
+      if (stethClicks === 2) {
+        console.log('[Dev] 听诊器就绪 (2/2)');
+      }
+    } else if (e.target.classList.contains('decor-glasses')) {
+      if (stethClicks >= 2 && !devUnlocked) {
+        glassesClicks++;
+        if (glassesClicks === 24) {
+          devUnlocked = true;
+          alert('🛠️ 开发者模式已解锁！');
+          document.getElementById('page-4-wrapper').style.display = 'block';
+          const devTab = document.getElementById('tab-dev');
+          devTab.style.display = 'flex';
+          window.adjustTabs();
+          devTab.click();
+        }
+      }
+    }
+  });
 }
 
 // ================= 接收 SillyTavern 跨域数据 =================
