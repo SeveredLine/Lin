@@ -1990,6 +1990,53 @@ function initApp() {
   let isPlaying = false;
   let progressAnimationFrame = null;
 
+  // 全局交互锁：任意点击、触摸、按键后解锁，彻底避免浏览器拦截引发的池子报错
+  let hasInteracted = false;
+  const unlockAudio = () => {
+    hasInteracted = true;
+    if (autoPlaySwitch && autoPlaySwitch.checked && !isPlaying && currentHowl) playTrack();
+    ['click', 'touchstart', 'keydown'].forEach((evt) =>
+      document.removeEventListener(evt, unlockAudio),
+    );
+  };
+  ['click', 'touchstart', 'keydown'].forEach((evt) => document.addEventListener(evt, unlockAudio));
+
+  // 自定义平滑对数淡入淡出引擎
+  function customFade(howlObj, from, to, duration, onComplete) {
+    if (!howlObj) return;
+    // 如果该实例已经在执行淡入/淡出，先取消它，防止状态打架
+    if (howlObj._customFadeId) cancelAnimationFrame(howlObj._customFadeId);
+
+    const startTime = performance.now();
+
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      let t = Math.min(elapsed / duration, 1);
+
+      let currentVol;
+      if (from < to) {
+        // 渐显 (Fade In): t^2 曲线，音量起步平缓，后期提速，避免爆音
+        const curve = Math.pow(t, 2);
+        currentVol = from + (to - from) * curve;
+      } else {
+        // 渐隐 (Fade Out): (1-t)^2 曲线，音量快速下降后平滑收尾 (等功率交叉淡出)
+        const curve = Math.pow(1 - t, 2);
+        currentVol = to + (from - to) * curve;
+      }
+
+      // 直接操作基础音量
+      howlObj.volume(Math.max(0, Math.min(1, currentVol)));
+
+      if (t < 1) {
+        howlObj._customFadeId = requestAnimationFrame(update);
+      } else {
+        howlObj._customFadeId = null;
+        if (onComplete) onComplete();
+      }
+    }
+    howlObj._customFadeId = requestAnimationFrame(update);
+  }
+
   const pPlayBtn = document.getElementById('btn-play');
   const pPrevBtn = document.getElementById('btn-prev');
   const pNextBtn = document.getElementById('btn-next');
@@ -2171,16 +2218,13 @@ function initApp() {
     howlObj.on('load', function () {
       const tTot = document.getElementById('p-time-total');
       if (tTot) tTot.innerText = formatTime(this.duration());
-      if (autoStart) playTrack();
+      if (autoStart && hasInteracted) playTrack();
     });
     howlObj.on('play', function () {
       isPlaying = true;
       updateUI(true);
 
-      this.fade(this.volume(), 1, 1000);
-      setTimeout(() => {
-        if (this.playing()) this.volume(1);
-      }, 1050);
+      customFade(this, this.volume(), 1, 1000);
 
       if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
       progressAnimationFrame = requestAnimationFrame(stepProgress);
@@ -2238,27 +2282,17 @@ function initApp() {
     renderPlaylist();
 
     if (currentHowl) {
-      const fadingHowl = currentHowl;
-      fadingHowl.off(); // 卸载所有监听事件，避免状态串线
+      const oldHowl = currentHowl;
+      oldHowl.off(); // 拔掉所有监听，防止干扰新歌
 
       if (isPlaying) {
-        fadingHowl.fade(fadingHowl.volume(), 0, 800);
-        fadingHowls.push(fadingHowl);
-
-        // 垃圾回收防御：如果积压过多 fade 动画（例如用户狂点下一首），直接强杀最早的一个
-        if (fadingHowls.length > 3) {
-          const oldHowl = fadingHowls.shift();
+        customFade(oldHowl, oldHowl.volume(), 0, 800, () => {
+          oldHowl.stop();
           oldHowl.unload();
-        }
-
-        // 不再依赖 .once('fade') 监听器，改用 setTimeout 进行强制收割
-        setTimeout(() => {
-          const idx = fadingHowls.indexOf(fadingHowl);
-          if (idx !== -1) fadingHowls.splice(idx, 1);
-          fadingHowl.unload();
-        }, 850);
+        });
       } else {
-        fadingHowl.unload();
+        oldHowl.stop();
+        oldHowl.unload();
       }
     }
 
@@ -2359,18 +2393,14 @@ function initApp() {
 
   function playTrack() {
     if (!currentHowl) return;
-    currentHowl.off('fade');
 
     if (!currentHowl.playing()) {
-      currentHowl.volume(0); // 局部归零，通过 onplay 回调去触发 1000ms 的淡入到 1
+      currentHowl.volume(0);
       currentHowl.play();
     } else {
       isPlaying = true;
       updateUI(true);
-      currentHowl.fade(currentHowl.volume(), 1, 1000);
-      setTimeout(() => {
-        if (currentHowl && currentHowl.playing()) currentHowl.volume(1);
-      }, 1050);
+      customFade(currentHowl, currentHowl.volume(), 1, 1000);
 
       if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
       progressAnimationFrame = requestAnimationFrame(stepProgress);
@@ -2382,16 +2412,9 @@ function initApp() {
     isPlaying = false;
     updateUI(false);
 
-    currentHowl.off('fade');
-    const currentVol = currentHowl.volume();
-    currentHowl.fade(currentVol, 0, 800);
-
-    setTimeout(() => {
-      // 执行时，如果在此期间用户没有再次按下“播放”，则彻底暂停
-      if (!isPlaying && currentHowl) {
-        currentHowl.pause();
-      }
-    }, 850);
+    customFade(currentHowl, currentHowl.volume(), 0, 800, () => {
+      if (!isPlaying) currentHowl.pause();
+    });
   }
 
   function playNext(auto = false) {
@@ -2470,12 +2493,6 @@ function initApp() {
           ? validIndices[Math.floor(Math.random() * validIndices.length)]
           : validIndices[0];
     }
-
-    const initPlay = () => {
-      if (autoPlaySwitch && autoPlaySwitch.checked && !isPlaying && currentHowl) playTrack();
-      document.removeEventListener('click', initPlay);
-    };
-    document.addEventListener('click', initPlay);
 
     loadTrack(startIdx, false);
     if (typeof Howler !== 'undefined') {
