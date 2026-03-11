@@ -54,9 +54,13 @@ function initApp() {
     area.addEventListener('click', window.closeBook);
   });
 
-  // 默认启动时翻开封面（进入第一页）
+  // 启动时是否翻开封面（从本地存储读取设置，默认关闭）
   setTimeout(() => {
-    document.querySelector('.page[data-index="-1"]').classList.add('flipped');
+    const autoOpen = localStorage.getItem('LinUI_autoOpen') === 'true';
+    if (autoOpen) {
+      const cover = document.querySelector('.page[data-index="-1"]');
+      if (cover) cover.classList.add('flipped');
+    }
   }, 400);
 
   // ====== 标签页切换逻辑 ======
@@ -482,14 +486,14 @@ function initApp() {
         label.style.setProperty('--rand-w', `${w}%`);
         label.style.setProperty('--rand-h', `${h}%`);
         label.style.setProperty('--rand-br', br);
-        
+
         label.classList.add('circled-option');
 
         // 实时检查是否全部做完，更新提交按钮状态与文本
         const totalQs = scale.questions.length;
         const answeredQs = wrapper.querySelectorAll('.scale-q.answered').length;
         const submitBtn = document.getElementById('submitScaleBtn');
-        
+
         if (answeredQs === totalQs) {
           submitBtn.classList.remove('incomplete');
           submitBtn.removeAttribute('disabled');
@@ -1949,6 +1953,7 @@ function initApp() {
   const trackName = document.getElementById('track-name');
   const volumeSlider = document.getElementById('volumeSlider');
   const autoPlaySwitch = document.getElementById('autoPlaySwitch');
+  const autoOpenSwitch = document.getElementById('autoOpenSwitch');
   const albumArt = document.getElementById('album-art');
 
   // 设置唱片机根据时段分配外观颜色
@@ -2124,6 +2129,9 @@ function initApp() {
       updateUI(true);
 
       this.fade(this.volume(), 1, 1000);
+      setTimeout(() => {
+        if (this.playing()) this.volume(1);
+      }, 1050);
 
       if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
       progressAnimationFrame = requestAnimationFrame(stepProgress);
@@ -2303,6 +2311,9 @@ function initApp() {
       isPlaying = true;
       updateUI(true);
       currentHowl.fade(currentHowl.volume(), 1, 1000);
+      setTimeout(() => {
+        if (currentHowl && currentHowl.playing()) currentHowl.volume(1);
+      }, 1050);
 
       if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
       progressAnimationFrame = requestAnimationFrame(stepProgress);
@@ -2425,6 +2436,13 @@ function initApp() {
     });
   }
 
+  if (autoOpenSwitch) {
+    autoOpenSwitch.checked = localStorage.getItem('LinUI_autoOpen') === 'true';
+    autoOpenSwitch.addEventListener('change', (e) => {
+      localStorage.setItem('LinUI_autoOpen', e.target.checked);
+    });
+  }
+
   if (volumeSlider) {
     volumeSlider.addEventListener('input', (e) => {
       let vol = e.target.value;
@@ -2456,6 +2474,10 @@ function initApp() {
       if (volumeSlider) volumeSlider.value = 30;
       if (turnSpeedSlider) turnSpeedSlider.value = 6;
       if (autoPlaySwitch) autoPlaySwitch.checked = true;
+      if (autoOpenSwitch) {
+        autoOpenSwitch.checked = false;
+        localStorage.setItem('LinUI_autoOpen', 'false');
+      }
       root.style.setProperty('--base-font-size', '15px');
       root.style.setProperty('--turn-speed', '1s');
       Howler.volume(0.3);
