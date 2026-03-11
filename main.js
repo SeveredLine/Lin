@@ -2205,6 +2205,9 @@ function initApp() {
     });
   }
 
+  // 用于收集并在延迟后强制清理淡出中的实例，防止事件丢失导致 HTML5 Pool 耗尽
+  const fadingHowls = [];
+
   // 增加 isPrev 参数，判断是否为“返回上一首”操作
   function loadTrack(index, autoStart = false, isPrev = false) {
     if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
@@ -2235,17 +2238,27 @@ function initApp() {
     renderPlaylist();
 
     if (currentHowl) {
+      const fadingHowl = currentHowl;
+      fadingHowl.off(); // 卸载所有监听事件，避免状态串线
+      
       if (isPlaying) {
-        const fadingHowl = currentHowl;
-        fadingHowl.off();
         fadingHowl.fade(fadingHowl.volume(), 0, 800);
-        fadingHowl.once('fade', () => {
-          fadingHowl.stop();
+        fadingHowls.push(fadingHowl);
+        
+        // 垃圾回收防御：如果积压过多 fade 动画（例如用户狂点下一首），直接强杀最早的一个
+        if (fadingHowls.length > 3) {
+          const oldHowl = fadingHowls.shift();
+          oldHowl.unload();
+        }
+
+        // 不再依赖 .once('fade') 监听器，改用 setTimeout 进行强制收割
+        setTimeout(() => {
+          const idx = fadingHowls.indexOf(fadingHowl);
+          if (idx !== -1) fadingHowls.splice(idx, 1);
           fadingHowl.unload();
-        });
+        }, 850);
       } else {
-        currentHowl.stop();
-        currentHowl.unload();
+        fadingHowl.unload();
       }
     }
 
@@ -2299,23 +2312,18 @@ function initApp() {
       return;
     }
 
+    // Howler 原生方法获取播放进度。
     let seek = currentHowl.seek();
-    const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
-    if (typeof seek !== 'number') {
-      seek = node ? node.currentTime : 0;
-    }
+    if (typeof seek !== 'number') seek = 0;
 
-    let duration = currentHowl.duration() || 0;
-    if (duration === 0 && node && node.duration) {
-      duration = node.duration;
-    }
-
-    if (isNaN(duration) || duration <= 0) {
+    // 获取总时长。在 HTML5 模式下，未解析完元数据时返回 0，不更新跳出即可。
+    let duration = currentHowl.duration();
+    if (typeof duration !== 'number' || isNaN(duration) || duration <= 0) {
       progressAnimationFrame = requestAnimationFrame(stepProgress);
       return;
     }
 
-    let percent = duration > 0 ? (seek / duration) * 100 : 0;
+    let percent = (seek / duration) * 100;
     let percentStr = percent.toFixed(2) + '%';
     let timeStr = formatTime(seek);
 
@@ -2373,11 +2381,17 @@ function initApp() {
     if (!currentHowl) return;
     isPlaying = false;
     updateUI(false);
+    
     currentHowl.off('fade');
-    currentHowl.fade(currentHowl.volume(), 0, 800);
-    currentHowl.once('fade', () => {
-      if (!isPlaying) currentHowl.pause(); // 淡出完毕后真正暂停
-    });
+    const currentVol = currentHowl.volume();
+    currentHowl.fade(currentVol, 0, 800);
+    
+    setTimeout(() => {
+      // 执行时，如果在此期间用户没有再次按下“播放”，则彻底暂停
+      if (!isPlaying && currentHowl) {
+        currentHowl.pause();
+      }
+    }, 850);
   }
 
   function playNext(auto = false) {
@@ -2433,16 +2447,15 @@ function initApp() {
   if (pProgressBar) {
     pProgressBar.addEventListener('click', (e) => {
       if (!currentHowl) return;
+      // 避免在完全没有加载出音频元数据时强行 seek 导致错乱
+      if (currentHowl.state() !== 'loaded') return; 
+
       const rect = pProgressBar.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
+      const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       const targetTime = percent * currentHowl.duration();
 
-      const node = currentHowl._sounds && currentHowl._sounds[0] && currentHowl._sounds[0]._node;
-      if (node) {
-        node.currentTime = targetTime;
-      } else {
-        currentHowl.seek(targetTime);
-      }
+      // 直接调用官方 API，即便目前正处于音量淡入淡出 (fade) 中，它也能够完美处理，并不互相影响。
+      currentHowl.seek(targetTime);
     });
   }
 
