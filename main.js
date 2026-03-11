@@ -2240,11 +2240,11 @@ function initApp() {
     if (currentHowl) {
       const fadingHowl = currentHowl;
       fadingHowl.off(); // 卸载所有监听事件，避免状态串线
-      
+
       if (isPlaying) {
         fadingHowl.fade(fadingHowl.volume(), 0, 800);
         fadingHowls.push(fadingHowl);
-        
+
         // 垃圾回收防御：如果积压过多 fade 动画（例如用户狂点下一首），直接强杀最早的一个
         if (fadingHowls.length > 3) {
           const oldHowl = fadingHowls.shift();
@@ -2381,11 +2381,11 @@ function initApp() {
     if (!currentHowl) return;
     isPlaying = false;
     updateUI(false);
-    
+
     currentHowl.off('fade');
     const currentVol = currentHowl.volume();
     currentHowl.fade(currentVol, 0, 800);
-    
+
     setTimeout(() => {
       // 执行时，如果在此期间用户没有再次按下“播放”，则彻底暂停
       if (!isPlaying && currentHowl) {
@@ -2448,7 +2448,7 @@ function initApp() {
     pProgressBar.addEventListener('click', (e) => {
       if (!currentHowl) return;
       // 避免在完全没有加载出音频元数据时强行 seek 导致错乱
-      if (currentHowl.state() !== 'loaded') return; 
+      if (currentHowl.state() !== 'loaded') return;
 
       const rect = pProgressBar.getBoundingClientRect();
       const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
