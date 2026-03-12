@@ -90,7 +90,7 @@ function initApp() {
   const lampCord = document.getElementById('lampCord');
   let isDarkMode = false;
   const toggleDarkMode = (e) => {
-    if (e) e.preventDefault();
+    if (e && e.cancelable) e.preventDefault();
     lampCord.classList.add('pulled');
     setTimeout(() => {
       lampCord.classList.remove('pulled');
@@ -1956,7 +1956,7 @@ function initApp() {
       intersects = raycaster.intersectObjects(present.mesh.children, true);
 
       if (intersects.length > 0) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         if (!present.opening && !present.opened) {
           present.opening = true;
           if (window.stopConfetti) window.stopConfetti();
@@ -2285,10 +2285,20 @@ function initApp() {
       const oldHowl = currentHowl;
       oldHowl.off(); // 拔掉所有监听，防止干扰新歌
 
+      // 清理积压的淡出实例，防止用户狂点“下一首”造成内存和音频池泄漏
+      while (fadingHowls.length > 5) {
+        let staleHowl = fadingHowls.shift();
+        staleHowl.stop();
+        staleHowl.unload();
+      }
+
       if (isPlaying) {
+        fadingHowls.push(oldHowl);
         customFade(oldHowl, oldHowl.volume(), 0, 800, () => {
           oldHowl.stop();
           oldHowl.unload();
+          const idx = fadingHowls.indexOf(oldHowl);
+          if (idx !== -1) fadingHowls.splice(idx, 1);
         });
       } else {
         oldHowl.stop();
