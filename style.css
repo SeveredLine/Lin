@@ -118,6 +118,17 @@ body {
   height: auto;
   animation: floating 6s ease-in-out infinite;
   will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.player-control-panel.active .p-album-art::before {
+  animation: p-rotation 5s infinite linear;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.playlist-item.active .li-title::after {
+  will-change: opacity;
 }
 .notebook {
   flex: 1;
@@ -1805,9 +1816,9 @@ body.dark-mode .playlist-item.active {
   opacity: 1;
 }
 
-/* 水波纹日夜切换特效 */
+/* 日夜切换特效 */
 ::view-transition-group(root) {
-  animation-duration: 1s;
+  animation-duration: 0.8s;
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -1815,19 +1826,16 @@ body.dark-mode .playlist-item.active {
   mix-blend-mode: normal;
 }
 ::view-transition-old(root) {
-  z-index: 1;
+  z-index: 2;
+  animation: theme-fade-out 0.8s ease-in-out forwards;
+  will-change: opacity;
 }
 ::view-transition-new(root) {
-  z-index: 2;
-  contain: paint;
-  isolation: isolate;
-  clip-path: circle(0px at var(--ripple-x, 85vw) var(--ripple-y, 80px));
-  will-change: clip-path;
-  animation: theme-ripple 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  z-index: 1;
 }
-@keyframes theme-ripple {
+@keyframes theme-fade-out {
   to {
-    clip-path: circle(var(--ripple-r, 150vw) at var(--ripple-x, 85vw) var(--ripple-y, 80px));
+    opacity: 0;
   }
 }
 
