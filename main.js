@@ -2226,8 +2226,8 @@ function initApp() {
 
       customFade(this, this.volume(), 1, 1000);
 
-      if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      if (progressAnimationFrame) clearTimeout(progressAnimationFrame);
+      progressAnimationFrame = setTimeout(stepProgress, 500);
     });
     howlObj.on('pause', function () {
       isPlaying = false;
@@ -2340,19 +2340,12 @@ function initApp() {
   const pTimeCurEl = document.getElementById('p-time-current');
   let lastTimeStr = '';
   let lastPercentStr = '';
-  let lastRafTime = 0;
 
-  function stepProgress(timestamp) {
+  function stepProgress() {
     if (!currentHowl || !isPlaying) return;
 
-    if (timestamp - lastRafTime < 100) {
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
-      return;
-    }
-    lastRafTime = timestamp;
-
     if (currentHowl.state() !== 'loaded') {
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      progressAnimationFrame = setTimeout(stepProgress, 500);
       return;
     }
 
@@ -2363,7 +2356,7 @@ function initApp() {
     // 获取总时长。在 HTML5 模式下，未解析完元数据时返回 0，不更新跳出即可。
     let duration = currentHowl.duration();
     if (typeof duration !== 'number' || isNaN(duration) || duration <= 0) {
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      progressAnimationFrame = setTimeout(stepProgress, 500);
       return;
     }
 
@@ -2380,7 +2373,7 @@ function initApp() {
       lastTimeStr = timeStr;
     }
 
-    progressAnimationFrame = requestAnimationFrame(stepProgress);
+    progressAnimationFrame = setTimeout(stepProgress, 500);
   }
 
   function updateUI(playing) {
@@ -2412,8 +2405,8 @@ function initApp() {
       updateUI(true);
       customFade(currentHowl, currentHowl.volume(), 1, 1000);
 
-      if (progressAnimationFrame) cancelAnimationFrame(progressAnimationFrame);
-      progressAnimationFrame = requestAnimationFrame(stepProgress);
+      if (progressAnimationFrame) clearTimeout(progressAnimationFrame);
+      progressAnimationFrame = setTimeout(stepProgress, 500);
     }
   }
 
