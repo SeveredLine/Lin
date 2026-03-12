@@ -106,7 +106,6 @@ body {
   height: 125px;
 }
 
-/* 锁定移动端宽高比，防止拉伸 */
 .app-container {
   position: relative;
   display: flex;
@@ -232,7 +231,6 @@ body {
   transform: rotate(-8deg);
 }
 
-/* Pages层级提高以覆盖线圈 */
 .pages-container {
   position: absolute;
   top: 0;
@@ -306,7 +304,6 @@ body {
     inset 2px 0 4px rgba(0, 0, 0, 0.04);
 }
 
-/* 翻过去后的背面设计 */
 .page-back {
   z-index: 1;
   transform: rotateY(180deg);
@@ -321,7 +318,6 @@ body {
   cursor: pointer;
 }
 
-/* 涂鸦图片样式 */
 .doodle-img {
   width: 85%;
   max-height: 85%;
@@ -340,7 +336,6 @@ body.dark-mode .doodle-img {
   filter: invert(0.85) hue-rotate(180deg) drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.5));
 }
 
-/* 翻页后左侧可见角度设定。必须先 translateZ 再 rotateY，确保所有的页根在左侧绝对对齐不偏移 */
 .page[data-index='-1'].flipped {
   transform: translateZ(1px) rotateY(-105deg);
   z-index: 101;
@@ -362,7 +357,6 @@ body.dark-mode .doodle-img {
   z-index: 105;
 }
 
-/* 初始右侧状态下的物理 Z 轴偏移 */
 .page[data-index='-1'] {
   transform: translateZ(5px) rotateY(0deg);
   z-index: 5;
@@ -384,7 +378,6 @@ body.dark-mode .doodle-img {
   z-index: 1;
 }
 
-/* 纸张背面不同颜色的拟真处理 */
 .page[data-index='-1'] .page-back {
   background-color: #2a3b45;
 }
@@ -413,7 +406,6 @@ body.dark-mode .page[data-index='3'] .page-back {
   background-color: #3b4952;
 }
 
-/* 精致封面 */
 .cover-design {
   background: linear-gradient(135deg, #1b3a4b 0%, #3e5c76 100%);
   display: flex;
@@ -553,7 +545,6 @@ body.dark-mode .input-wrapper input {
   transform: scale(0.9);
 }
 
-/* 全屏模式样式 */
 .app-container.fullscreen-mode {
   max-width: 100vw;
   max-height: 100vh;
@@ -688,7 +679,6 @@ body.dark-mode .oh-card-wrapper {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* OH卡特有样式 */
 .oh-card-wrapper {
   display: flex;
   flex-direction: column;
@@ -712,7 +702,6 @@ body.dark-mode .oh-card-wrapper {
   margin-bottom: 15px;
 }
 
-/* 表单样式 */
 .oh-card-wrapper,
 .scale-notebook {
   margin: auto;
@@ -724,7 +713,6 @@ body.dark-mode .oh-card-wrapper {
   position: relative;
   width: 90vw;
   max-width: 580px;
-  /* 极简呼吸白质感，去除所有横竖线 */
   background: #fdfcfb;
   background-image: var(--paper-noise);
   padding: 45px 35px 50px 35px;
@@ -733,7 +721,6 @@ body.dark-mode .oh-card-wrapper {
     0 15px 40px rgba(0, 0, 0, 0.1),
     0 2px 8px rgba(0, 0, 0, 0.04);
   color: #2c3e50;
-  /* 动画速度减缓至 1.5s，和 OH 卡同步 */
   animation: handOverFromTop 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
@@ -1350,7 +1337,6 @@ body:has(.p-album-art.birthday) {
   z-index: 5;
 }
 
-/* Settings 开关样式 */
 .setting-item {
   margin-top: 35px;
   display: flex;
@@ -1700,7 +1686,6 @@ body.dark-mode .p-btn {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232d3748'%3E%3Cpath d='M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z'/%3E%3C/svg%3E");
 }
 
-/* 新增的动态播放列表样式 */
 .playlist-container {
   margin-top: 25px;
   background: var(--card-bg);
@@ -1816,7 +1801,6 @@ body.dark-mode .playlist-item.active {
   opacity: 1;
 }
 
-/* 日夜切换特效 */
 ::view-transition-group(root) {
   animation-duration: 0.8s;
 }
@@ -1839,7 +1823,6 @@ body.dark-mode .playlist-item.active {
   }
 }
 
-/* 字体全局绑定 */
 .tab {
   font-size: calc(var(--base-font-size) - 1px);
 }
@@ -2023,7 +2006,6 @@ body.dark-mode .cd-target {
   border-color: rgba(163, 217, 177, 0.3);
 }
 
-/* 顶部标题栏弹性布局 */
 .archive-header {
   display: flex;
   justify-content: space-between;
@@ -2034,10 +2016,9 @@ body.dark-mode .cd-target {
 }
 
 .archive-header .archive-title {
-  margin-bottom: 0; /* 覆盖原来的 mb-20 */
+  margin-bottom: 0;
 }
 
-/* 听诊器装饰 (右上角) */
 .decor-stethoscope {
   width: 55px;
   height: auto;
@@ -2054,7 +2035,6 @@ body.dark-mode .decor-stethoscope {
   filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.4));
 }
 
-/* 底部签名区块容器 */
 .signature-section {
   display: flex;
   flex-direction: column;
@@ -2064,7 +2044,6 @@ body.dark-mode .decor-stethoscope {
   gap: 8px;
 }
 
-/* 恶魔眼镜装饰 */
 .decor-glasses {
   width: 150px;
   height: auto;
@@ -2078,7 +2057,6 @@ body.dark-mode .decor-glasses {
   filter: drop-shadow(0px 3px 6px rgba(0, 0, 0, 0.5));
 }
 
-/* 全新设计的签名排版 */
 .doctor-signature {
   text-align: center;
   position: relative;
@@ -2110,7 +2088,6 @@ body.dark-mode .doctor-signature .sign-date {
   opacity: 0.5;
 }
 
-/* 生日彩蛋：满屏纸屑画布 */
 #confetti-canvas {
   position: fixed;
   top: 0;
@@ -2125,7 +2102,6 @@ body.dark-mode .doctor-signature .sign-date {
 #confetti-canvas.active {
   opacity: 1;
 }
-/* 3D 礼盒所在容器需允许点击交互 */
 .garden-svg-container canvas {
   width: 100% !important;
   height: 100% !important;
@@ -2134,7 +2110,6 @@ body.dark-mode .doctor-signature .sign-date {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* 顶部标签栏样式 */
 .tab.is-top-tab {
   position: absolute;
   top: -46px;

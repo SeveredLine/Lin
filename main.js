@@ -30,12 +30,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function initApp() {
-  // ================= 基础交互与 UI =================
   const tabs = document.querySelectorAll('.tab');
   const pagesContainer = document.querySelectorAll('.page');
   const root = document.documentElement;
 
-  // 螺旋环渲染
   const spiralContainer = document.getElementById('spirals');
   for (let i = 0; i < 14; i++) {
     let ring = document.createElement('div');
@@ -43,7 +41,6 @@ function initApp() {
     spiralContainer.appendChild(ring);
   }
 
-  // ====== 封面合上书本逻辑 ======
   window.closeBook = function () {
     tabs.forEach((t) => t.classList.remove('active'));
     pagesContainer.forEach((page) => page.classList.remove('flipped'));
@@ -54,7 +51,6 @@ function initApp() {
     area.addEventListener('click', window.closeBook);
   });
 
-  // 启动时是否翻开封面（从本地存储读取设置，默认关闭）
   setTimeout(() => {
     const autoOpen = localStorage.getItem('LinUI_autoOpen') === 'true';
     if (autoOpen) {
@@ -63,7 +59,6 @@ function initApp() {
     }
   }, 400);
 
-  // ====== 标签页切换逻辑 ======
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
       tabs.forEach((t) => t.classList.remove('active'));
@@ -76,7 +71,6 @@ function initApp() {
 
       pagesContainer.forEach((page) => {
         const pageIndex = parseInt(page.getAttribute('data-index'));
-        // 点击任意书页时，封面及其之前的页面必须保持翻开状态
         if (pageIndex < targetIndex || pageIndex === -1) {
           page.classList.add('flipped');
         } else {
@@ -86,7 +80,6 @@ function initApp() {
     });
   });
 
-  // 暗黑模式灯绳 - 带水波纹扩散特效
   const lampCord = document.getElementById('lampCord');
   let isDarkMode = false;
   const toggleDarkMode = (e) => {
@@ -100,7 +93,6 @@ function initApp() {
         else document.body.classList.remove('dark-mode');
       };
 
-      // 检测浏览器是否支持全新的 View Transitions 水波纹 API
       if (document.startViewTransition) {
         const rect = lampCord.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
@@ -116,7 +108,6 @@ function initApp() {
 
         document.startViewTransition(switchTheme);
       } else {
-        // 兼容不支持水波纹的旧浏览器，临时赋予CSS渐变
         document.body.style.transition = 'background-color 1.2s ease';
         const notebook = document.querySelector('.notebook');
         const pageFronts = document.querySelectorAll('.page-front');
@@ -136,14 +127,12 @@ function initApp() {
   lampCord.addEventListener('mousedown', toggleDarkMode);
   lampCord.addEventListener('touchstart', toggleDarkMode);
 
-  // ================= 诊室聊天功能 =================
   const sendBtn = document.getElementById('sendBtn');
   const chatInput = document.getElementById('chatInput');
   const chatHistory = document.getElementById('chat-history');
   const chatPage = document.getElementById('page-0');
   const globalOverlay = document.getElementById('global-overlay');
 
-  // 1. OH卡字卡和图卡图床数据
   const ohWords = [
     '8cuxn2',
     'f2eyxf',
@@ -330,8 +319,8 @@ function initApp() {
     const randomWord = ohWords[Math.floor(Math.random() * ohWords.length)];
     const randomImage = ohImages[Math.floor(Math.random() * ohImages.length)];
 
-    const wordCardSize = '95%'; // 字卡（底图）大小
-    const imageCardSize = '65%'; // 图卡（内嵌图）大小
+    const wordCardSize = '95%';
+    const imageCardSize = '65%';
 
     const wrapper = document.createElement('div');
     wrapper.className = 'oh-card-wrapper';
@@ -381,22 +370,18 @@ function initApp() {
     }
   }
 
-  // 全局：带离场动效的浮层关闭逻辑
   window.closeGlobalOverlay = function () {
     const overlay = document.getElementById('global-overlay');
     if (!overlay || !overlay.firstElementChild) return;
 
-    // 禁用指针事件以防重复点击，并覆盖行内样式触发退场动画
     overlay.firstElementChild.style.pointerEvents = 'none';
     overlay.firstElementChild.style.animation = 'handBackToTop 1s ease-in-out forwards';
 
-    // 延时 950ms 等待动画临近结束时销毁 DOM
     setTimeout(() => {
       overlay.innerHTML = '';
     }, 950);
   };
 
-  // JSON 量表引擎
   window.loadAndShowScale = async function (scaleId) {
     try {
       const res = await fetch(`scales/${scaleId}.json`);
@@ -454,13 +439,11 @@ function initApp() {
 
     globalOverlay.appendChild(wrapper);
 
-    // 划掉题目 + 画绿圈
     wrapper.addEventListener('change', (e) => {
       if (e.target.type === 'radio') {
         const qDiv = e.target.closest('.scale-q');
         qDiv.classList.add('answered');
 
-        // 清除其他选项的选中状态和随机样式
         const labels = qDiv.querySelectorAll('.opt-label');
         labels.forEach((l) => {
           l.classList.remove('circled-option');
@@ -472,16 +455,13 @@ function initApp() {
 
         const label = e.target.closest('label');
 
-        // 随机生成涂鸦参数
-        const rot = (Math.random() * 16 - 8).toFixed(1); // -8度 到 8度的随机倾斜
-        const w = (Math.random() * 15 + 105).toFixed(1); // 105% 到 120% 的随机宽度
-        const h = (Math.random() * 20 + 120).toFixed(1); // 120% 到 140% 的随机高度
+        const rot = (Math.random() * 16 - 8).toFixed(1);
+        const w = (Math.random() * 15 + 105).toFixed(1);
+        const h = (Math.random() * 20 + 120).toFixed(1);
 
-        // 随机生成 8 个 40%~60% 的值，构建极其不规则的圆角 (手绘感)
         const r = () => Math.floor(Math.random() * 20 + 40);
         const br = `${r()}% ${r()}% ${r()}% ${r()}% / ${r()}% ${r()}% ${r()}% ${r()}%`;
 
-        // 将随机变量注入到当前 Label 的行内样式中
         label.style.setProperty('--rand-rot', `${rot}deg`);
         label.style.setProperty('--rand-w', `${w}%`);
         label.style.setProperty('--rand-h', `${h}%`);
@@ -489,7 +469,6 @@ function initApp() {
 
         label.classList.add('circled-option');
 
-        // 实时检查是否全部做完，更新提交按钮状态与文本
         const totalQs = scale.questions.length;
         const answeredQs = wrapper.querySelectorAll('.scale-q.answered').length;
         const submitBtn = document.getElementById('submitScaleBtn');
@@ -561,11 +540,9 @@ function initApp() {
     };
   };
 
-  // 3. 聊天输入逻辑 & 状态控制
   let isGenerating = false;
 
   function sendMessage() {
-    // 如果当前正在生成，点击按钮则触发“停止请求”
     if (isGenerating) {
       if (window.parent !== window) {
         window.parent.postMessage({ type: 'STOP_GEN_TO_ST' }, '*');
@@ -608,14 +585,12 @@ function initApp() {
     }
   });
 
-  // 监听输入框变化，实时同步回酒馆底层
   chatInput.addEventListener('input', (e) => {
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'SYNC_INPUT_TO_ST', text: e.target.value }, '*');
     }
   });
 
-  // 动态标签页溢出计算
   window.adjustTabs = function () {
     const tabs = Array.from(document.querySelectorAll('.tab'));
     const notebook = document.querySelector('.notebook');
@@ -654,9 +629,8 @@ function initApp() {
   setTimeout(window.adjustTabs, 50);
   setTimeout(window.adjustTabs, 500);
 
-  // ================= SVG 植物生成引擎 =================
   let plantGenerated = false;
-  window.__devPlantOverride = null; // 用于测试特定品种的注入点
+  window.__devPlantOverride = null;
 
   function generatePlant() {
     if (plantGenerated) return;
@@ -668,7 +642,6 @@ function initApp() {
     const date = new Date();
     const month = date.getMonth();
 
-    // 植物月份字典
     const monthNames = [
       '一月',
       '二月',
@@ -684,7 +657,6 @@ function initApp() {
       '十二月',
     ];
 
-    // n=品名, c=颜色组, w=权重, tCol/lCol=枝干/叶片颜色，arch=架构, fType=花型, lShape=叶型
     const pC = [
       {
         arch: 'vine',
@@ -922,7 +894,6 @@ function initApp() {
     if (selectedVar.lCol) cfg.lCol = selectedVar.lCol;
     cfg.m = selectedVar.m || {};
 
-    // 动态内联样式
     let svgContent = `
       <svg viewBox="0 0 400 450" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow: visible; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.15));">
       <style>
@@ -941,7 +912,6 @@ function initApp() {
     let paths = [];
     let organs = [];
 
-    // --- 核心绘图辅助函数 ---
     function addStem(x1, y1, cx, cy, x2, y2, width, color, delay) {
       let len = Math.hypot(x2 - x1, y2 - y1) * 1.2;
       paths.push(
@@ -949,7 +919,6 @@ function initApp() {
       );
     }
 
-    // 生成叶片 SVG 路径
     function getLeafPath(shape) {
       const dict = {
         willow: 'M0,0 C-4,-15 -4,-35 0,-45 C4,-35 4,-15 0,0 Z',
@@ -973,45 +942,38 @@ function initApp() {
       </g>`);
     }
 
-    // 生成花朵构造
     function addFlower(x, y, angle, scale, delay) {
       let fHtml = '';
       let c1 = cfg.fCol[0];
       let c2 = cfg.fCol[1] || c1;
 
       if (cfg.fType === 'peach') {
-        // 5瓣桃花/腊梅 (贴着枝干生长)
         for (let i = 0; i < 5; i++) {
           fHtml += `<path d="M0,0 C-6,-10 -10,-18 0,-22 C10,-18 6,-10 0,0 Z" fill="${c1}" transform="rotate(${i * 72})" opacity="0.9"/>`;
         }
         fHtml += `<circle r="3" fill="${c2}" />`;
       } else if (cfg.fType === 'lotus') {
-        // 恢复侧面碗状结构，结合参数化层数
         let layers = cfg.m.layers || 3;
         for (let l = layers; l >= 1; l--) {
           let count = l * 2 + 1;
           let s = 1 - (layers - l) * 0.15;
           let pC = l % 2 === 0 ? c2 : c1;
-          let spread = 25 + l * 12; // 扇形展开角度
+          let spread = 25 + l * 12;
           for (let i = 0; i < count; i++) {
-            let rot = -spread + ((spread * 2) / (count - 1 || 1)) * i + (Math.random() * 4 - 2); // 扇形排布+微调
+            let rot = -spread + ((spread * 2) / (count - 1 || 1)) * i + (Math.random() * 4 - 2);
             let shape = cfg.m.dense
               ? `M0,0 C-5,-20 -3,-45 0,-50 C3,-45 5,-20 0,0 Z`
               : `M0,0 C-10,-15 -8,-45 0,-50 C8,-45 10,-15 0,0 Z`;
             fHtml += `<path d="${shape}" fill="${pC}" transform="rotate(${rot}) scale(${s})" opacity="0.9"/>`;
           }
         }
-        // 底部加一个小莲蓬
         fHtml += `<ellipse cx="0" cy="-8" rx="6" ry="3" fill="#FFD700" opacity="0.85"/>`;
       } else if (cfg.fType === 'mum') {
-        // 菊花：加入随机长短的错落感与双层管状花瓣
         let mDense = cfg.m.dense ? 40 : 24;
         for (let i = 0; i < mDense; i++) {
-          let r = 1 - Math.random() * 0.35; // 花瓣长短不一
+          let r = 1 - Math.random() * 0.35;
           let rot = i * (360 / mDense) + Math.random() * 8;
-          // 外层长瓣
           fHtml += `<path d="M0,0 Q-4,-20 0,-${40 * r} Q4,-20 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
-          // 内层短心
           fHtml += `<path d="M0,0 Q-2,-10 0,-${20 * r} Q2,-10 0,0 Z" fill="${c2}" transform="rotate(${rot + 15})" opacity="0.95"/>`;
         }
         fHtml += `<circle r="4" fill="${c2}" />`;
@@ -1042,27 +1004,21 @@ function initApp() {
           fHtml += `<circle cx="${cx}" cy="${cy}" r="10" fill="${c}" transform="rotate(${rot}) scale(${s})" opacity="0.95"/>`;
         }
       } else if (cfg.fType === 'hibiscus') {
-        // 芙蓉：宽大重叠的波浪感花瓣，与生动的立体花蕊
         for (let i = 0; i < 5; i++) {
           let rot = i * 72 + (Math.random() * 10 - 5);
-          // 宽大透明的外层
           fHtml += `<path d="M0,0 C-25,-10 -35,-40 0,-45 C35,-40 25,-10 0,0 Z" fill="${c1}" transform="rotate(${rot})" opacity="0.85"/>`;
-          // 颜色较深的内层渐变效果
           fHtml += `<path d="M0,0 C-10,-5 -15,-20 0,-25 C15,-20 10,-5 0,0 Z" fill="${c2}" transform="rotate(${rot})" opacity="0.6"/>`;
         }
-        // 弯曲延伸的雄蕊群
         fHtml += `<path d="M0,0 Q5,-15 0,-28" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>`;
         fHtml += `<circle cx="0" cy="-28" r="2.5" fill="#FFA500"/>`;
         fHtml += `<circle cx="-2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
         fHtml += `<circle cx="2.5" cy="-25" r="1.5" fill="#FFA500"/>`;
       } else if (cfg.fType === 'jasmine' || cfg.fType === 'simple') {
-        // 简单4-5瓣花
         for (let i = 0; i < 4; i++) {
           fHtml += `<path d="M0,0 Q-8,-15 0,-20 Q8,-15 0,0 Z" fill="${c1}" transform="rotate(${i * 90})"/>`;
         }
         fHtml += `<circle r="2" fill="#FFD700" />`;
       } else if (cfg.fType === 'cluster' || cfg.fType === 'micro') {
-        // 细碎簇生花 (桂花/瑞香)
         for (let i = 0; i < 5; i++) {
           let ox = (Math.random() - 0.5) * 15;
           let oy = (Math.random() - 0.5) * 15;
@@ -1078,9 +1034,6 @@ function initApp() {
       );
     }
 
-    // ================= 生成算法 =================
-
-    // 木本分形树 (桃花, 芙蓉, 山茶, 腊梅, 桂花)
     function buildTree(x, y, angle, length, depth, width, delay) {
       if (depth === 0) return;
       let x2 = x + Math.sin(angle) * length;
@@ -1095,18 +1048,14 @@ function initApp() {
       addStem(x, y, cx, cy, x2, y2, width, cfg.tCol, delay);
       let isEndpoint = depth === 1;
 
-      // 提高花朵繁茂度 (簇生花可以在末端一次爆出多朵)
       let fProb = cfg.m.fProb !== undefined ? cfg.m.fProb : 0.6;
 
-      // 让大树结出更大的花朵和叶片 (在基础缩放上再放大30%)
       let organScale = 1.3;
 
       if (cfg.fType === 'peach' || cfg.fType === 'micro') {
         if (depth <= 4 && Math.random() < fProb) {
-          // 几率产生多朵花簇拥
           let blooms = Math.floor(Math.random() * 3) + 1;
           for (let b = 0; b < blooms; b++) {
-            // 根据树干的粗细适当扩大簇生花的偏移范围，避免挤在一起
             let ox = (Math.random() - 0.5) * 16;
             let oy = (Math.random() - 0.5) * 16;
             addFlower(
@@ -1146,26 +1095,20 @@ function initApp() {
         );
       }
 
-      // 底层干可生2-4枝，中层可生0-3枝
       let bProb = cfg.m.bProb !== undefined ? cfg.m.bProb : 0.65;
       let maxBranches = 1;
-      if (depth === 5)
-        maxBranches = 2 + Math.floor(Math.random() * 3); // 根部 2~4 枝
+      if (depth === 5) maxBranches = 2 + Math.floor(Math.random() * 3);
       else {
         let r = Math.random();
-        if (r < bProb - 0.3)
-          maxBranches = 3; // 茂盛变异
-        else if (r < bProb)
-          maxBranches = 2; // 正常分叉
-        else if (r > 0.9 && depth < 3) maxBranches = 0; // 自然枯顶
+        if (r < bProb - 0.3) maxBranches = 3;
+        else if (r < bProb) maxBranches = 2;
+        else if (r > 0.9 && depth < 3) maxBranches = 0;
       }
 
       for (let i = 0; i < maxBranches; i++) {
-        // 让分支散得更开更随机
         let dir = i % 2 === 0 ? -1 : 1;
         let spread = maxBranches === 1 ? Math.random() * 0.6 - 0.3 : dir * (0.3 + i * 0.15);
         let newAngle = angle + (isSympodial ? dir * 0.5 : spread) + (Math.random() * 0.4 - 0.2);
-        // 分叉越多，子枝干越倾向于缩短，形成自然的树冠穹顶
         let lengthDrop = maxBranches > 2 ? 0.5 : 0.65;
         let newLength = length * (lengthDrop + Math.random() * 0.3);
 
@@ -1173,21 +1116,19 @@ function initApp() {
       }
     }
 
-    // 基生/丛生型 (荷花, 鸢尾)
     function buildBasal() {
       let numStems =
         cfg.fType === 'lotus'
           ? 4 + Math.floor(Math.random() * 3)
           : 5 + Math.floor(Math.random() * 4);
       for (let i = 0; i < numStems; i++) {
-        let angle = (Math.random() - 0.5) * 0.8; // 随机发散角
-        let length = 90 + Math.random() * 80; // 随机高度
+        let angle = (Math.random() - 0.5) * 0.8;
+        let length = 90 + Math.random() * 80;
         let x2 = Math.sin(angle) * length;
         let y2 = -Math.cos(angle) * length;
         let delay = i * 0.15 + Math.random() * 0.1;
 
         if (cfg.fType === 'lotus') {
-          // 荷花直立茎带微随机弯曲
           let cx = x2 * 0.5 + (Math.random() - 0.5) * 30;
           let cy = y2 * 0.5;
           addStem(0, 0, cx, cy, x2, y2, 3 + Math.random() * 2, cfg.tCol, delay);
@@ -1210,17 +1151,15 @@ function initApp() {
             );
           }
         } else {
-          // 鸢尾：中心长花，两侧长叶
           if (i === Math.floor(numStems / 2) || (numStems > 6 && i === 0)) {
             let fLen = length * (1.1 + Math.random() * 0.3);
-            let cx = (Math.random() - 0.5) * 40; // 花葶随机歪曲
+            let cx = (Math.random() - 0.5) * 40;
             let cy = -fLen * 0.5;
             let fx = Math.sin(angle) * fLen * 0.3;
             let fy = -fLen;
             addStem(0, 0, cx, cy, fx, fy, 4 + Math.random() * 2, cfg.tCol, delay);
             addFlower(fx, fy, (Math.random() - 0.5) * 30, 1.2 + Math.random() * 0.5, delay + 0.5);
           } else {
-            // 弯曲剑叶
             let cx = x2 * (1.2 + Math.random() * 0.8);
             let cy = y2 * (0.3 + Math.random() * 0.4);
             addStem(0, 0, cx, cy, x2, y2, 6 + Math.random() * 4, cfg.lCol, delay);
@@ -1229,25 +1168,22 @@ function initApp() {
       }
     }
 
-    // 草本单轴型 (菊花, 栀子, 瑞香)
     function buildHerb() {
-      // 从 cfg.m 读取形态学变异参数，若无则使用默认值 1.0
-      let hMod = cfg.m.hMod || 1.0; // 高度乘数
-      let cMod = cfg.m.cMod || 1.0; // 弯曲度(蛇形)乘数
-      let lDense = cfg.m.lDense || 1.0; // 叶片密度乘数
-      let fScale = cfg.m.fScale || 1.0; // 花朵大小乘数
+      let hMod = cfg.m.hMod || 1.0;
+      let cMod = cfg.m.cMod || 1.0;
+      let lDense = cfg.m.lDense || 1.0;
+      let fScale = cfg.m.fScale || 1.0;
 
       let height = (180 + Math.random() * 70) * hMod;
-      let curveX = (Math.random() - 0.5) * 80 * cMod; // 控制茎干的弯曲极值
-      let endX = curveX * 0.5 + (Math.random() - 0.5) * 40 * cMod; // 顶端偏移
+      let curveX = (Math.random() - 0.5) * 80 * cMod;
+      let endX = curveX * 0.5 + (Math.random() - 0.5) * 40 * cMod;
 
       addStem(0, 0, curveX, -height * 0.5, endX, -height, 6 + Math.random() * 3, cfg.tCol, 0);
 
       let baseSteps = 4 + Math.floor(Math.random() * 4);
-      let steps = Math.floor(baseSteps * lDense); // 应用叶片密度变异
+      let steps = Math.floor(baseSteps * lDense);
 
       for (let i = 1; i < steps; i++) {
-        // 利用二次贝塞尔方程，计算叶子在弯曲茎干上的坐标
         let t = i / steps;
         let mt = 1 - t;
         let px = mt * mt * 0 + 2 * mt * t * curveX + t * t * endX;
@@ -1259,7 +1195,6 @@ function initApp() {
         let lScale = 0.8 + Math.random() * 0.6;
 
         addLeaf(px, py, lAng, lScale, delay);
-        // 如果是 simple 类型或触发几率，则对生/多生
         if (cfg.fType === 'simple' || Math.random() > 0.7) {
           addLeaf(
             px,
@@ -1271,7 +1206,6 @@ function initApp() {
         }
       }
 
-      // 生成顶端花朵，并应用缩放乘数
       addFlower(
         endX,
         -height,
@@ -1281,26 +1215,24 @@ function initApp() {
       );
     }
 
-    // 藤本垂枝型 (迎春, 蔷薇)
     function buildVine() {
-      let numVines = 3 + Math.floor(Math.random() * 4); // 3 到 6 根藤条
+      let numVines = 3 + Math.floor(Math.random() * 4);
       for (let i = 0; i < numVines; i++) {
         let sign = i % 2 === 0 ? 1 : -1;
-        let angle = sign * (0.2 + Math.random() * 0.6); // 随机抛射角
-        let len = 140 + Math.random() * 100; // 随机藤条长度
+        let angle = sign * (0.2 + Math.random() * 0.6);
+        let len = 140 + Math.random() * 100;
 
-        // 生成受重力拉扯的贝塞尔曲线
         let cx = Math.sin(angle) * len * (1 + Math.random() * 0.5);
         let cy = -Math.cos(angle) * len * (1 + Math.random() * 0.5);
-        let x2 = cx + sign * len * (0.1 + Math.random() * 0.5); // 末端自然下坠
+        let x2 = cx + sign * len * (0.1 + Math.random() * 0.5);
         let y2 = cy + len * (0.4 + Math.random() * 0.7);
 
         let delay = i * 0.2 + Math.random() * 0.15;
         addStem(0, 0, cx, cy, x2, y2, 3 + Math.random() * 2, cfg.tCol, delay);
 
-        let numNodes = 3 + Math.floor(Math.random() * 5); // 每根藤条随机节点数
+        let numNodes = 3 + Math.floor(Math.random() * 5);
         for (let k = 1; k <= numNodes; k++) {
-          let t = k / (numNodes + 1) + (Math.random() - 0.5) * 0.1; // 沿途节点加入微调抖动
+          let t = k / (numNodes + 1) + (Math.random() - 0.5) * 0.1;
           if (t <= 0 || t >= 1) continue;
           let mt = 1 - t;
           let px = mt * mt * 0 + 2 * mt * t * cx + t * t * x2;
@@ -1326,13 +1258,11 @@ function initApp() {
       }
     }
 
-    // 路由分发
     if (cfg.arch === 'tree') {
-      let bLen = cfg.baseLen || 70; // 读取当前物种的基础高度
-      let lVar = cfg.lenVar || 30; // 读取当前物种的高度变异范围
+      let bLen = cfg.baseLen || 70;
+      let lVar = cfg.lenVar || 30;
       let tLength = bLen + Math.random() * lVar;
 
-      // 树干粗细与生成的高度成正比联动，同时加上微小的粗糙随机
       let tWidth = tLength * 0.16 + Math.random() * 4;
       buildTree(0, 0, (Math.random() - 0.5) * 0.2, tLength, 5, tWidth, 0.2);
     } else if (cfg.arch === 'basal') buildBasal();
@@ -1348,8 +1278,6 @@ function initApp() {
     plantGenerated = true;
   }
 
-  // ================= 音乐播放器系统 (Howler.js) =================
-  // 前端JS由于安全限制无法读取文件系统结构，这里将结构映射为JSON
   const filesMap = {
     morning: [
       'atlasaudio-corporate-491319.mp3',
@@ -1402,7 +1330,6 @@ function initApp() {
     ],
   };
 
-  // 根据当前时间判断时段
   const hour = new Date().getHours();
   let timePeriod = 'morning';
   if (hour >= 12 && hour < 18) {
@@ -1411,7 +1338,6 @@ function initApp() {
     timePeriod = 'evening';
   }
 
-  // 解析文件名功能：第一个 - 之前为歌手，最后一个 - 之后为ID，中间为歌名
   function parseFileName(filename) {
     const rawName = filename.replace('.mp3', '');
     const parts = rawName.split('-');
@@ -1425,7 +1351,6 @@ function initApp() {
     return { artist: artist, title: title };
   }
 
-  // 组装当前播放列表
   let playlist = filesMap[timePeriod].map((filename) => {
     const info = parseFileName(filename);
     return {
@@ -1435,24 +1360,21 @@ function initApp() {
     };
   });
 
-  // 读取本地存储的播放器设置（针对当前时段）
   const storageKey = `LinAudio_${timePeriod}`;
   let playerSettings = JSON.parse(localStorage.getItem(storageKey)) || {
     mode: 1,
     disabled: [],
     vol: 30,
   };
-  let playMode = playerSettings.mode; // 0: 列表循环, 1: 随机播放, 2: 单曲循环
+  let playMode = playerSettings.mode;
 
   function savePlayerSettings() {
     localStorage.setItem(storageKey, JSON.stringify(playerSettings));
   }
 
-  // ================= 🎂 生日彩蛋特效引擎 =================
   window.activateBirthdayMode = function () {
     console.log('🎂 生日彩蛋触发！特别曲目已加入歌单。');
 
-    // 1. 音乐逻辑
     const bdayTracks = [
       'the_mountain-birthday-490600.mp3',
       'the_mountain-cartoon-cartoon-music-489996.mp3',
@@ -1472,16 +1394,13 @@ function initApp() {
       loadTrack(0, true);
     }
 
-    // 2. 触发满屏飘带纸屑 (2D Canvas)
     launchConfetti();
 
-    // 3. 动态加载 Three.js 并在此处渲染 3D 礼盒，替换植物
     const gardenLabel = document.getElementById('gardenLabel');
     if (gardenLabel) gardenLabel.innerText = '生日快乐！点击拆开礼物 🎁';
     loadAndShowPresent();
   };
 
-  // --- 彩蛋 1: 飘带与纸屑 ---
   function launchConfetti() {
     let oldCanvas = document.getElementById('confetti-canvas');
     if (oldCanvas) oldCanvas.remove();
@@ -1990,7 +1909,6 @@ function initApp() {
   let isPlaying = false;
   let progressAnimationFrame = null;
 
-  // 全局交互锁：任意点击、触摸、按键后解锁，彻底避免浏览器拦截引发的池子报错
   let hasInteracted = false;
   const unlockAudio = () => {
     hasInteracted = true;
@@ -2001,10 +1919,8 @@ function initApp() {
   };
   ['click', 'touchstart', 'keydown'].forEach((evt) => document.addEventListener(evt, unlockAudio));
 
-  // 自定义平滑对数淡入淡出引擎
   function customFade(howlObj, from, to, duration, onComplete) {
     if (!howlObj) return;
-    // 如果该实例已经在执行淡入/淡出，先取消它，防止状态打架
     if (howlObj._customFadeId) cancelAnimationFrame(howlObj._customFadeId);
 
     const startTime = performance.now();
@@ -2015,16 +1931,13 @@ function initApp() {
 
       let currentVol;
       if (from < to) {
-        // 渐显 (Fade In): t^2 曲线，音量起步平缓，后期提速，避免爆音
         const curve = Math.pow(t, 2);
         currentVol = from + (to - from) * curve;
       } else {
-        // 渐隐 (Fade Out): (1-t)^2 曲线，音量快速下降后平滑收尾 (等功率交叉淡出)
         const curve = Math.pow(1 - t, 2);
         currentVol = to + (from - to) * curve;
       }
 
-      // 直接操作基础音量
       howlObj.volume(Math.max(0, Math.min(1, currentVol)));
 
       if (t < 1) {
@@ -2052,11 +1965,9 @@ function initApp() {
   const autoOpenSwitch = document.getElementById('autoOpenSwitch');
   const albumArt = document.getElementById('album-art');
 
-  // 设置唱片机根据时段分配外观颜色
   if (albumArt) albumArt.className = `p-album-art ${timePeriod}`;
   if (volumeSlider) volumeSlider.value = playerSettings.vol;
 
-  // 格式化时间为 MM:SS
   function formatTime(secs) {
     if (isNaN(secs) || secs < 0) return '00:00';
     const minutes = Math.floor(secs / 60);
@@ -2064,7 +1975,6 @@ function initApp() {
     return `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   }
 
-  // 动态渲染交互式播放列表
   function renderPlaylist() {
     const container = document.getElementById('playlist-container');
     if (!container) return;
@@ -2085,7 +1995,6 @@ function initApp() {
       })
       .join('');
 
-    // 绑定点击事件
     container.querySelectorAll('.playlist-item').forEach((item) => {
       item.addEventListener('click', (e) => {
         const idx = parseInt(item.getAttribute('data-idx'));
@@ -2114,7 +2023,7 @@ function initApp() {
           return;
         }
 
-        if (playerSettings.disabled.includes(trackSrc)) return; // 拦截被拉黑歌曲的点击播放
+        if (playerSettings.disabled.includes(trackSrc)) return;
         if (idx !== currentTrackIndex) loadTrack(idx, true);
         else togglePlay();
       });
@@ -2249,10 +2158,8 @@ function initApp() {
     });
   }
 
-  // 用于收集并在延迟后强制清理淡出中的实例，防止事件丢失导致 HTML5 Pool 耗尽
   const fadingHowls = [];
 
-  // 增加 isPrev 参数，判断是否为“返回上一首”操作
   function loadTrack(index, autoStart = false, isPrev = false) {
     if (typeof Howl === 'undefined' || typeof Howler === 'undefined') {
       console.warn('[Lin 音乐系统] Howler.js 未加载，播放器进入离线模式。');
@@ -2261,10 +2168,9 @@ function initApp() {
       return;
     }
 
-    // 如果不是在按“上一首”，且存在有效的上一首歌曲，则记录进历史栈
     if (currentHowl && !isPrev && currentTrackIndex !== index) {
       playHistory.push(currentTrackIndex);
-      if (playHistory.length > 50) playHistory.shift(); // 最多追溯 50 首歌，防内存溢出
+      if (playHistory.length > 50) playHistory.shift();
     }
 
     currentTrackIndex = index;
@@ -2283,9 +2189,8 @@ function initApp() {
 
     if (currentHowl) {
       const oldHowl = currentHowl;
-      oldHowl.off(); // 拔掉所有监听，防止干扰新歌
+      oldHowl.off();
 
-      // 清理积压的淡出实例，防止用户狂点“下一首”造成内存和音频池泄漏
       while (fadingHowls.length > 5) {
         let staleHowl = fadingHowls.shift();
         staleHowl.stop();
@@ -2349,11 +2254,9 @@ function initApp() {
       return;
     }
 
-    // Howler 原生方法获取播放进度。
     let seek = currentHowl.seek();
     if (typeof seek !== 'number') seek = 0;
 
-    // 获取总时长。在 HTML5 模式下，未解析完元数据时返回 0，不更新跳出即可。
     let duration = currentHowl.duration();
     if (typeof duration !== 'number' || isNaN(duration) || duration <= 0) {
       progressAnimationFrame = setTimeout(stepProgress, 500);
@@ -2447,22 +2350,18 @@ function initApp() {
     if (validIndices.length === 0) return pauseTrack();
 
     let prevIndex = -1;
-    // 优先从历史记录栈中回溯
     while (playHistory.length > 0) {
       let idx = playHistory.pop();
-      // 必须确保历史记录中的这首歌没有在刚才被拉黑
       if (!playerSettings.disabled.includes(playlist[idx].src)) {
         prevIndex = idx;
         break;
       }
     }
 
-    // 如果历史栈被掏空（或者都是被拉黑的歌），则按照现有模式（顺序/随机）给个上一首
     if (prevIndex === -1) {
       prevIndex = getNextValidIndex(currentTrackIndex, -1);
     }
 
-    // 传入 isPrev = true 标志，防止这次后退操作又被错误记入历史
     loadTrack(prevIndex, true, true);
   }
 
@@ -2473,14 +2372,12 @@ function initApp() {
   if (pProgressBar) {
     pProgressBar.addEventListener('click', (e) => {
       if (!currentHowl) return;
-      // 避免在完全没有加载出音频元数据时强行 seek 导致错乱
       if (currentHowl.state() !== 'loaded') return;
 
       const rect = pProgressBar.getBoundingClientRect();
       const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
       const targetTime = percent * currentHowl.duration();
 
-      // 直接调用官方 API，即便目前正处于音量淡入淡出 (fade) 中，它也能够完美处理，并不互相影响。
       currentHowl.seek(targetTime);
     });
   }
@@ -2506,7 +2403,6 @@ function initApp() {
     trackName.innerText = `未找到 ${timePeriod} 时段音乐`;
   }
 
-  // ================= 设置页功能 =================
   const fontSizeSlider = document.getElementById('fontSizeSlider');
   const turnSpeedSlider = document.getElementById('turnSpeedSlider');
   const resetSettingsBtn = document.getElementById('resetSettingsBtn');
@@ -2529,7 +2425,6 @@ function initApp() {
     volumeSlider.addEventListener('input', (e) => {
       let vol = e.target.value;
       Howler.volume(vol / 100);
-      // 存储音量设置
       if (typeof playerSettings !== 'undefined') {
         playerSettings.vol = vol;
         savePlayerSettings();
@@ -2574,7 +2469,6 @@ function initApp() {
     });
   }
 
-  // ================= 开发者模式 =================
   window.devTestOH = sendOHCard;
 
   window.devTestScale = function () {
@@ -2752,11 +2646,9 @@ function initApp() {
   });
 }
 
-// ================= 接收 SillyTavern 跨域数据 =================
 window.addEventListener('message', (event) => {
   if (!event.data) return;
 
-  // 1. 同步 12 项状态栏
   if (event.data.type === 'SYNC_STATUS') {
     const d = event.data.data;
     const setT = (id, val) => {
@@ -2781,25 +2673,21 @@ window.addEventListener('message', (event) => {
       targetEl.innerHTML = `🎯 <strong>预期目标：</strong>${d['预期目标'] || '暂未设定'}`;
   }
 
-  // 2. 触发动态量表引擎
   if (event.data.type === 'TRIGGER_SCALE') {
     const scaleId = event.data.scaleId;
     window.loadAndShowScale(scaleId);
   }
 
-  // 3. 生日彩蛋触发
   if (event.data.type === 'TRIGGER_BIRTHDAY') {
     if (window.activateBirthdayMode) window.activateBirthdayMode();
   }
 
-  // 4. 同步全局聊天记录
   if (event.data.type === 'SYNC_CHAT') {
     const msgs = event.data.messages;
     const chatHistory = document.getElementById('chat-history');
     const chatPage = document.getElementById('page-0');
     if (!chatHistory) return;
 
-    // 简单 Markdown 解析器（处理加粗、斜体、真实换行）
     const parseMD = (str) => {
       return str
         .replace(/&/g, '&amp;')
@@ -2856,14 +2744,12 @@ window.addEventListener('message', (event) => {
     }
   }
 
-  // 5. 实时输入框同步 (当你在酒馆里打字时，浮窗里也能看到)
   if (event.data.type === 'SYNC_INPUT_FROM_ST') {
     if (document.activeElement !== chatInput) {
       chatInput.value = event.data.text;
     }
   }
 
-  // 6. 生成状态控制 (把发送按钮变成停止按钮)
   if (event.data.type === 'GEN_STATE') {
     isGenerating = event.data.state;
     sendBtn.innerHTML = isGenerating
@@ -2872,7 +2758,6 @@ window.addEventListener('message', (event) => {
     sendBtn.style.background = '';
   }
 
-  // 7. 流式打字机效果注入
   if (event.data.type === 'STREAM_UPDATE') {
     const chatPage = document.getElementById('page-0');
     let typingBubble = document.getElementById('typing-bubble');
@@ -2887,7 +2772,6 @@ window.addEventListener('message', (event) => {
     typingBubble.innerHTML =
       parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
 
-    // AI 正在打字时，始终让视口吸附在容器最底部，平滑跟随后续文字
     if (chatPage) {
       chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'auto' });
     }
