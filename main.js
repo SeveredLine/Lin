@@ -509,9 +509,9 @@ function initApp() {
 
     document.getElementById('submitScaleBtn').onclick = () => {
       let totalScore = 0;
-      let posItems = 0;
       let factorScores = {};
       let allAnswered = true;
+      let details = [];
       if (scale.factors) for (let k in scale.factors) factorScores[k] = 0;
 
       scale.questions.forEach((q, idx) => {
@@ -521,30 +521,29 @@ function initApp() {
           return;
         }
         let val = parseInt(checkedInput.value);
+        let labelText = checkedInput.nextElementSibling.innerText;
         totalScore += val;
-        if (val > 1) posItems++;
         if (q.f && factorScores[q.f] !== undefined) factorScores[q.f] += val;
+
+        details.push(`${idx + 1}. ${q.q}\n答：${labelText} (${val}分)`);
       });
 
       if (!allAnswered) return;
 
-      let totalMean = (totalScore / scale.questions.length).toFixed(2);
-      let posMean = posItems > 0 ? (totalScore / posItems).toFixed(2) : 0;
-
-      let report = `${scale.title} 结果\n--------------------\n【总体情况】\n总分: ${totalScore}\n总均分: ${totalMean}\n阳性项目数: ${posItems}\n阳性症状均分: ${posMean}\n--------------------\n`;
+      let report = `系统提示：患者已完成《${scale.title}》。\n\n【得分情况】\n总计得分: ${totalScore}\n`;
       if (scale.factors) {
-        report += `【各症状因子分】\n`;
+        report += `各维度分布:\n`;
         for (let k in scale.factors) {
-          let mean = (factorScores[k] / scale.factors[k].count).toFixed(2);
-          report += `${scale.factors[k].name}: ${mean}\n`;
+          report += `- ${scale.factors[k].name}: ${factorScores[k]}\n`;
         }
       }
+      report += `\n【详细答题情况】\n${details.join('\n\n')}`;
 
       if (window.parent !== window) {
         window.parent.postMessage(
           {
             type: 'SEND_CHAT_TO_ST',
-            text: `这是我的${scale.title}结果：\n${report}`,
+            text: `这是我的《${scale.title}》结果：\n\n${report}`,
           },
           '*',
         );
@@ -641,7 +640,7 @@ function initApp() {
 
       if (placement === 'right') {
         if (tab.getBoundingClientRect().bottom > maxBottom) {
-          placement = 'top'; // 触底了，将状态切换到顶部
+          placement = 'top';
         }
       }
 
