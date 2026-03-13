@@ -537,13 +537,13 @@ function initApp() {
           report += `- ${scale.factors[k].name}: ${factorScores[k]}\n`;
         }
       }
-      report += `\n【详细答题情况】\n${details.join('\n\n')}`;
+      report += `\n【详细答题情况】\n${details.join('\n\n')}\n\n[系统指令]：这是患者刚刚填写的问卷完整结果。请你在接下来的回复中，根据此得分和患者的答题细节，自然、温和地进行专业解读和心理安抚。绝对不要向患者机械地念出具体分数，而是将其转化为对Ta当前状态的共情与理解。`;
 
       if (window.parent !== window) {
         window.parent.postMessage(
           {
-            type: 'SEND_CHAT_TO_ST',
-            text: `这是我的《${scale.title}》结果：\n\n${report}`,
+            type: 'SEND_HIDDEN_TO_AI',
+            text: report,
           },
           '*',
         );
@@ -2715,8 +2715,8 @@ function initApp() {
 window.addEventListener('message', (event) => {
   if (!event.data) return;
 
-  if (event.data.type === 'SYNC_STATUS') {
-    const d = event.data.data;
+  const updateStatusUI = (d) => {
+    if (!d) return;
     const setT = (id, val) => {
       const el = document.getElementById(id);
       if (el) el.innerText = val || '暂无数据';
@@ -2737,12 +2737,7 @@ window.addEventListener('message', (event) => {
     const targetEl = document.getElementById('s-target');
     if (targetEl)
       targetEl.innerHTML = `🎯 <strong>预期目标：</strong>${d['预期目标'] || '暂未设定'}`;
-  }
-
-  if (event.data.type === 'TRIGGER_SCALE') {
-    const scaleId = event.data.scaleId;
-    window.loadAndShowScale(scaleId);
-  }
+  };
 
   if (event.data.type === 'TRIGGER_BIRTHDAY') {
     if (window.activateBirthdayMode) window.activateBirthdayMode();
@@ -2767,17 +2762,32 @@ window.addEventListener('message', (event) => {
         el.id !== 'typing-bubble',
     );
 
+    let latestStatusContent = null;
+    let latestScale = null;
+
     msgs.forEach((m, i) => {
       const isAI = m.role === 'ai';
-      const className = isAI ? 'ai-msg msg-narration' : 'user-note msg-user';
+      let text = m.text;
 
-      let contentHTML = window.parseMD(m.text);
+      if (isAI) {
+        const statusMatch = text.match(/<状态栏>([\s\S]*?)<\/状态栏>/);
+        if (statusMatch) latestStatusContent = statusMatch[1];
+
+        const actionMatch = text.match(/\[action:run_(.*?)_test\]/i);
+        if (actionMatch) latestScale = actionMatch[1].toLowerCase();
+
+        text = text.replace(/<状态栏>[\s\S]*?<\/状态栏>/g, '');
+        text = text.replace(/\[action:.*?\]/gi, '');
+        text = text.replace(/\{\{setglobalvar::.*?\}\}/gi, '');
+      }
+
+      const className = isAI ? 'ai-msg msg-narration' : 'user-note msg-user';
+      let contentHTML = window.parseMD(text.trim());
       if (isAI) {
         contentHTML = window.applyCharacterFonts(contentHTML);
       }
 
       let node = existingNodes[i];
-
       if (node) {
         if (node.className !== className) {
           const newNode = document.createElement('div');
@@ -2798,6 +2808,29 @@ window.addEventListener('message', (event) => {
         chatHistory.appendChild(newNode);
       }
     });
+
+    if (latestStatusContent) {
+      const ex = (key) => {
+        const r = latestStatusContent.match(new RegExp(`${key}【([\\s\\S]*?)】`));
+        return r ? r[1].trim() : '';
+      };
+      updateStatusUI({
+        病历状态: ex('病历状态'),
+        本次记录: ex('本次记录'),
+        上次互动: ex('上次互动'),
+        当前关系: ex('当前关系'),
+        特殊性: ex('特殊性'),
+        优势资源: ex('优势资源'),
+        注意事项: ex('注意事项'),
+        问题成因: ex('问题成因'),
+        影响评估: ex('影响评估'),
+        干预方案: ex('干预方案'),
+        执行事项: ex('执行事项'),
+        预期目标: ex('预期目标'),
+      });
+    }
+
+    if (latestScale) window.loadAndShowScale(latestScale);
 
     const allNodes = Array.from(chatHistory.children).filter((el) => el.id !== 'typing-bubble');
     if (allNodes.length > msgs.length) {
@@ -2836,8 +2869,35 @@ window.addEventListener('message', (event) => {
       document.getElementById('chat-history').appendChild(typingBubble);
     }
 
+    let rawText = event.data.text;
+
+    const statusMatch = rawText.match(/<状态栏>([\s\S]*?)<\/状态栏>/);
+    if (statusMatch) {
+      const ex = (key) => {
+        const r = statusMatch[1].match(new RegExp(`${key}【([\\s\\S]*?)】`));
+        return r ? r[1].trim() : '';
+      };
+      updateStatusUI({
+        病历状态: ex('病历状态'),
+        本次记录: ex('本次记录'),
+        上次互动: ex('上次互动'),
+        当前关系: ex('当前关系'),
+        特殊性: ex('特殊性'),
+        优势资源: ex('优势资源'),
+        注意事项: ex('注意事项'),
+        问题成因: ex('问题成因'),
+        影响评估: ex('影响评估'),
+        干预方案: ex('干预方案'),
+        执行事项: ex('执行事项'),
+        预期目标: ex('预期目标'),
+      });
+    }
+    rawText = rawText.replace(/<状态栏>[\s\S]*?<\/状态栏>/g, '');
+    rawText = rawText.replace(/\[action:.*?\]/gi, '');
+    rawText = rawText.replace(/\{\{setglobalvar::.*?\}\}/gi, '');
+
     typingBubble.innerHTML =
-      window.applyCharacterFonts(window.parseMD(event.data.text)) +
+      window.applyCharacterFonts(window.parseMD(rawText.trim())) +
       '<span class="typing-cursor"></span>';
 
     if (chatPage) {
