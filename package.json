@@ -1,0 +1,24 @@
+{
+  "name": "lin",
+  "version": "1.0.0",
+  "description": "This project wouldn't be possible without the amazing resources, libraries, and inspiration from the open-source community:",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SeveredLine/Lin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Unlicense",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SeveredLine/Lin/issues"
+  },
+  "homepage": "https://github.com/SeveredLine/Lin#readme",
+  "dependencies": {
+    "cn-font-split": "^7.4.1"
+  }
+}

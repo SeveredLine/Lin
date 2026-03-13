@@ -1,6 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
+@import url('./fonts/index.css');
 
 :root {
+  --font-lin: '云峰寒蝉体', sans-serif;
+  --font-qin: 'XuanZongTi-v0.1', sans-serif;
+
+  --font-children: 'Dymon-ShouXieTi', cursive;
+  --font-user: 'LXGWWenKaiScreen', cursive;
+  --font-narration: 'BaDingShiWeiTi-16', serif;
+
+  --font-ui-sans: var(--font-lin);
+
   --turn-speed: 1s;
   --bg-color: #e4ebe8;
   --bg-noise: url('textures/crisp-paper-ruffles.png');
@@ -17,7 +26,8 @@
   --tab-4: #a4d8d8;
   --card-bg: #ffffff;
   --border-light: rgba(0, 0, 0, 0.06);
-  --base-font-size: 15px;
+  --ui-base-size: 20px;
+  --base-font-size: var(--ui-base-size);
 }
 
 body.dark-mode {
@@ -38,6 +48,17 @@ body.dark-mode {
   --border-light: rgba(255, 255, 255, 0.08);
 }
 
+body.use-sys-fonts {
+  --font-lin: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-qin: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-children:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-user: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-narration:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-ui-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -49,7 +70,7 @@ body {
   background-color: var(--bg-color);
   background-image: var(--bg-noise);
   background-repeat: repeat;
-  font-family: 'Nunito', 'PingFang SC', sans-serif;
+  font-family: var(--font-ui-sans);
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -162,7 +183,7 @@ body {
     inset 2px 2px 5px rgba(255, 255, 255, 0.4);
   cursor: pointer;
   font-size: 14px;
-  letter-spacing: 3px;
+  letter-spacing: 0px;
   transform: translateX(0);
   transition:
     transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
@@ -170,6 +191,9 @@ body {
   position: relative;
   overflow: hidden;
   will-change: transform;
+}
+body.use-sys-fonts .tab {
+  letter-spacing: 3px !important;
 }
 .tab::before {
   content: '';
@@ -416,18 +440,19 @@ body.dark-mode .page[data-index='3'] .page-back {
   box-shadow: inset 8px 0 15px rgba(0, 0, 0, 0.3);
 }
 .cover-design h1 {
-  font-family: 'Georgia', serif;
+  font-family: var(--font-ui-sans);
   color: #f8e9d1;
-  font-size: 28px;
-  letter-spacing: 3px;
+  font-size: 32px;
+  letter-spacing: 4px;
   text-shadow: 2px 4px 6px rgba(0, 0, 0, 0.4);
   margin-bottom: 15px;
 }
 .cover-design p {
   color: #f8e9d1;
-  opacity: 0.7;
-  font-family: 'Courier New', Courier, monospace;
-  letter-spacing: 2px;
+  opacity: 0.8;
+  font-family: var(--font-user);
+  letter-spacing: 3px;
+  font-size: 18px;
 }
 
 .archive-title {
@@ -438,16 +463,6 @@ body.dark-mode .page[data-index='3'] .page-back {
   letter-spacing: 1px;
 }
 
-.ai-msg {
-  font-family: 'Georgia', serif;
-  color: var(--text-ai);
-  font-size: calc(var(--base-font-size) + 1px);
-  line-height: 2;
-  margin-bottom: 25px;
-  padding-left: 12px;
-  border-left: 4px solid var(--tab-1);
-  animation: fadeIn 0.8s ease forwards;
-}
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -499,10 +514,7 @@ body.dark-mode .input-wrapper {
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
 }
-body.dark-mode .input-wrapper input {
-  color: #f0f0f0;
-}
-.input-wrapper input {
+.input-wrapper textarea {
   flex: 1 1 120px;
   margin-right: auto;
   border: none;
@@ -511,6 +523,16 @@ body.dark-mode .input-wrapper input {
   font-size: var(--base-font-size);
   color: #333;
   font-weight: bold;
+  font-family: var(--font-user);
+  resize: none;
+  overflow-y: auto;
+  min-height: 24px;
+  max-height: 100px;
+  line-height: 1.5;
+  padding: 4px 0;
+}
+body.dark-mode .input-wrapper textarea {
+  color: #f0f0f0;
 }
 .send-btn {
   flex-shrink: 0;
@@ -568,18 +590,28 @@ body.dark-mode .input-wrapper input {
   border-radius: 0;
 }
 
+.ai-msg {
+  color: var(--text-ai);
+  font-size: calc(var(--base-font-size) + 1px);
+  line-height: 1.6;
+  margin-bottom: 15px;
+  padding-left: 12px;
+  border-left: 4px solid var(--tab-1);
+  animation: fadeIn 0.8s ease forwards;
+}
+
 .user-note {
+  font-family: var(--font-user) !important;
   background: linear-gradient(135deg, #fff9c4 0%, #fbc02d 100%);
   color: #333;
-  padding: 14px 18px;
-  margin: 15px 0 25px auto;
+  padding: 12px 16px;
+  margin: 10px 0 20px auto;
   width: fit-content;
   max-width: 85%;
   border-radius: 2px 12px 12px 12px;
   box-shadow:
     3px 5px 12px rgba(0, 0, 0, 0.15),
     inset 1px 1px 2px rgba(255, 255, 255, 0.6);
-  font-family: 'Comic Sans MS', cursive;
   font-size: var(--base-font-size);
   line-height: 1.5;
   transform: rotate(-2deg);
@@ -588,6 +620,91 @@ body.dark-mode .input-wrapper input {
   transform-origin: top right;
   will-change: transform, opacity;
 }
+
+.msg-narration {
+  font-family: var(--font-narration) !important;
+  color: #64748b !important;
+  font-size: var(--base-font-size) !important;
+  letter-spacing: 0.5px !important;
+}
+body.dark-mode .msg-narration {
+  color: #cbd5e1 !important;
+}
+
+span.msg-lin {
+  font-family: var(--font-lin) !important;
+  color: #0f3057 !important;
+  font-size: calc(var(--base-font-size) + 6px) !important;
+  letter-spacing: 0px !important;
+  text-shadow: 0px 0px 1px rgba(15, 48, 87, 0.3) !important;
+}
+body.dark-mode span.msg-lin {
+  color: #a8c0ea !important;
+  text-shadow: 0px 0px 1px rgba(168, 192, 234, 0.3) !important;
+}
+
+span.msg-qin {
+  font-family: var(--font-qin) !important;
+  color: #1a1a1a !important;
+  font-size: calc(var(--base-font-size) + 5px) !important;
+  letter-spacing: 1px !important;
+  text-shadow:
+    1px 1px 2px rgba(0, 0, 0, 0.3),
+    0 0 1px rgba(0, 0, 0, 0.5) !important;
+}
+
+span.msg-children {
+  font-family: var(--font-children) !important;
+  font-size: calc(var(--base-font-size) + 6px) !important;
+  letter-spacing: 1px !important;
+  font-weight: bold !important;
+
+  background: linear-gradient(
+    110deg,
+    #ff4757 0%,
+    #ffa502 33%,
+    #2ed573 66%,
+    #1e90ff 100%
+  ) !important;
+  background-size: 100% 100% !important;
+
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+
+  filter: drop-shadow(0px 1px 1px rgba(0, 0, 0, 0.15)) !important;
+}
+body.dark-mode span.msg-children {
+  background: linear-gradient(110deg, #ff6b81, #ffcc33, #7bed9f, #70a1ff) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 5px;
+  height: calc(var(--base-font-size) + 2px);
+  background: linear-gradient(to bottom, var(--tab-3), var(--tab-4));
+  vertical-align: text-bottom;
+  margin-left: 4px;
+  border-radius: 3px;
+  animation: fluid-blink 1s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes fluid-blink {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
 @keyframes popIn {
   0% {
     opacity: 0;
@@ -761,7 +878,7 @@ body.dark-mode .scale-close-btn:hover {
 }
 
 .scale-title {
-  font-family: 'Caveat', cursive, sans-serif;
+  font-family: var(--font-lin);
   font-size: calc(var(--base-font-size) + 14px);
   font-weight: 700;
   color: #2c3e50;
@@ -870,7 +987,7 @@ body.dark-mode .opt-label.circled-option {
 }
 
 .notebook-btn {
-  font-family: 'Nunito', 'PingFang SC', sans-serif;
+  font-family: var(--font-ui-sans);
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -1193,6 +1310,7 @@ input[type='range']::-webkit-slider-thumb:active {
 }
 
 .reset-btn {
+  font-family: var(--font-ui-sans);
   background: var(--card-bg);
   border: 2px solid var(--tab-1);
   color: var(--text-main);
@@ -1261,8 +1379,8 @@ body.dark-mode .garden-frame::before {
   position: relative;
 }
 .garden-label {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 16px;
+  font-family: var(--font-ui-sans);
+  font-size: calc(var(--base-font-size) + 2px);
   color: var(--text-main);
   font-weight: bold;
   margin-top: 10px;
@@ -1271,7 +1389,7 @@ body.dark-mode .garden-frame::before {
   width: 100%;
   text-align: center;
   opacity: 0.8;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 body.dark-mode .garden-label {
   border-top-color: rgba(255, 255, 255, 0.05);
@@ -1863,7 +1981,7 @@ body.dark-mode .playlist-item.active {
 }
 
 .clean-dossier {
-  font-family: 'Nunito', 'PingFang SC', sans-serif;
+  font-family: var(--font-ui-sans);
   color: var(--text-main);
   display: flex;
   flex-direction: column;
@@ -2063,7 +2181,7 @@ body.dark-mode .decor-glasses {
 }
 .doctor-signature .sign-text {
   display: block;
-  font-family: 'Caveat', 'Georgia', cursive;
+  font-family: var(--font-lin);
   font-size: 26px;
   color: var(--text-main);
   font-weight: 800;
@@ -2073,7 +2191,7 @@ body.dark-mode .decor-glasses {
 }
 .doctor-signature .sign-date {
   display: block;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: '云峰寒蝉体', Courier, monospace;
   font-size: 10px;
   color: var(--text-ai);
   opacity: 0.4;
@@ -2127,6 +2245,29 @@ body.dark-mode .doctor-signature .sign-date {
 .tab.is-top-tab.active {
   transform: translateY(0);
 }
+
+.tab.is-bottom-tab {
+  position: absolute;
+  bottom: -46px;
+  top: auto;
+  writing-mode: horizontal-tb;
+  padding: 35px 20px 12px 20px;
+  border-radius: 0 0 12px 12px;
+  transform: translateY(-18px);
+  white-space: nowrap;
+  box-shadow:
+    2px 4px 10px var(--shadow-color),
+    inset 2px -2px 5px rgba(255, 255, 255, 0.4);
+  z-index: 1;
+  letter-spacing: 0px;
+}
+body.use-sys-fonts .tab.is-bottom-tab {
+  letter-spacing: 2px !important;
+}
+.tab.is-bottom-tab.active {
+  transform: translateY(0);
+}
+
 #tab-dev {
   background: #e74c3c !important;
   color: white !important;
@@ -2207,8 +2348,9 @@ body.dark-mode .dev-group {
   align-items: center;
   overflow: hidden;
 }
+
 .dev-chat-box {
-  height: 140px;
+  height: 280px;
   background: var(--card-bg);
   border-radius: 8px;
   padding: 12px;

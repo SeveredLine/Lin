@@ -12,10 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
   </head>
   <body>
-    <!-- OH卡和表单的全局动画浮层 -->
     <div id="global-overlay"></div>
 
-    <!-- 暗黑模式拉绳 -->
     <div class="pull-cord-container" id="lampCord">
       <div class="cord"><div class="knob"></div></div>
     </div>
@@ -25,7 +23,6 @@
         <div class="spiral-container" id="spirals"></div>
 
         <div class="pages-container" id="book-pages">
-          <!-- 封面与封底层级 -->
           <div class="page" data-index="-1">
             <div class="page-front cover-design">
               <h1>林雨涵</h1>
@@ -36,7 +33,6 @@
             </div>
           </div>
 
-          <!-- 标签页容器 -->
           <div class="page" data-index="0">
             <div class="page-front" id="page-0"></div>
             <div class="page-back close-book-area">
@@ -69,7 +65,6 @@
             </div>
           </div>
 
-          <!-- 隐藏的开发者模式页面 -->
           <div class="page" data-index="4" id="page-4-wrapper" style="display: none">
             <div class="page-front" id="page-4" style="padding: 25px 15px 90px 15px">
               <div class="archive-title" style="color: #e74c3c; margin-bottom: 5px">
@@ -77,7 +72,6 @@
               </div>
 
               <div class="dev-panel">
-                <!-- OH 卡与量表 -->
                 <div class="dev-group">
                   <h4>UI 组件测试</h4>
                   <div class="dev-row">
@@ -86,7 +80,6 @@
                   </div>
                 </div>
 
-                <!-- 植物引擎 -->
                 <div class="dev-group">
                   <h4>植物引擎测试</h4>
                   <div class="dev-row">
@@ -128,7 +121,6 @@
                   <div id="dev-plant-container" class="dev-garden-frame"></div>
                 </div>
 
-                <!-- 消息测试 -->
                 <div class="dev-group">
                   <h4>对话流渲染测试</h4>
                   <div class="dev-row">
@@ -156,7 +148,6 @@
         </div>
       </div>
 
-      <!-- 侧边标签栏 -->
       <div class="tabs-container">
         <div class="tab" data-index="0">📝 诊室</div>
         <div class="tab" data-index="1">📋 档案</div>

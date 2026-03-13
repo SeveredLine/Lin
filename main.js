@@ -1,3 +1,25 @@
+window.applyCharacterFonts = function (html) {
+  html = html.replace(
+    /([\'"‘“『])\s*([LQC])[:：]\s*([\s\S]*?)([\'"’”』]|$)/g,
+    (match, openQ, role, content, closeQ) => {
+      const roleMap = { L: 'msg-lin', Q: 'msg-qin', C: 'msg-children' };
+      const cls = roleMap[role.toUpperCase()];
+      return `${openQ}<span class="${cls}">${content}</span>${closeQ}`;
+    },
+  );
+  return html;
+};
+
+window.parseMD = function (str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
   const pages = ['tab0.html', 'tab1.html', 'tab2.html', 'tab3.html'];
   let isHtmlLoaded = false;
@@ -337,7 +359,7 @@ function initApp() {
           <div class="oh-inner" style="position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d;">
             
             <!-- 牌背 -->
-            <div class="oh-image-large" style="position: absolute; width: 100%; height: 100%; margin-bottom: 0; backface-visibility: hidden; box-sizing: border-box; font-family: 'Nunito', 'PingFang SC', sans-serif;">?</div>
+            <div class="oh-image-large" style="position: absolute; width: 100%; height: 100%; margin-bottom: 0; backface-visibility: hidden; box-sizing: border-box; font-family: var(--font-ui-sans);">?</div>
             
             <!-- 牌面 -->
             <div style="position: absolute; width: 100%; height: 100%; transform: rotateY(180deg); backface-visibility: hidden; display: flex; justify-content: center; align-items: center; background:#fff; border-radius:12px; overflow:hidden; border: 8px solid #fcfcfc; box-shadow: inset 0 0 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.15); box-sizing: border-box;">
@@ -531,7 +553,7 @@ function initApp() {
       globalOverlay.innerHTML = `
         <div class="scale-notebook" style="text-align:center; padding: 60px 40px;">
           <div class="scale-close-btn" onclick="window.closeGlobalOverlay()">×</div>
-          <h2 style="color:#2ecc71; margin-bottom:15px; font-family:'Caveat', cursive; font-size: 32px;">评估已完成 ✨</h2>
+          <h2 style="color:#2ecc71; margin-bottom:15px; font-family: var(--font-lin); font-size: 32px;">评估已完成 ✨</h2>
           <p style="font-size:16px; font-weight: bold; color:var(--text-main); margin-bottom:10px;">记录已同步给林医生。</p>
           <p style="font-size:14px; color:var(--text-ai); margin-bottom:30px; opacity: 0.8;">“辛苦了，接下来交给我吧。”</p>
           <button class="notebook-btn submit-btn" onclick="window.closeGlobalOverlay()">合上报告</button>
@@ -554,6 +576,7 @@ function initApp() {
     if (!text) return;
 
     chatInput.value = '';
+    chatInput.style.height = 'auto';
 
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'SEND_CHAT_TO_ST', text: text }, '*');
@@ -586,6 +609,8 @@ function initApp() {
   });
 
   chatInput.addEventListener('input', (e) => {
+    e.target.style.height = 'auto';
+    e.target.style.height = e.target.scrollHeight + 'px';
     if (window.parent !== window) {
       window.parent.postMessage({ type: 'SYNC_INPUT_TO_ST', text: e.target.value }, '*');
     }
@@ -597,31 +622,48 @@ function initApp() {
     if (!notebook) return;
 
     tabs.forEach((tab) => {
-      tab.classList.remove('is-top-tab');
+      tab.classList.remove('is-top-tab', 'is-bottom-tab');
       tab.style.left = '';
+      tab.style.top = '';
+      tab.style.bottom = '';
     });
 
-    const maxBottom = notebook.getBoundingClientRect().bottom - 15;
+    const notebookRect = notebook.getBoundingClientRect();
+    const maxBottom = notebookRect.bottom - 15;
+    const maxRight = notebookRect.right - 50;
 
     let topOffset = 60;
-    let isOverflowing = false;
+    let bottomOffset = 60;
+    let placement = 'right';
 
     tabs.forEach((tab) => {
       if (tab.style.display === 'none') return;
 
-      if (!isOverflowing) {
-        const tabBottom = tab.getBoundingClientRect().bottom;
-        if (tabBottom > maxBottom) {
-          isOverflowing = true;
+      if (placement === 'right') {
+        if (tab.getBoundingClientRect().bottom > maxBottom) {
+          placement = 'top'; // 触底了，将状态切换到顶部
         }
       }
 
-      if (isOverflowing) {
+      if (placement === 'top') {
         tab.classList.add('is-top-tab');
         tab.style.left = topOffset + 'px';
 
-        const currentWidth = tab.offsetWidth || 90;
-        topOffset += currentWidth + 8;
+        const currentRightEdge = tab.getBoundingClientRect().right;
+
+        if (currentRightEdge > maxRight) {
+          tab.classList.remove('is-top-tab');
+          placement = 'bottom';
+        } else {
+          topOffset += tab.getBoundingClientRect().width + 8;
+        }
+      }
+
+      if (placement === 'bottom') {
+        tab.classList.add('is-bottom-tab');
+        tab.style.left = bottomOffset + 'px';
+
+        bottomOffset += tab.getBoundingClientRect().width + 8;
       }
     });
   };
@@ -1963,6 +2005,7 @@ function initApp() {
   const volumeSlider = document.getElementById('volumeSlider');
   const autoPlaySwitch = document.getElementById('autoPlaySwitch');
   const autoOpenSwitch = document.getElementById('autoOpenSwitch');
+  const sysFontSwitch = document.getElementById('sysFontSwitch');
   const albumArt = document.getElementById('album-art');
 
   if (albumArt) albumArt.className = `p-album-art ${timePeriod}`;
@@ -2414,10 +2457,19 @@ function initApp() {
     });
   }
 
-  if (autoOpenSwitch) {
-    autoOpenSwitch.checked = localStorage.getItem('LinUI_autoOpen') === 'true';
-    autoOpenSwitch.addEventListener('change', (e) => {
-      localStorage.setItem('LinUI_autoOpen', e.target.checked);
+  if (sysFontSwitch) {
+    const useSysFont = localStorage.getItem('LinUI_useSysFont') === 'true';
+    sysFontSwitch.checked = useSysFont;
+    if (useSysFont) document.body.classList.add('use-sys-fonts');
+
+    sysFontSwitch.addEventListener('change', (e) => {
+      const isChecked = e.target.checked;
+      localStorage.setItem('LinUI_useSysFont', isChecked);
+      if (isChecked) {
+        document.body.classList.add('use-sys-fonts');
+      } else {
+        document.body.classList.remove('use-sys-fonts');
+      }
     });
   }
 
@@ -2434,7 +2486,13 @@ function initApp() {
 
   if (fontSizeSlider) {
     fontSizeSlider.addEventListener('input', (e) => {
-      root.style.setProperty('--base-font-size', e.target.value + 'px');
+      let offset = parseInt(e.target.value) - 15;
+      root.style.setProperty('--base-font-size', `calc(var(--ui-base-size) + ${offset}px)`);
+
+      // 【新增】：字号改变后，给浏览器 10 毫秒时间渲染变大的文字，然后强制重新计算标签位置！
+      setTimeout(() => {
+        if (window.adjustTabs) window.adjustTabs();
+      }, 10);
     });
   }
 
@@ -2455,7 +2513,12 @@ function initApp() {
         autoOpenSwitch.checked = false;
         localStorage.setItem('LinUI_autoOpen', 'false');
       }
-      root.style.setProperty('--base-font-size', '15px');
+      if (sysFontSwitch) {
+        sysFontSwitch.checked = false;
+        localStorage.setItem('LinUI_useSysFont', 'false');
+        document.body.classList.remove('use-sys-fonts');
+      }
+      root.style.setProperty('--base-font-size', 'var(--ui-base-size)');
       root.style.setProperty('--turn-speed', '1s');
       Howler.volume(0.3);
       if (typeof playerSettings !== 'undefined') {
@@ -2579,19 +2642,20 @@ function initApp() {
     box.innerHTML = '';
 
     const bubble = document.createElement('div');
-    bubble.className = 'ai-msg';
+    bubble.className = 'ai-msg msg-narration';
     bubble.style.marginBottom = '0';
-    bubble.style.fontSize = '14px';
     box.appendChild(bubble);
 
     let text =
-      '这是一条测试流式生成的模拟消息。你看，现在我真的在「一个字一个字」地往外吐了！\n\n而且我加入了真实的随机延迟逻辑：有时候我会很快，有时候会稍微卡顿一下……这就和真实大模型的网络请求一模一样。完美！';
+      '林雨涵推门进来，微笑着说：“L:你好，我是林医生。”\n秦渡言坐在一旁，补充道：『Q:注意你的时间。』\n这时，孩子们在门外欢快地喊着：“C:我们想进来玩！”林医生转头：“L:稍等一下哦。”';
     let index = 0;
 
     function typeNext() {
       if (index <= text.length) {
-        let currentText = text.substring(0, index).replace(/\n/g, '<br>');
-        bubble.innerHTML = currentText + '<span style="animation: blink 1s infinite;">▌</span>';
+        let currentText = text.substring(0, index);
+        bubble.innerHTML =
+          window.applyCharacterFonts(window.parseMD(currentText)) +
+          '<span class="typing-cursor"></span>';
         index++;
         box.scrollTop = box.scrollHeight;
 
@@ -2602,19 +2666,22 @@ function initApp() {
 
         streamTimeout = setTimeout(typeNext, delay);
       } else {
-        bubble.innerHTML = text.replace(/\n/g, '<br>');
+        bubble.innerHTML = window.applyCharacterFonts(window.parseMD(text));
         streamTimeout = null;
       }
     }
-
     typeNext();
   };
 
   window.devTestNonStream = function () {
     const box = document.getElementById('dev-chat-output');
+    const rawAiText =
+      '林雨涵推门进来，微笑着说：“L:你好，我是林医生。”\n秦渡言坐在一旁，补充道：『Q:注意你的时间。』\n这时，孩子们在门外欢快地喊着：“C:我们想进来玩！”林医生转头：“L:稍等一下哦。”';
+    const parsedText = window.applyCharacterFonts(rawAiText.replace(/\n/g, '<br>'));
+
     box.innerHTML = `
-      <div class="user-note" style="transform: rotate(2deg); margin: 5px 0 15px auto; font-size: 14px; padding: 10px 14px;">测试渲染排版</div>
-      <div class="ai-msg" style="margin-bottom:0; font-size: 14px;">这是一条<strong>非流式</strong>的测试消息，直接整体插入 DOM，用于检查对话气泡在窄屏环境下的压缩效果。</div>
+      <div class="user-note msg-user" style="transform: rotate(2deg); margin: 5px 0 15px auto; padding: 10px 14px;">好的，我已经准备好了。</div>
+      <div class="ai-msg msg-narration" style="margin-bottom:0;">${parsedText}</div>
     `;
     box.scrollTop = box.scrollHeight;
   };
@@ -2688,15 +2755,10 @@ window.addEventListener('message', (event) => {
     const chatPage = document.getElementById('page-0');
     if (!chatHistory) return;
 
-    const parseMD = (str) => {
-      return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\n/g, '<br>');
-    };
+    const oldTypingBubble = document.getElementById('typing-bubble');
+    if (oldTypingBubble) {
+      oldTypingBubble.remove();
+    }
 
     document.querySelectorAll('.temp-note').forEach((el) => el.remove());
 
@@ -2708,8 +2770,12 @@ window.addEventListener('message', (event) => {
 
     msgs.forEach((m, i) => {
       const isAI = m.role === 'ai';
-      const className = isAI ? 'ai-msg' : 'user-note';
-      const contentHTML = parseMD(m.text);
+      const className = isAI ? 'ai-msg msg-narration' : 'user-note msg-user';
+
+      let contentHTML = window.parseMD(m.text);
+      if (isAI) {
+        contentHTML = window.applyCharacterFonts(contentHTML);
+      }
 
       let node = existingNodes[i];
 
@@ -2718,7 +2784,8 @@ window.addEventListener('message', (event) => {
           const newNode = document.createElement('div');
           newNode.className = className;
           newNode.innerHTML = contentHTML;
-          if (!isAI) newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
+          if (className.includes('user-note'))
+            newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
           chatHistory.replaceChild(newNode, node);
         } else if (node.innerHTML !== contentHTML) {
           node.innerHTML = contentHTML;
@@ -2727,7 +2794,8 @@ window.addEventListener('message', (event) => {
         const newNode = document.createElement('div');
         newNode.className = className;
         newNode.innerHTML = contentHTML;
-        if (!isAI) newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
+        if (className.includes('user-note'))
+          newNode.style.transform = `rotate(${(((i * 13.5) % 6) - 3).toFixed(1)}deg)`;
         chatHistory.appendChild(newNode);
       }
     });
@@ -2765,12 +2833,13 @@ window.addEventListener('message', (event) => {
     if (!typingBubble) {
       typingBubble = document.createElement('div');
       typingBubble.id = 'typing-bubble';
-      typingBubble.className = 'ai-msg';
-      chatHistory.appendChild(typingBubble);
+      typingBubble.className = 'ai-msg msg-narration';
+      document.getElementById('chat-history').appendChild(typingBubble);
     }
 
     typingBubble.innerHTML =
-      parseMD(event.data.text) + '<span style="animation: blink 1s infinite;">▌</span>';
+      window.applyCharacterFonts(window.parseMD(event.data.text)) +
+      '<span class="typing-cursor"></span>';
 
     if (chatPage) {
       chatPage.scrollTo({ top: chatPage.scrollHeight, behavior: 'auto' });
